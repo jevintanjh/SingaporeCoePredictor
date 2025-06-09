@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-from models.simple_ensemble import SimpleCOEModel
+from models.realistic_forecaster import RealisticCOEForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -31,10 +31,20 @@ def load_and_process_data():
         processor = DataProcessor()
         data = processor.load_data('data/COEBiddingResultsPrices_1749430265007.csv')
         processed_data = processor.preprocess_data(data)
+        st.success(f"Loaded {len(processed_data)} records from {processed_data['date'].min()} to {processed_data['date'].max()}")
         return processed_data, processor
     except Exception as e:
         st.error(f"Error loading data: {str(e)}")
-        return None, None
+        # Try alternative path
+        try:
+            processor = DataProcessor()
+            data = processor.load_data('attached_assets/COEBiddingResultsPrices_1749430265007.csv')
+            processed_data = processor.preprocess_data(data)
+            st.success(f"Loaded {len(processed_data)} records from alternative path")
+            return processed_data, processor
+        except Exception as e2:
+            st.error(f"Alternative path also failed: {str(e2)}")
+            return None, None
 
 @st.cache_resource
 def initialize_model():
@@ -42,7 +52,7 @@ def initialize_model():
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            model = SimpleCOEModel()
+            model = RealisticCOEForecaster()
             model.fit(data)
             return model
         except Exception as e:
