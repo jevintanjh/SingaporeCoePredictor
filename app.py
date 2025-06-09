@@ -155,18 +155,24 @@ def main():
         # Generate predictions
         predictions = {}
         try:
-            predictions = model.predict(prediction_cycles)
+            if hasattr(model, 'predict'):
+                if model_type == "Quota-Enhanced Model":
+                    predictions = model.predict(data, prediction_cycles)
+                else:
+                    predictions = model.predict(prediction_cycles)
             
             if predictions:
                 # Display predictions in cards
                 cols = st.columns(len(selected_categories))
                 for i, category in enumerate(selected_categories):
-                    if category in predictions:
+                    if category in predictions and len(predictions[category]) > 0:
                         with cols[i]:
                             latest_actual = data[data['vehicle_class'] == category]['premium'].iloc[-1]
-                            pred_value = predictions[category]['mean'][0]
-                            confidence_lower = predictions[category]['lower'][0]
-                            confidence_upper = predictions[category]['upper'][0]
+                            
+                            # Handle simple list format
+                            pred_value = float(predictions[category][0])
+                            confidence_lower = pred_value * 0.9
+                            confidence_upper = pred_value * 1.1
                             
                             change = ((pred_value - latest_actual) / latest_actual) * 100
                             
@@ -176,21 +182,15 @@ def main():
                                 delta=f"{change:+.1f}%"
                             )
                             
-                            st.caption(f"95% CI: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}")
+                            st.caption(f"Est. range: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}")
                             
-                            # Add directional prediction insights
-                            if hasattr(model, 'get_performance_metrics') and category in predictions:
-                                pred_data = predictions[category]
-                                if 'direction_confidence' in pred_data:
-                                    avg_confidence = sum(pred_data['direction_confidence']) / len(pred_data['direction_confidence'])
-                                    if avg_confidence > 0.7:
-                                        confidence_status = "High Confidence"
-                                    elif avg_confidence > 0.6:
-                                        confidence_status = "Medium Confidence"
-                                    else:
-                                        confidence_status = "Low Confidence"
-                                    
-                                    st.caption(f"Direction: {confidence_status} ({avg_confidence:.1%})")
+                            # Show model type
+                            if model_type == "Quota-Enhanced Model":
+                                st.caption("Uses quota features")
+                            elif model_type == "Advanced Ensemble":
+                                st.caption("Multi-model ensemble")
+                            else:
+                                st.caption("Directional analysis")
                     else:
                         with cols[i]:
                             st.metric(
@@ -199,7 +199,7 @@ def main():
                                 help="Insufficient data for prediction"
                             )
             else:
-                st.warning("Model predictions are being generated. Please wait...")
+                st.info("Generating predictions...")
         except Exception as e:
             st.error(f"Error generating predictions: {str(e)}")
             st.info("Showing historical data only")
