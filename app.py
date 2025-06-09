@@ -11,7 +11,7 @@ from models.fast_directional_forecaster import FastDirectionalForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
-from utils.fast_validation import FastModelValidation
+from utils.fixed_validation import FixedModelValidation
 from utils.advanced_validation import AdvancedModelValidation
 from utils.validation_visualizations import (
     create_walk_forward_chart, create_backtest_chart, create_direction_accuracy_chart,
@@ -315,7 +315,7 @@ def main():
             if run_validation:
                 with st.spinner(f"Running fast validation for {validation_category}..."):
                     try:
-                        validator = FastModelValidation()
+                        validator = FixedModelValidation()
                         
                         # Run fast validation
                         validation_result = validator.run_fast_validation(
@@ -380,7 +380,7 @@ def main():
             with st.spinner("Running comprehensive validation suite..."):
                 try:
                     # Run fast validation first
-                    validator = FastModelValidation()
+                    validator = FixedModelValidation()
                     fast_results = validator.run_fast_validation(
                         FastDirectionalForecaster, data, validation_category
                     )
@@ -531,7 +531,7 @@ def main():
         if st.button("Compare All Categories", key="compare_all"):
             with st.spinner("Running fast validation across all categories..."):
                 try:
-                    validator = FastModelValidation()
+                    validator = FixedModelValidation()
                     all_results = validator.run_all_categories_fast(
                         FastDirectionalForecaster, data
                     )
