@@ -9,6 +9,7 @@ warnings.filterwarnings('ignore')
 
 from models.fast_directional_forecaster import FastDirectionalForecaster
 from models.adaptive_ensemble import AdaptiveEnsembleForecaster
+from models.quota_enhanced_forecaster import QuotaEnhancedForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -54,30 +55,54 @@ def load_and_process_data():
             return None, None
 
 @st.cache_resource
-def initialize_model():
-    """Initialize and train the ensemble model"""
+def initialize_model(model_type="Fast Directional (Current)"):
+    """Initialize and train the selected model"""
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            model = FastDirectionalForecaster()
+            if model_type == "Quota-Enhanced Model":
+                model = QuotaEnhancedForecaster()
+            elif model_type == "Advanced Ensemble":
+                model = AdaptiveEnsembleForecaster()
+            else:
+                model = FastDirectionalForecaster()
+            
             model.fit(data)
             return model
         except Exception as e:
-            st.error(f"Error initializing model: {str(e)}")
+            st.error(f"Error initializing {model_type}: {str(e)}")
             return None
     return None
 
 def main():
-    # Load data and initialize model
+    # Load data first
     data, processor = load_and_process_data()
-    model = initialize_model()
     
-    if data is None or model is None:
-        st.error("Failed to load data or initialize model. Please check your data file.")
+    if data is None:
+        st.error("Failed to load data. Please check your data file.")
         return
     
     # Sidebar controls
     st.sidebar.header("Dashboard Controls")
+    
+    # Model selection
+    st.sidebar.subheader("Model Selection")
+    model_type = st.sidebar.selectbox(
+        "Choose Prediction Model",
+        [
+            "Fast Directional (Current)",
+            "Quota-Enhanced Model",
+            "Advanced Ensemble"
+        ],
+        help="Select the ML model for predictions"
+    )
+    
+    # Initialize model based on selection
+    model = initialize_model(model_type)
+    
+    if model is None:
+        st.error(f"Failed to initialize {model_type}. Please try a different model.")
+        return
     
     # Category selection
     categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E']
