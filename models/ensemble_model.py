@@ -282,7 +282,7 @@ class COEEnsembleModel:
                 
                 # Store individual predictions
                 for model_name, pred in step_predictions.items():
-                    predictions[model_name].append(pred)
+                    predictions[model_name].append(float(pred))  # Ensure scalar values
                 
                 # Update latest_data for next iteration with more realistic adjustments
                 new_row = latest_data.copy()
@@ -338,19 +338,34 @@ class COEEnsembleModel:
                 
                 if predictions and any(len(preds) > 0 for preds in predictions.values()):
                     # Calculate ensemble prediction
-                    available_predictions = [preds for preds in predictions.values() if len(preds) > 0]
+                    available_predictions = []
+                    for model_name, preds in predictions.items():
+                        if len(preds) > 0:
+                            # Ensure predictions are proper arrays
+                            pred_array = np.array(preds)
+                            if pred_array.ndim == 1:  # 1D array is good
+                                available_predictions.append(pred_array)
+                            elif pred_array.ndim == 0:  # Single value
+                                available_predictions.append([pred_array])
+                    
                     if available_predictions:
-                        ensemble_mean = np.mean(available_predictions, axis=0)
-                        ensemble_std = np.std(available_predictions, axis=0)
+                        # Ensure all prediction arrays have the same length
+                        min_length = min(len(pred) for pred in available_predictions)
+                        trimmed_predictions = [pred[:min_length] for pred in available_predictions]
                         
-                        # Calculate confidence intervals (assuming normal distribution)
+                        # Convert to numpy array for ensemble calculation
+                        ensemble_array = np.array(trimmed_predictions)
+                        ensemble_mean = np.mean(ensemble_array, axis=0)
+                        ensemble_std = np.std(ensemble_array, axis=0)
+                        
+                        # Calculate confidence intervals
                         confidence_lower = ensemble_mean - 1.96 * ensemble_std
                         confidence_upper = ensemble_mean + 1.96 * ensemble_std
                         
                         all_predictions[category] = {
-                            'mean': ensemble_mean.tolist(),
-                            'lower': confidence_lower.tolist(),
-                            'upper': confidence_upper.tolist(),
+                            'mean': ensemble_mean.tolist() if ensemble_mean.ndim > 0 else [float(ensemble_mean)],
+                            'lower': confidence_lower.tolist() if confidence_lower.ndim > 0 else [float(confidence_lower)],
+                            'upper': confidence_upper.tolist() if confidence_upper.ndim > 0 else [float(confidence_upper)],
                             'individual_models': predictions
                         }
         
