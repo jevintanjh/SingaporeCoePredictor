@@ -36,9 +36,9 @@ def load_and_process_data():
     """Load and process the COE data"""
     try:
         processor = DataProcessor()
-        data = processor.load_data('data/COEBiddingResultsPrices_1749430265007.csv')
+        data = processor.load_data('data/COE_Clean_2002_2025.csv')
         processed_data = processor.preprocess_data(data)
-        st.success(f"Loaded {len(processed_data)} records from {processed_data['date'].min()} to {processed_data['date'].max()}")
+        st.success(f"Loaded {len(processed_data)} records from {processed_data['date'].min()} to {processed_data['date'].max()} (23-year historical dataset)")
         return processed_data, processor
     except Exception as e:
         st.error(f"Error loading data: {str(e)}")
