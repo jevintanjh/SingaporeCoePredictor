@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-from models.volatility_aware_forecaster import VolatilityAwareCOEForecaster
+from models.directional_forecaster import DirectionalCOEForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -57,7 +57,7 @@ def initialize_model():
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            model = VolatilityAwareCOEForecaster()
+            model = DirectionalCOEForecaster()
             model.fit(data)
             return model
         except Exception as e:
@@ -151,21 +151,19 @@ def main():
                             
                             st.caption(f"95% CI: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}")
                             
-                            # Add volatility insights
-                            if hasattr(model, 'get_volatility_insights'):
-                                vol_insights = model.get_volatility_insights(category)
-                                if vol_insights:
-                                    vol_ratio = vol_insights.get('volatility_ratio', 1)
-                                    regime = vol_insights.get('regime', 'normal')
-                                    
-                                    if vol_ratio > 1.2:
-                                        vol_status = "🔴 High Volatility"
-                                    elif vol_ratio < 0.8:
-                                        vol_status = "🟢 Low Volatility"
+                            # Add directional prediction insights
+                            if hasattr(model, 'get_performance_metrics') and category in predictions:
+                                pred_data = predictions[category]
+                                if 'direction_confidence' in pred_data:
+                                    avg_confidence = sum(pred_data['direction_confidence']) / len(pred_data['direction_confidence'])
+                                    if avg_confidence > 0.7:
+                                        confidence_status = "High Confidence"
+                                    elif avg_confidence > 0.6:
+                                        confidence_status = "Medium Confidence"
                                     else:
-                                        vol_status = "🟡 Normal Volatility"
+                                        confidence_status = "Low Confidence"
                                     
-                                    st.caption(f"{vol_status} • {regime.title()} Regime")
+                                    st.caption(f"Direction: {confidence_status} ({avg_confidence:.1%})")
                     else:
                         with cols[i]:
                             st.metric(
@@ -322,7 +320,7 @@ def main():
                         
                         # Run fast validation
                         validation_result = validator.run_fast_validation(
-                            VolatilityAwareCOEForecaster, data, validation_category
+                            DirectionalCOEForecaster, data, validation_category
                         )
                         
                         if validation_result:
@@ -382,7 +380,7 @@ def main():
                 try:
                     validator = FastModelValidation()
                     all_results = validator.run_all_categories_fast(
-                        VolatilityAwareCOEForecaster, data
+                        DirectionalCOEForecaster, data
                     )
                     
                     # Direction accuracy comparison
