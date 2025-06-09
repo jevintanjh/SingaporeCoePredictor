@@ -1,19 +1,17 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
 import xgboost as xgb
 from prophet import Prophet
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.optimizers import Adam
 import warnings
 warnings.filterwarnings('ignore')
 
 class COEEnsembleModel:
     """
-    Ensemble model combining LSTM, Prophet, and XGBoost for COE price prediction
+    Ensemble model combining Random Forest, Gradient Boosting, Prophet, and XGBoost for COE price prediction
     """
     
     def __init__(self):
@@ -63,19 +61,14 @@ class COEEnsembleModel:
         
         return np.array(X), np.array(y)
     
-    def build_lstm_model(self, input_shape):
-        """Build LSTM model architecture"""
-        model = Sequential([
-            LSTM(50, return_sequences=True, input_shape=input_shape),
-            Dropout(0.2),
-            LSTM(50, return_sequences=False),
-            Dropout(0.2),
-            Dense(25),
-            Dense(1)
-        ])
-        
-        model.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
-        return model
+    def build_gradient_boosting_model(self):
+        """Build Gradient Boosting model"""
+        return GradientBoostingRegressor(
+            n_estimators=100,
+            max_depth=6,
+            learning_rate=0.1,
+            random_state=42
+        )
     
     def fit_category_models(self, category_data, category):
         """Fit all models for a specific category"""
@@ -125,16 +118,38 @@ class COEEnsembleModel:
         except Exception as e:
             print(f"XGBoost training failed for {category}: {e}")
         
-        # 2. Prophet Model
+        # 2. Random Forest Model
+        try:
+            rf_model = RandomForestRegressor(
+                n_estimators=100,
+                max_depth=10,
+                random_state=42,
+                n_jobs=-1
+            )
+            rf_model.fit(X_train, y_train)
+            self.models[category]['random_forest'] = rf_model
+        except Exception as e:
+            print(f"Random Forest training failed for {category}: {e}")
+        
+        # 3. Gradient Boosting Model
+        try:
+            gb_model = self.build_gradient_boosting_model()
+            gb_model.fit(X_train, y_train)
+            self.models[category]['gradient_boosting'] = gb_model
+        except Exception as e:
+            print(f"Gradient Boosting training failed for {category}: {e}")
+        
+        # 4. Prophet Model (for time series patterns)
         try:
             prophet_data = train_data[['date', 'premium']].copy()
             prophet_data.columns = ['ds', 'y']
             
             prophet_model = Prophet(
-                daily_seasonality=False,
-                weekly_seasonality=False,
-                yearly_seasonality=True,
-                changepoint_prior_scale=0.05
+                daily_seasonality='auto',
+                weekly_seasonality='auto', 
+                yearly_seasonality='auto',
+                changepoint_prior_scale=0.05,
+                seasonality_prior_scale=10.0
             )
             
             # Add additional regressors
@@ -150,28 +165,6 @@ class COEEnsembleModel:
             self.models[category]['prophet'] = prophet_model
         except Exception as e:
             print(f"Prophet training failed for {category}: {e}")
-        
-        # 3. LSTM Model
-        try:
-            lookback = min(6, len(train_data) // 4)  # Adaptive lookback
-            if lookback >= 3:
-                # Prepare LSTM data
-                lstm_features = np.column_stack([y_train_scaled, X_train_scaled])
-                X_lstm, y_lstm = self.prepare_lstm_data(lstm_features, lookback)
-                
-                if len(X_lstm) > 0:
-                    lstm_model = self.build_lstm_model((lookback, lstm_features.shape[1]))
-                    lstm_model.fit(
-                        X_lstm, y_lstm[:, 0],  # Predict premium (first column)
-                        epochs=50,
-                        batch_size=16,
-                        verbose=0,
-                        validation_split=0.2
-                    )
-                    self.models[category]['lstm'] = lstm_model
-                    self.models[category]['lstm_lookback'] = lookback
-        except Exception as e:
-            print(f"LSTM training failed for {category}: {e}")
         
         # Calculate performance metrics
         self.calculate_performance_metrics(category, val_data)
@@ -199,7 +192,7 @@ class COEEnsembleModel:
         if len(df) == 0:
             return None
         
-        predictions = {'xgboost': [], 'prophet': [], 'lstm': []}
+        predictions = {'xgboost': [], 'prophet': [], 'random_forest': [], 'gradient_boosting': []}
         
         # Get the latest data point
         latest_data = df.iloc[-1:].copy()
@@ -211,11 +204,28 @@ class COEEnsembleModel:
             if 'xgboost' in self.models[category]:
                 try:
                     X_pred = latest_data[self.feature_cols].values
-                    X_pred_scaled = self.scalers[category]['features'].transform(X_pred)
-                    xgb_pred = self.models[category]['xgboost'].predict(X_pred_scaled)[0]
+                    xgb_pred = self.models[category]['xgboost'].predict(X_pred)[0]
                     step_predictions['xgboost'] = xgb_pred
                 except Exception as e:
                     print(f"XGBoost prediction error for {category}: {e}")
+            
+            # Random Forest prediction
+            if 'random_forest' in self.models[category]:
+                try:
+                    X_pred = latest_data[self.feature_cols].values
+                    rf_pred = self.models[category]['random_forest'].predict(X_pred)[0]
+                    step_predictions['random_forest'] = rf_pred
+                except Exception as e:
+                    print(f"Random Forest prediction error for {category}: {e}")
+            
+            # Gradient Boosting prediction
+            if 'gradient_boosting' in self.models[category]:
+                try:
+                    X_pred = latest_data[self.feature_cols].values
+                    gb_pred = self.models[category]['gradient_boosting'].predict(X_pred)[0]
+                    step_predictions['gradient_boosting'] = gb_pred
+                except Exception as e:
+                    print(f"Gradient Boosting prediction error for {category}: {e}")
             
             # Prophet prediction
             if 'prophet' in self.models[category]:
@@ -232,36 +242,6 @@ class COEEnsembleModel:
                     step_predictions['prophet'] = prophet_pred['yhat'].iloc[0]
                 except Exception as e:
                     print(f"Prophet prediction error for {category}: {e}")
-            
-            # LSTM prediction
-            if 'lstm' in self.models[category]:
-                try:
-                    lookback = self.models[category]['lstm_lookback']
-                    recent_data = df.tail(lookback)
-                    
-                    # Prepare LSTM input
-                    lstm_features = []
-                    for _, row in recent_data.iterrows():
-                        features = [row['premium']] + [row[col] for col in self.feature_cols]
-                        lstm_features.append(features)
-                    
-                    lstm_features = np.array(lstm_features)
-                    
-                    # Scale features
-                    target_vals = lstm_features[:, 0].reshape(-1, 1)
-                    target_scaled = self.scalers[category]['target'].transform(target_vals).flatten()
-                    
-                    feature_vals = lstm_features[:, 1:]
-                    feature_scaled = self.scalers[category]['features'].transform(feature_vals)
-                    
-                    lstm_input = np.column_stack([target_scaled, feature_scaled])
-                    lstm_input = lstm_input.reshape(1, lookback, -1)
-                    
-                    lstm_pred_scaled = self.models[category]['lstm'].predict(lstm_input, verbose=0)[0, 0]
-                    lstm_pred = self.scalers[category]['target'].inverse_transform([[lstm_pred_scaled]])[0, 0]
-                    step_predictions['lstm'] = lstm_pred
-                except Exception as e:
-                    print(f"LSTM prediction error for {category}: {e}")
             
             # Ensemble prediction (weighted average)
             if step_predictions:
