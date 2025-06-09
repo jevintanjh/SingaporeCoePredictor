@@ -1,0 +1,110 @@
+Product Requirements Document (PRD): COE Price Predictor Model
+Product Name: Singapore COE Price Predictor
+Version: 1.0 (Capstone Project)
+Date: May 22, 2025
+Author: [Your Name/Team Name]
+Purpose: This PRD outlines the requirements for developing a machine learning and generative AI-powered model to predict Certificate of Entitlement (COE) prices in Singapore for each vehicle category, leveraging historical data and external influencing factors. It aims to provide insights for potential car buyers and industry stakeholders.
+1. Vision & Goals
+Vision: To create an intelligent, transparent, and user-friendly system that forecasts future COE premiums in Singapore, empowering individuals and businesses with data-driven insights for vehicle purchasing decisions.
+Goals (SMART):
+Accuracy: Achieve a Mean Absolute Percentage Error (MAPE) of less than 5% on COE price predictions for the next 2-3 bidding cycles across all categories within the project's test data.
+Data Integration: Successfully integrate historical COE bidding data from data.gov.sg by [End of Project Phase 1].
+External Factor Integration: Incorporate at least 2-3 key external influencing factors (e.g., historical fuel prices, interest rates) into the prediction model by [End of Project Phase 2].
+Automation: Implement an automated workflow using n8n to fetch the latest COE results and compare predictions with actuals within 24 hours of each bidding exercise closure.
+Accessibility: Deploy a basic interactive web interface (or an API endpoint) within Google Colab for users to view predicted COE prices and historical trends by [End of Project].
+2. User Stories / Personas
+Persona: Savvy Car Buyer (Individual)
+
+Name: Marcus Lim
+Background: 35-year-old professional, looking to buy his first family car within the next 6-12 months. He's budget-conscious and wants to time his purchase to get the best COE price.
+Needs: Reliable COE price predictions, understanding of trends, and insights into influencing factors.
+User Stories:
+As Marcus, I want to see the predicted COE prices for the next 2-3 bidding cycles for Category A and B cars so that I can estimate my potential car cost.
+As Marcus, I want to understand why the COE prices are predicted to go up or down (e.g., due to quota changes, economic indicators) so that I can make informed decisions.
+As Marcus, I want to be able to view historical COE price trends and compare them with the predictions so that I can gauge the model's accuracy.
+Persona: Automotive Industry Analyst (Business)
+
+Name: Sarah Tan
+Background: Analyst for a car dealership, responsible for pricing strategy and inventory management. Needs to anticipate market movements to optimize stock and sales.
+Needs: Accurate, data-backed forecasts for all COE categories and the ability to analyze underlying drivers.
+User Stories:
+As Sarah, I want to get predicted COE prices for all categories (Cat A-E) for the upcoming cycles so that I can adjust our sales targets and pricing strategies.
+As Sarah, I want to see the impact of key variables (e.g., bids received, quota, interest rates) on COE prices so that I can explain market dynamics to management.
+As Sarah, I want to review the model's past prediction accuracy against actual results so that I can trust its forecasts.
+3. Features & Functionality
+3.1. Data Acquisition & Preprocessing
+F1.1: Historical COE Data Retrieval:
+Automatically fetch historical COE bidding results (Premium, Quota, Bids Received, Bids Success) for all categories from data.gov.sg (LTA) from January 2010 to the latest available date.
+F1.2: External Data Integration:
+Integrate historical data for at least 2-3 relevant external influencing factors (e.g., Singapore GDP growth, 3-month SIBOR/SORA interest rates, fuel prices).
+F1.3: Data Cleaning & Transformation:
+Handle missing values, convert data types (e.g., 'Text' to numeric for premiums, bids), and ensure consistent formats across all datasets.
+Create a unified time-series dataset for each COE category.
+F1.4: Feature Engineering:
+Generate new features such as:
+Lagged COE prices, quotas, bids for previous cycles.
+Rolling averages/standard deviations of key metrics.
+Bid-to-Quota ratio.
+Time-based features (month, quarter, year, bidding number).
+3.2. Predictive Model Training & Prediction
+F2.1: Model Training:
+Implement and train suitable time-series forecasting models (e.g., LSTM, Prophet, XGBoost, or a combination/ensemble) for each COE category.
+Utilize a chronological train-validation-test split for robust evaluation.
+F2.2: COE Price Prediction:
+Generate predictions for COE premiums for the next 2-3 bidding cycles for each vehicle category.
+F2.3: Prediction Confidence (Optional but Recommended):
+Provide confidence intervals or prediction ranges for the forecasted COE prices.
+3.3. User Interface / Interaction (within Google Colab)
+F3.1: Predicted Prices Display:
+A display within the Colab notebook showing the predicted COE prices for the next 2-3 bidding cycles for all categories.
+(Optional for Capstone) A basic interactive web interface (e.g., using Flask or Streamlit within Colab, exposed via ngrok for temporary access) displaying these predictions.
+F3.2: Historical Trend Visualization:
+Interactive charts (e.g., using Plotly or Matplotlib within Colab) displaying historical COE prices, quotas, and bids, allowing users to select specific categories and time ranges.
+F3.3: Actual vs. Predicted Comparison:
+Visualize the model's past predictions against actual COE results from data.gov.sg to demonstrate accuracy within the Colab environment.
+F3.4: Influencing Factors Explanation (Generative AI):
+(Leveraging OpenAI API) Provide natural language explanations or insights within the Colab output/UI into which factors (quota, bids received, economic indicators) are most heavily influencing the current predictions or historical trends.
+3.4. Automation & Monitoring (using n8n & Google Colab)
+F4.1: Automated Data Fetch:
+An n8n workflow to automatically fetch the latest COE bidding results from data.gov.sg API after each bidding exercise (twice a month).
+F4.2: Automated Prediction Update:
+Trigger the Google Colab notebook (e.g., via Google Colab API, or a simple HTTP request to a temporary exposed endpoint) to run the prediction script using the newly updated data.
+F4.3: Performance Tracking:
+Automate the calculation of performance metrics (e.g., MAPE, RMSE) for the latest predictions against actual results within the Colab environment.
+F4.4: Notification System (Optional):
+Send automated notifications (e.g., via email or a messaging platform, facilitated by n8n) with the latest predictions and performance metrics after each cycle.
+4. Technical Requirements
+Data Sources:
+Primary: data.gov.sg (COE Bidding Results / Prices dataset).
+Secondary: Department of Statistics Singapore (SingStat), MAS, EMA, etc., for external factors.
+Programming Language: Python
+Key Libraries:
+Data Manipulation: pandas, numpy
+Time-Series Forecasting: statsmodels (ARIMA/SARIMA), prophet, tensorflow/keras (for LSTMs/GRUs), scikit-learn (for tree models, feature engineering), pmdarima (for auto_arima).
+Data Visualization: matplotlib, seaborn, plotly (for interactive charts).
+API Interaction: requests.
+Web Framework (for optional UI): Flask or Streamlit.
+Generative AI: openai (for OpenAI API integration).
+Colab-specific: google.colab for integration features, ngrok (for temporary public exposure if UI is used).
+Deployment Environment: Google Colab (for model training, inference, and potentially a lightweight API/UI demonstration).
+Automation Tool: n8n (for scheduling data fetching, triggering Colab runs, and notifications).
+AI API Keys: OpenAI API keys for generative AI capabilities (e.g., explaining predictions, summarizing trends).
+Model Types: Time-series forecasting models (statistical, ML, deep learning).
+Performance Metrics: Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), Mean Absolute Percentage Error (MAPE).
+5. Out of Scope
+Real-time (intra-bidding cycle) COE price prediction.
+Integration with live car dealership systems for automated pricing.
+Legal or financial advisory services based on predictions.
+Permanent, production-grade deployment infrastructure (Colab is for capstone demonstration).
+Building a custom LLM for COE data (fine-tuning an existing one is in scope if feasible).
+6. Future Considerations/Enhancements
+Interactive Scenario Planning: Allow users to input hypothetical changes (e.g., "What if interest rates rise by 1%?") and see the predicted impact on COE prices.
+Probabilistic Forecasts: Provide probability distributions for future COE prices rather than just point estimates.
+Multi-Lingual Support: Offer explanations and UI in Singapore's official languages (Malay, Mandarin, Tamil) using aisingapore/SEA-LION.
+Dedicated Web App: Transition from a Colab-based demo to a full-fledged web application deployed on a cloud platform (e.g., Google Cloud Run, Streamlit Cloud) for continuous availability.
+News & Policy Monitoring: Automate parsing of relevant news articles or LTA announcements to identify potential policy changes that could impact COE.
+7. Success Metrics
+Model Performance: Consistently achieving a MAPE of < 5% on unseen data.
+Reliability: Automated data fetching and prediction updates run successfully for at least 95% of bidding cycles.
+Usability: Positive feedback from test users regarding the clarity of predictions and insights provided by the Colab output/UI and generative AI explanations.
+Completeness: All core features (F1.1-F4.4) are implemented and functional within the Google Colab environment.
