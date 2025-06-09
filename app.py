@@ -163,14 +163,7 @@ def main():
                 else:
                     predictions = model.predict(prediction_cycles)
             
-            # Debug output
-            if model_type == "Advanced Ensemble":
-                st.write(f"Debug: Advanced Ensemble predictions = {predictions}")
-                st.write(f"Debug: Type = {type(predictions)}")
-                if predictions:
-                    for cat, preds in predictions.items():
-                        st.write(f"Debug: {cat} = {preds}")
-            
+
             if predictions:
                 # Display predictions in cards
                 cols = st.columns(len(selected_categories))
@@ -179,8 +172,12 @@ def main():
                         with cols[i]:
                             latest_actual = data[data['vehicle_class'] == category]['premium'].iloc[-1]
                             
-                            # Handle simple list format
-                            pred_value = float(predictions[category][0])
+                            # Handle numpy float64 and simple list format
+                            pred_raw = predictions[category][0]
+                            if hasattr(pred_raw, 'item'):  # numpy scalar
+                                pred_value = float(pred_raw.item())
+                            else:
+                                pred_value = float(pred_raw)
                             confidence_lower = pred_value * 0.9
                             confidence_upper = pred_value * 1.1
                             
