@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-from models.realistic_forecaster import RealisticCOEForecaster
+from models.volatility_aware_forecaster import VolatilityAwareCOEForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -57,7 +57,7 @@ def initialize_model():
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            model = RealisticCOEForecaster()
+            model = VolatilityAwareCOEForecaster()
             model.fit(data)
             return model
         except Exception as e:
@@ -150,6 +150,22 @@ def main():
                             )
                             
                             st.caption(f"95% CI: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}")
+                            
+                            # Add volatility insights
+                            if hasattr(model, 'get_volatility_insights'):
+                                vol_insights = model.get_volatility_insights(category)
+                                if vol_insights:
+                                    vol_ratio = vol_insights.get('volatility_ratio', 1)
+                                    regime = vol_insights.get('regime', 'normal')
+                                    
+                                    if vol_ratio > 1.2:
+                                        vol_status = "🔴 High Volatility"
+                                    elif vol_ratio < 0.8:
+                                        vol_status = "🟢 Low Volatility"
+                                    else:
+                                        vol_status = "🟡 Normal Volatility"
+                                    
+                                    st.caption(f"{vol_status} • {regime.title()} Regime")
                     else:
                         with cols[i]:
                             st.metric(
@@ -287,12 +303,12 @@ def main():
                         
                         # Run walk-forward validation
                         wf_result = validator.walk_forward_validation(
-                            RealisticCOEForecaster, data, validation_category
+                            VolatilityAwareCOEForecaster, data, validation_category
                         )
                         
                         # Run backtesting
                         bt_result = validator.backtest_cycles(
-                            RealisticCOEForecaster, data, validation_category, validation_cycles
+                            VolatilityAwareCOEForecaster, data, validation_category, validation_cycles
                         )
                         
                         validation_results = {validation_category: {
@@ -353,7 +369,7 @@ def main():
                 try:
                     validator = ModelValidation()
                     all_results = validator.run_comprehensive_validation(
-                        RealisticCOEForecaster, data
+                        VolatilityAwareCOEForecaster, data
                     )
                     
                     # Direction accuracy comparison
