@@ -57,6 +57,45 @@ def calculate_directional_accuracy(y_true, y_pred):
     correct_directions = actual_direction == predicted_direction
     return np.mean(correct_directions) * 100
 
+def calculate_volatility_correlation(y_true, y_pred, window=5):
+    """Calculate correlation between actual and predicted volatility"""
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    
+    if len(y_true) < window + 2:
+        return 0.0
+    
+    # Calculate rolling volatility for actual prices
+    actual_returns = np.diff(y_true) / y_true[:-1]
+    actual_volatility = []
+    
+    for i in range(window, len(actual_returns)):
+        vol = np.std(actual_returns[i-window:i])
+        actual_volatility.append(vol)
+    
+    # Calculate rolling volatility for predicted prices
+    pred_returns = np.diff(y_pred) / y_pred[:-1]
+    pred_volatility = []
+    
+    for i in range(window, len(pred_returns)):
+        vol = np.std(pred_returns[i-window:i])
+        pred_volatility.append(vol)
+    
+    # Ensure same length
+    min_len = min(len(actual_volatility), len(pred_volatility))
+    if min_len < 3:
+        return 0.0
+    
+    actual_vol = np.array(actual_volatility[:min_len])
+    pred_vol = np.array(pred_volatility[:min_len])
+    
+    # Calculate correlation
+    try:
+        correlation = np.corrcoef(actual_vol, pred_vol)[0, 1]
+        return correlation if not np.isnan(correlation) else 0.0
+    except:
+        return 0.0
+
 def calculate_theil_u_statistic(y_true, y_pred):
     """Calculate Theil's U statistic"""
     y_true = np.array(y_true)
@@ -121,6 +160,7 @@ def calculate_metrics(y_true, y_pred, return_dict=True):
         
         # Advanced metrics
         metrics['directional_accuracy'] = calculate_directional_accuracy(y_true_clean, y_pred_clean)
+        metrics['volatility_correlation'] = calculate_volatility_correlation(y_true_clean, y_pred_clean)
         
         # Calculate residuals
         residuals = y_true_clean - y_pred_clean

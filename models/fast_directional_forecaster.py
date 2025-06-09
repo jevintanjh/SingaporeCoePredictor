@@ -203,12 +203,16 @@ class FastDirectionalForecaster:
             else:
                 direction_accuracy = 50
             
+            # Calculate volatility correlation
+            volatility_correlation = self.calculate_volatility_correlation(test_prices, price_predictions)
+            
             self.performance_metrics[category] = {
                 'mae': mae,
                 'rmse': rmse,
                 'mape': mape,
                 'r2': r2,
                 'direction_accuracy': direction_accuracy,
+                'volatility_correlation': volatility_correlation,
                 'n_test_points': len(test_prices),
                 'has_direction_model': True,
                 'model_type': 'fast_directional'
