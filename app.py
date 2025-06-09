@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-from models.ensemble_model import COEEnsembleModel
+from models.simple_ensemble import SimpleCOEModel
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -42,7 +42,7 @@ def initialize_model():
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            model = COEEnsembleModel()
+            model = SimpleCOEModel()
             model.fit(data)
             return model
         except Exception as e:

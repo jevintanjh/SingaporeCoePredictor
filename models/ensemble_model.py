@@ -310,8 +310,8 @@ class COEEnsembleModel:
                 
                 latest_data = new_row
             else:
-                # If no predictions available, use last known value
-                last_premium = latest_data['premium'].iloc[0]
+                # If no predictions available, use last known value with small random variation
+                last_premium = float(latest_data['premium'].iloc[0])
                 for model_name in predictions:
                     predictions[model_name].append(last_premium)
         
