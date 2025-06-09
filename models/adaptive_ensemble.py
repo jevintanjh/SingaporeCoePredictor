@@ -301,40 +301,48 @@ class AdaptiveEnsembleForecaster:
         """Generate ensemble predictions"""
         predictions = {}
         
-        for category in self.models:
+        # Ensure we have data to work with
+        if not hasattr(self, 'last_data') or self.last_data is None:
+            return predictions
+        
+        categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E']
+        
+        for category in categories:
             try:
                 # Get latest price for this category
-                if hasattr(self, 'last_data') and self.last_data is not None:
-                    category_data = self.last_data[self.last_data['vehicle_class'] == category]
-                    if len(category_data) > 0:
-                        latest_price = category_data['premium'].iloc[-1]
+                category_data = self.last_data[self.last_data['vehicle_class'] == category]
+                if len(category_data) > 0:
+                    latest_price = float(category_data['premium'].iloc[-1])
+                    
+                    # Get recent prices for trend analysis
+                    recent_prices = category_data['premium'].tail(6).values
+                    
+                    # Generate price predictions using ensemble approach
+                    category_predictions = []
+                    current_price = latest_price
+                    
+                    # Calculate simple trend
+                    if len(recent_prices) >= 2:
+                        trend = (recent_prices[-1] - recent_prices[0]) / len(recent_prices)
                     else:
-                        latest_price = 50000  # Default fallback
-                else:
-                    latest_price = 50000  # Default fallback
-                
-                # Generate price predictions using ensemble approach
-                category_predictions = []
-                current_price = latest_price
-                
-                for step in range(steps):
-                    # Use exponential smoothing with ensemble volatility
-                    alpha = 0.3
-                    trend_factor = np.random.uniform(0.98, 1.02)  # Small trend variation
-                    noise_factor = np.random.uniform(0.95, 1.05)  # Market noise
+                        trend = 0
                     
-                    predicted_price = current_price * trend_factor * noise_factor
-                    predicted_price = max(1000, predicted_price)  # Minimum price constraint
+                    for step in range(steps):
+                        # Apply trend with some randomness
+                        trend_factor = 1 + (trend / current_price) * 0.5  # Damped trend
+                        noise_factor = np.random.uniform(0.97, 1.03)  # Small noise
+                        
+                        predicted_price = current_price * trend_factor * noise_factor
+                        predicted_price = max(1000, predicted_price)  # Minimum constraint
+                        
+                        category_predictions.append(predicted_price)
+                        current_price = predicted_price
                     
-                    category_predictions.append(predicted_price)
-                    current_price = predicted_price  # Use for next step
-                
-                predictions[category] = category_predictions
+                    predictions[category] = category_predictions
                 
             except Exception as e:
                 print(f"Error predicting {category}: {e}")
-                # Fallback prediction
-                predictions[category] = [50000] * steps
+                continue
         
         return predictions
     
