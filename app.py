@@ -168,18 +168,40 @@ def main():
                 # Display predictions in cards
                 cols = st.columns(len(selected_categories))
                 for i, category in enumerate(selected_categories):
-                    if category in predictions and len(predictions[category]) > 0:
+                    if category in predictions:
                         with cols[i]:
                             latest_actual = data[data['vehicle_class'] == category]['premium'].iloc[-1]
                             
-                            # Handle numpy float64 and simple list format
-                            pred_raw = predictions[category][0]
-                            if hasattr(pred_raw, 'item'):  # numpy scalar
-                                pred_value = float(pred_raw.item())
+                            # Handle different prediction formats
+                            if isinstance(predictions[category], dict):
+                                # Dictionary format with mean/lower/upper
+                                if 'mean' in predictions[category] and len(predictions[category]['mean']) > 0:
+                                    pred_raw = predictions[category]['mean'][0]
+                                    if hasattr(pred_raw, 'item'):  # numpy scalar
+                                        pred_value = float(pred_raw.item())
+                                    else:
+                                        pred_value = float(pred_raw)
+                                    
+                                    # Use confidence intervals if available
+                                    if 'lower' in predictions[category] and 'upper' in predictions[category]:
+                                        confidence_lower = float(predictions[category]['lower'][0])
+                                        confidence_upper = float(predictions[category]['upper'][0])
+                                    else:
+                                        confidence_lower = pred_value * 0.9
+                                        confidence_upper = pred_value * 1.1
+                                else:
+                                    continue  # Skip if no valid data
+                            elif isinstance(predictions[category], list) and len(predictions[category]) > 0:
+                                # Simple list format
+                                pred_raw = predictions[category][0]
+                                if hasattr(pred_raw, 'item'):  # numpy scalar
+                                    pred_value = float(pred_raw.item())
+                                else:
+                                    pred_value = float(pred_raw)
+                                confidence_lower = pred_value * 0.9
+                                confidence_upper = pred_value * 1.1
                             else:
-                                pred_value = float(pred_raw)
-                            confidence_lower = pred_value * 0.9
-                            confidence_upper = pred_value * 1.1
+                                continue  # Skip if invalid format
                             
                             change = ((pred_value - latest_actual) / latest_actual) * 100
                             
