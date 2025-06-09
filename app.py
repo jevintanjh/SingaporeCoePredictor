@@ -158,6 +158,8 @@ def main():
             if hasattr(model, 'predict'):
                 if model_type == "Quota-Enhanced Model":
                     predictions = model.predict(data, prediction_cycles)
+                elif model_type == "Advanced Ensemble":
+                    predictions = model.predict(prediction_cycles)
                 else:
                     predictions = model.predict(prediction_cycles)
             
