@@ -233,23 +233,21 @@ def main():
                     st.metric("Success Rate", f"{avg_success_rate:.1f}%")
                     st.metric("Bid-to-Quota Ratio", f"{avg_bid_quota_ratio:.2f}")
                     
-                    # Add volatility-specific insights
-                    if hasattr(model, 'get_volatility_insights'):
-                        vol_insights = model.get_volatility_insights(category)
-                        if vol_insights:
-                            current_vol = vol_insights.get('current_volatility', 0)
-                            avg_vol = vol_insights.get('average_volatility', 0)
-                            regime = vol_insights.get('regime', 'normal')
+                    # Add directional analysis insights
+                    if hasattr(model, 'get_performance_metrics'):
+                        metrics = model.get_performance_metrics(category)
+                        if metrics:
+                            st.markdown("**Directional Analysis**")
                             
-                            st.markdown("**Volatility Analysis**")
-                            st.metric("Current vs Avg Vol", f"{current_vol/avg_vol:.2f}x" if avg_vol > 0 else "N/A")
+                            if 'top_features' in metrics:
+                                top_features = metrics['top_features']
+                                if top_features:
+                                    st.caption("Key Direction Indicators:")
+                                    for feat, importance in top_features[:3]:
+                                        st.caption(f"• {feat}: {importance:.3f}")
                             
-                            if regime == 'high':
-                                st.error(f"High Volatility Regime - Increased uncertainty")
-                            elif regime == 'low':
-                                st.success(f"Low Volatility Regime - Stable conditions")
-                            else:
-                                st.info(f"Normal Volatility Regime - Standard conditions")
+                            if 'model_type' in metrics:
+                                st.info(f"Using {metrics['model_type']} with {metrics.get('features_used', 0)} indicators")
         
         # Model performance section
         st.header("🎯 Model Performance")
