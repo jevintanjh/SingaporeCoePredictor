@@ -368,12 +368,12 @@ def main():
                 st.info("Previous validation results (click 'Run Validation' for fresh results)")
                 
                 # Show charts from stored results
-                if stored_results[validation_category]['walk_forward']:
+                if validation_category in stored_results and stored_results[validation_category].get('walk_forward'):
                     wf_chart = create_walk_forward_chart(stored_results, validation_category)
                     if wf_chart:
                         st.plotly_chart(wf_chart, use_container_width=True)
                 
-                if stored_results[validation_category]['backtest']:
+                if validation_category in stored_results and stored_results[validation_category].get('backtest'):
                     bt_chart = create_backtest_chart(stored_results, validation_category)
                     if bt_chart:
                         st.plotly_chart(bt_chart, use_container_width=True)
