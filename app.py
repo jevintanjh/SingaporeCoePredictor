@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-from models.enhanced_directional_forecaster import EnhancedDirectionalForecaster
+from models.fast_directional_forecaster import FastDirectionalForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -58,7 +58,7 @@ def initialize_model():
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            model = EnhancedDirectionalForecaster()
+            model = FastDirectionalForecaster()
             model.fit(data)
             return model
         except Exception as e:
@@ -319,7 +319,7 @@ def main():
                         
                         # Run fast validation
                         validation_result = validator.run_fast_validation(
-                            EnhancedDirectionalForecaster, data, validation_category
+                            FastDirectionalForecaster, data, validation_category
                         )
                         
                         if validation_result:
@@ -382,7 +382,7 @@ def main():
                     # Run fast validation first
                     validator = FastModelValidation()
                     fast_results = validator.run_fast_validation(
-                        EnhancedDirectionalForecaster, data, validation_category
+                        FastDirectionalForecaster, data, validation_category
                     )
                     
                     if fast_results:
@@ -533,7 +533,7 @@ def main():
                 try:
                     validator = FastModelValidation()
                     all_results = validator.run_all_categories_fast(
-                        EnhancedDirectionalForecaster, data
+                        FastDirectionalForecaster, data
                     )
                     
                     # Direction accuracy comparison
