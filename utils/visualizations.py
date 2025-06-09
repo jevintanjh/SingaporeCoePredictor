@@ -89,6 +89,13 @@ def create_prediction_chart(historical_data, predictions, category, prediction_c
     
     fig = go.Figure()
     
+    # Validate inputs
+    if historical_data is None or len(historical_data) == 0:
+        return go.Figure().add_annotation(text="No historical data available", x=0.5, y=0.5)
+    
+    if predictions is None or 'mean' not in predictions:
+        return go.Figure().add_annotation(text="No predictions available", x=0.5, y=0.5)
+    
     # Historical data
     fig.add_trace(
         go.Scatter(
@@ -108,50 +115,62 @@ def create_prediction_chart(historical_data, predictions, category, prediction_c
     last_date = historical_data['date'].max()
     future_dates = [last_date + pd.DateOffset(days=15 * (i + 1)) for i in range(prediction_cycles)]
     
-    # Prediction line
-    fig.add_trace(
-        go.Scatter(
-            x=future_dates,
-            y=predictions['mean'],
-            mode='lines+markers',
-            name='Prediction',
-            line=dict(color='red', width=2, dash='dash'),
-            marker=dict(size=6, symbol='diamond'),
-            hovertemplate='<b>Date:</b> %{x}<br>' +
-                         '<b>Predicted Premium:</b> $%{y:,.0f}<br>' +
-                         '<extra></extra>'
-        )
-    )
+    # Ensure predictions have the right structure
+    pred_means = predictions.get('mean', [])
+    pred_upper = predictions.get('upper', [])
+    pred_lower = predictions.get('lower', [])
     
-    # Confidence interval
-    fig.add_trace(
-        go.Scatter(
-            x=future_dates + future_dates[::-1],
-            y=predictions['upper'] + predictions['lower'][::-1],
-            fill='toself',
-            fillcolor='rgba(255, 0, 0, 0.2)',
-            line=dict(color='rgba(255,255,255,0)'),
-            name='95% Confidence Interval',
-            hoverinfo='skip',
-            showlegend=True
+    if len(pred_means) > 0:
+        # Prediction line
+        fig.add_trace(
+            go.Scatter(
+                x=future_dates[:len(pred_means)],
+                y=pred_means,
+                mode='lines+markers',
+                name='Prediction',
+                line=dict(color='red', width=2, dash='dash'),
+                marker=dict(size=6, symbol='diamond'),
+                hovertemplate='<b>Date:</b> %{x}<br>' +
+                             '<b>Predicted Premium:</b> $%{y:,.0f}<br>' +
+                             '<extra></extra>'
+            )
         )
-    )
-    
-    # Connect historical and prediction
-    connect_x = [historical_data['date'].iloc[-1], future_dates[0]]
-    connect_y = [historical_data['premium'].iloc[-1], predictions['mean'][0]]
-    
-    fig.add_trace(
-        go.Scatter(
-            x=connect_x,
-            y=connect_y,
-            mode='lines',
-            line=dict(color='gray', width=1, dash='dot'),
-            name='Connection',
-            showlegend=False,
-            hoverinfo='skip'
-        )
-    )
+        
+        # Confidence interval
+        if len(pred_upper) > 0 and len(pred_lower) > 0:
+            valid_dates = future_dates[:min(len(pred_upper), len(pred_lower))]
+            valid_upper = pred_upper[:len(valid_dates)]
+            valid_lower = pred_lower[:len(valid_dates)]
+            
+            fig.add_trace(
+                go.Scatter(
+                    x=valid_dates + valid_dates[::-1],
+                    y=valid_upper + valid_lower[::-1],
+                    fill='toself',
+                    fillcolor='rgba(255, 0, 0, 0.2)',
+                    line=dict(color='rgba(255,255,255,0)'),
+                    name='95% Confidence Interval',
+                    hoverinfo='skip',
+                    showlegend=True
+                )
+            )
+        
+        # Connect historical and prediction
+        if len(future_dates) > 0:
+            connect_x = [historical_data['date'].iloc[-1], future_dates[0]]
+            connect_y = [historical_data['premium'].iloc[-1], pred_means[0]]
+            
+            fig.add_trace(
+                go.Scatter(
+                    x=connect_x,
+                    y=connect_y,
+                    mode='lines',
+                    line=dict(color='gray', width=1, dash='dot'),
+                    name='Connection',
+                    showlegend=False,
+                    hoverinfo='skip'
+                )
+            )
     
     # Update layout
     fig.update_layout(

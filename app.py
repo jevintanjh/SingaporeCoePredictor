@@ -111,30 +111,42 @@ def main():
         st.header("🔮 Current Predictions")
         
         # Generate predictions
+        predictions = {}
         try:
             predictions = model.predict(prediction_cycles)
             
-            # Display predictions in cards
-            cols = st.columns(len(selected_categories))
-            for i, category in enumerate(selected_categories):
-                if category in predictions:
-                    with cols[i]:
-                        latest_actual = data[data['vehicle_class'] == category]['premium'].iloc[-1]
-                        pred_value = predictions[category]['mean'][0]
-                        confidence_lower = predictions[category]['lower'][0]
-                        confidence_upper = predictions[category]['upper'][0]
-                        
-                        change = ((pred_value - latest_actual) / latest_actual) * 100
-                        
-                        st.metric(
-                            label=category,
-                            value=f"${pred_value:,.0f}",
-                            delta=f"{change:+.1f}%"
-                        )
-                        
-                        st.caption(f"95% CI: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}")
+            if predictions:
+                # Display predictions in cards
+                cols = st.columns(len(selected_categories))
+                for i, category in enumerate(selected_categories):
+                    if category in predictions:
+                        with cols[i]:
+                            latest_actual = data[data['vehicle_class'] == category]['premium'].iloc[-1]
+                            pred_value = predictions[category]['mean'][0]
+                            confidence_lower = predictions[category]['lower'][0]
+                            confidence_upper = predictions[category]['upper'][0]
+                            
+                            change = ((pred_value - latest_actual) / latest_actual) * 100
+                            
+                            st.metric(
+                                label=category,
+                                value=f"${pred_value:,.0f}",
+                                delta=f"{change:+.1f}%"
+                            )
+                            
+                            st.caption(f"95% CI: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}")
+                    else:
+                        with cols[i]:
+                            st.metric(
+                                label=category,
+                                value="N/A",
+                                help="Insufficient data for prediction"
+                            )
+            else:
+                st.warning("Model predictions are being generated. Please wait...")
         except Exception as e:
             st.error(f"Error generating predictions: {str(e)}")
+            st.info("Showing historical data only")
         
         # Historical trends and predictions
         st.header("📈 Historical Trends & Predictions")
@@ -151,19 +163,30 @@ def main():
                 with col1:
                     # Historical and prediction chart
                     try:
-                        if category in predictions:
-                            fig = create_prediction_chart(
-                                category_data, 
-                                predictions[category], 
-                                category,
-                                prediction_cycles
-                            )
+                        if predictions and category in predictions and len(category_data) > 0:
+                            # Ensure we have at least 6 months of historical data
+                            if len(category_data) >= 12:  # At least 12 bidding cycles (6 months)
+                                fig = create_prediction_chart(
+                                    category_data, 
+                                    predictions[category], 
+                                    category,
+                                    prediction_cycles
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
+                            else:
+                                st.warning(f"Insufficient historical data for {category} predictions. Showing available data.")
+                                fig = create_historical_chart(category_data, category, show_volume=False)
+                                st.plotly_chart(fig, use_container_width=True)
+                        elif len(category_data) > 0:
+                            fig = create_historical_chart(category_data, category, show_volume=False)
                             st.plotly_chart(fig, use_container_width=True)
                         else:
-                            fig = create_historical_chart(category_data, category)
-                            st.plotly_chart(fig, use_container_width=True)
+                            st.warning(f"No data available for {category}")
                     except Exception as e:
-                        st.error(f"Error creating chart for {category}: {str(e)}")
+                        st.error(f"Chart error for {category}: {str(e)}")
+                        # Show basic data table as fallback
+                        if len(category_data) > 0:
+                            st.dataframe(category_data[['date', 'premium', 'quota', 'bids_received']].tail(10))
                 
                 with col2:
                     # Key statistics
@@ -299,16 +322,17 @@ def main():
             if st.button("Download Predictions"):
                 try:
                     pred_data = []
-                    for category in selected_categories:
-                        if category in predictions:
-                            for i in range(prediction_cycles):
-                                pred_data.append({
-                                    'category': category,
-                                    'cycle': i + 1,
-                                    'predicted_premium': predictions[category]['mean'][i],
-                                    'confidence_lower': predictions[category]['lower'][i],
-                                    'confidence_upper': predictions[category]['upper'][i]
-                                })
+                    if predictions:
+                        for category in selected_categories:
+                            if category in predictions:
+                                for i in range(prediction_cycles):
+                                    pred_data.append({
+                                        'category': category,
+                                        'cycle': i + 1,
+                                        'predicted_premium': predictions[category]['mean'][i],
+                                        'confidence_lower': predictions[category]['lower'][i],
+                                        'confidence_upper': predictions[category]['upper'][i]
+                                    })
                     
                     if pred_data:
                         pred_df = pd.DataFrame(pred_data)
@@ -319,6 +343,8 @@ def main():
                             file_name=f"coe_predictions_{prediction_cycles}cycles.csv",
                             mime="text/csv"
                         )
+                    else:
+                        st.warning("No prediction data available for download")
                 except Exception as e:
                     st.error(f"Error preparing predictions for download: {str(e)}")
     
