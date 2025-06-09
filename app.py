@@ -163,6 +163,14 @@ def main():
                 else:
                     predictions = model.predict(prediction_cycles)
             
+            # Debug output
+            if model_type == "Advanced Ensemble":
+                st.write(f"Debug: Advanced Ensemble predictions = {predictions}")
+                st.write(f"Debug: Type = {type(predictions)}")
+                if predictions:
+                    for cat, preds in predictions.items():
+                        st.write(f"Debug: {cat} = {preds}")
+            
             if predictions:
                 # Display predictions in cards
                 cols = st.columns(len(selected_categories))
