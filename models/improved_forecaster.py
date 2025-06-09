@@ -153,39 +153,41 @@ class ImprovedCOEForecaster:
             }
             
             # Train directional prediction model
-            X, y = self.create_directional_dataset(data, category)
-            if X is not None and len(X) > 15:
-                try:
-                    # Split data
-                    split_idx = int(len(X) * 0.8)
-                    X_train, X_test = X[:split_idx], X[split_idx:]
-                    y_train, y_test = y[:split_idx], y[split_idx:]
+            dataset_result = self.create_directional_dataset(data, category)
+            if dataset_result is not None:
+                X, y = dataset_result
+                if X is not None and len(X) > 15:
+                    try:
+                        # Split data
+                        split_idx = int(len(X) * 0.8)
+                        X_train, X_test = X[:split_idx], X[split_idx:]
+                        y_train, y_test = y[:split_idx], y[split_idx:]
+                        
+                        # Scale features
+                        scaler = StandardScaler()
+                        X_train_scaled = scaler.fit_transform(X_train)
+                        X_test_scaled = scaler.transform(X_test)
+                        
+                        # Train direction classifier
+                        clf = RandomForestClassifier(
+                            n_estimators=100, 
+                            max_depth=6, 
+                            min_samples_split=5,
+                            random_state=42
+                        )
+                        clf.fit(X_train_scaled, y_train)
+                        
+                        # Test performance
+                        y_pred = clf.predict(X_test_scaled)
+                        direction_accuracy = accuracy_score(y_test, y_pred)
+                        
+                        # Only keep model if it's better than random + margin
+                        if direction_accuracy > 0.55:
+                            self.direction_models[category] = clf
+                            self.scalers[category] = scaler
                     
-                    # Scale features
-                    scaler = StandardScaler()
-                    X_train_scaled = scaler.fit_transform(X_train)
-                    X_test_scaled = scaler.transform(X_test)
-                    
-                    # Train direction classifier
-                    clf = RandomForestClassifier(
-                        n_estimators=100, 
-                        max_depth=6, 
-                        min_samples_split=5,
-                        random_state=42
-                    )
-                    clf.fit(X_train_scaled, y_train)
-                    
-                    # Test performance
-                    y_pred = clf.predict(X_test_scaled)
-                    direction_accuracy = accuracy_score(y_test, y_pred)
-                    
-                    # Only keep model if it's better than random + margin
-                    if direction_accuracy > 0.55:
-                        self.direction_models[category] = clf
-                        self.scalers[category] = scaler
-                
-                except Exception:
-                    pass
+                    except Exception:
+                        pass
             
             # Calculate overall performance metrics
             if len(prices) > 25:
