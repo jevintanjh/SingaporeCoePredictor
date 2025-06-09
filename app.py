@@ -326,7 +326,14 @@ def main():
                             validation_results = {validation_category: validation_result}
                             
                             # Display validation summary
-                            summary = validator.format_fast_summary(validation_results)
+                            summary_lines = []
+                            for cat, metrics in validation_results.items():
+                                dir_acc = metrics.get('direction_accuracy', 0)
+                                mape = metrics.get('mape', 0)
+                                status = "ABOVE RANDOM" if dir_acc > 50 else "BELOW RANDOM"
+                                summary_lines.append(f"{cat}: {dir_acc:.1f}% direction accuracy ({status}), {mape:.1f}% MAPE")
+                            
+                            summary = "\n".join(summary_lines)
                             st.text_area("Validation Summary", summary, height=200)
                             
                             # Create visualizations
@@ -548,7 +555,14 @@ def main():
                         st.dataframe(metrics_table, use_container_width=True)
                     
                     # Summary text
-                    summary = validator.format_fast_summary(all_results)
+                    summary_lines = []
+                    for cat, metrics in all_results.items():
+                        dir_acc = metrics.get('direction_accuracy', 0)
+                        mape = metrics.get('mape', 0)
+                        status = "ABOVE RANDOM" if dir_acc > 50 else "BELOW RANDOM"
+                        summary_lines.append(f"{cat}: {dir_acc:.1f}% direction accuracy ({status}), {mape:.1f}% MAPE")
+                    
+                    summary = "\n".join(summary_lines)
                     st.text_area("All Categories Summary", summary, height=300)
                     
                     st.session_state.all_validation_results = all_results
