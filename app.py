@@ -228,14 +228,14 @@ def main():
                                     category,
                                     prediction_cycles
                                 )
-                                st.plotly_chart(fig, use_container_width=True)
+                                st.plotly_chart(fig, use_container_width=True, key=f"pred_chart_{category.replace(' ', '_')}")
                             else:
                                 st.warning(f"Insufficient historical data for {category} predictions. Showing available data.")
                                 fig = create_historical_chart(category_data, category, show_volume=False)
-                                st.plotly_chart(fig, use_container_width=True)
+                                st.plotly_chart(fig, use_container_width=True, key=f"hist_chart_{category.replace(' ', '_')}_insufficient")
                         elif len(category_data) > 0:
                             fig = create_historical_chart(category_data, category, show_volume=False)
-                            st.plotly_chart(fig, use_container_width=True)
+                            st.plotly_chart(fig, use_container_width=True, key=f"hist_chart_{category.replace(' ', '_')}_main")
                         else:
                             st.warning(f"No data available for {category}")
                     except Exception as e:
