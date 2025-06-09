@@ -12,6 +12,7 @@ from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
 from utils.fast_validation import FastModelValidation
+from utils.advanced_validation import AdvancedModelValidation
 from utils.validation_visualizations import (
     create_walk_forward_chart, create_backtest_chart, create_direction_accuracy_chart,
     create_volatility_tracking_chart, create_validation_metrics_table, create_prediction_error_distribution
@@ -371,6 +372,165 @@ def main():
                         st.plotly_chart(bt_chart, use_container_width=True)
             else:
                 st.info("Click 'Run Validation' to perform comprehensive model testing")
+        
+        # Advanced validation techniques
+        st.subheader("Advanced Model Stability Tests")
+        
+        advanced_col1, advanced_col2 = st.columns(2)
+        
+        with advanced_col1:
+            st.markdown("**Robustness Testing**")
+            
+            if st.button("Bootstrap Validation", help="Test model stability with 100 resampled datasets"):
+                with st.spinner("Running bootstrap validation..."):
+                    try:
+                        advanced_validator = AdvancedModelValidation()
+                        bootstrap_results = advanced_validator.bootstrap_validation(
+                            ImprovedCOEForecaster, data, validation_category
+                        )
+                        
+                        if bootstrap_results:
+                            st.success("Bootstrap validation completed!")
+                            
+                            # Display confidence intervals
+                            for metric, stats in bootstrap_results.items():
+                                if isinstance(stats, dict):
+                                    metric_name = metric.replace('_', ' ').title()
+                                    st.metric(
+                                        metric_name,
+                                        f"{stats['mean']:.2f} ± {stats['std']:.2f}",
+                                        delta=f"95% CI: [{stats['ci_5']:.2f}, {stats['ci_95']:.2f}]"
+                                    )
+                        else:
+                            st.warning("Insufficient data for bootstrap validation")
+                    except Exception as e:
+                        st.error(f"Bootstrap validation error: {str(e)}")
+            
+            if st.button("Regime Analysis", help="Test performance across high/low volatility periods"):
+                with st.spinner("Analyzing regime performance..."):
+                    try:
+                        advanced_validator = AdvancedModelValidation()
+                        regime_results = advanced_validator.regime_change_validation(
+                            ImprovedCOEForecaster, data, validation_category
+                        )
+                        
+                        if regime_results:
+                            st.success("Regime analysis completed!")
+                            
+                            for regime_type, metrics in regime_results.items():
+                                if metrics:
+                                    st.subheader(f"{regime_type.replace('_', ' ').title()} Regime")
+                                    col1, col2, col3 = st.columns(3)
+                                    
+                                    with col1:
+                                        st.metric("MAPE", f"{metrics['mape']:.1f}%")
+                                    with col2:
+                                        st.metric("Direction Accuracy", f"{metrics['direction_accuracy']:.1f}%")
+                                    with col3:
+                                        st.metric("Test Periods", f"{metrics['n_periods']}")
+                        else:
+                            st.warning("Unable to identify distinct volatility regimes")
+                    except Exception as e:
+                        st.error(f"Regime analysis error: {str(e)}")
+        
+        with advanced_col2:
+            st.markdown("**Stress Testing**")
+            
+            if st.button("Comprehensive Stress Test", help="Test model with missing data, extreme volatility, and trend breaks"):
+                with st.spinner("Running stress tests..."):
+                    try:
+                        advanced_validator = AdvancedModelValidation()
+                        stress_results = advanced_validator.stress_testing(
+                            ImprovedCOEForecaster, data, validation_category
+                        )
+                        
+                        if stress_results:
+                            st.success("Stress testing completed!")
+                            
+                            # Missing data test
+                            if 'missing_data' in stress_results and stress_results['missing_data']:
+                                md = stress_results['missing_data']
+                                status = "Robust ✓" if md.get('can_handle_missing', False) else "Sensitive ✗"
+                                st.metric("Missing Data Handling", status)
+                            
+                            # Extreme volatility test
+                            if 'extreme_volatility' in stress_results and stress_results['extreme_volatility']:
+                                ev = stress_results['extreme_volatility']
+                                status = "Stable ✓" if ev.get('handles_extreme_volatility', False) else "Unstable ✗"
+                                st.metric("High Volatility Handling", status)
+                            
+                            # Trend break test
+                            if 'trend_breaks' in stress_results and stress_results['trend_breaks']:
+                                tb = stress_results['trend_breaks']
+                                status = "Adaptive ✓" if tb.get('handles_trend_breaks', False) else "Rigid ✗"
+                                st.metric("Trend Break Adaptation", status)
+                        else:
+                            st.warning("Stress testing could not be completed")
+                    except Exception as e:
+                        st.error(f"Stress testing error: {str(e)}")
+            
+            if st.button("Rolling Origin Test", help="Test how performance changes with increasing training data"):
+                with st.spinner("Running rolling origin validation..."):
+                    try:
+                        advanced_validator = AdvancedModelValidation()
+                        rolling_results = advanced_validator.rolling_origin_validation(
+                            ImprovedCOEForecaster, data, validation_category
+                        )
+                        
+                        if rolling_results:
+                            st.success("Rolling origin validation completed!")
+                            
+                            trend_desc = "Improving" if rolling_results['performance_trend'] < 0 else "Degrading"
+                            st.metric("Performance Trend", trend_desc)
+                            st.metric("Final MAPE", f"{rolling_results['final_performance']:.1f}%")
+                            
+                            # Show trend chart
+                            if 'results' in rolling_results:
+                                results = rolling_results['results']
+                                
+                                import plotly.graph_objects as go
+                                fig = go.Figure()
+                                
+                                fig.add_trace(go.Scatter(
+                                    x=results['training_sizes'],
+                                    y=results['test_performance'],
+                                    mode='lines+markers',
+                                    name='MAPE (%)',
+                                    line=dict(color='blue')
+                                ))
+                                
+                                fig.update_layout(
+                                    title=f'{validation_category} - Performance vs Training Size',
+                                    xaxis_title='Training Data Size',
+                                    yaxis_title='MAPE (%)',
+                                    height=300
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                        else:
+                            st.warning("Insufficient data for rolling origin validation")
+                    except Exception as e:
+                        st.error(f"Rolling origin validation error: {str(e)}")
+        
+        # Comprehensive validation report
+        if st.button("Generate Comprehensive Report", type="primary"):
+            with st.spinner("Generating comprehensive validation report..."):
+                try:
+                    advanced_validator = AdvancedModelValidation()
+                    comprehensive_results = advanced_validator.run_comprehensive_validation(
+                        ImprovedCOEForecaster, data, validation_category
+                    )
+                    
+                    # Format and display report
+                    report = advanced_validator.format_comprehensive_report(comprehensive_results)
+                    st.text_area("Comprehensive Validation Report", report, height=400)
+                    
+                    # Store results
+                    st.session_state[f'comprehensive_{validation_category}'] = comprehensive_results
+                    st.success("Comprehensive validation report generated!")
+                    
+                except Exception as e:
+                    st.error(f"Comprehensive validation error: {str(e)}")
         
         # Cross-category validation comparison
         if st.button("Compare All Categories", key="compare_all"):
