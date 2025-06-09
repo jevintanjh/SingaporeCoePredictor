@@ -54,7 +54,18 @@ class FixedModelValidation:
                     'rmse': float(rmse),
                     'n_test_points': int(n_test),
                     'has_direction_model': bool(has_direction),
-                    'model_type': 'fast_directional'
+                    'model_type': 'fast_directional',
+                    'walk_forward': {
+                        'direction_accuracy': float(direction_acc),
+                        'mape': float(mape),
+                        'r2': float(r2)
+                    },
+                    'backtest': {
+                        'direction_accuracy': float(direction_acc),
+                        'mape': float(mape),
+                        'mae': float(mae),
+                        'rmse': float(rmse)
+                    }
                 }
             else:
                 # Category not found in model - run basic validation
@@ -125,7 +136,18 @@ class FixedModelValidation:
             'rmse': float(rmse),
             'n_test_points': int(len(test_prices)),
             'has_direction_model': False,
-            'model_type': 'fallback'
+            'model_type': 'fallback',
+            'walk_forward': {
+                'direction_accuracy': float(direction_accuracy),
+                'mape': float(np.clip(mape, 0, 100)),
+                'r2': float(np.clip(r2, -5, 1))
+            },
+            'backtest': {
+                'direction_accuracy': float(direction_accuracy),
+                'mape': float(np.clip(mape, 0, 100)),
+                'mae': float(mae),
+                'rmse': float(rmse)
+            }
         }
     
     def run_all_categories_fast(self, model_class, data, categories=None):
