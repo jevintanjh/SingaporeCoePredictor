@@ -8,6 +8,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from models.fast_directional_forecaster import FastDirectionalForecaster
+from models.adaptive_ensemble import AdaptiveEnsembleForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -534,56 +535,113 @@ def main():
                     import traceback
                     st.text(traceback.format_exc())
         
-        # Cross-category validation comparison
-        if st.button("Compare All Categories", key="compare_all"):
-            with st.spinner("Running fast validation across all categories..."):
-                try:
-                    validator = FixedModelValidation()
-                    all_results = validator.run_all_categories_fast(
-                        FastDirectionalForecaster, data
-                    )
-                    
-                    # Simple metrics display without complex visualizations
-                    st.subheader("Direction Accuracy Performance")
-                    
-                    # Create simple metrics display
-                    cols = st.columns(len(all_results))
-                    for i, (category, metrics) in enumerate(all_results.items()):
-                        with cols[i]:
+        # Enhanced model comparison
+        col_a, col_b = st.columns(2)
+        
+        with col_a:
+            if st.button("Test Enhanced Ensemble Model", key="test_enhanced"):
+                with st.spinner("Testing advanced ensemble forecaster..."):
+                    try:
+                        validator = FixedModelValidation()
+                        enhanced_results = validator.run_all_categories_fast(
+                            AdaptiveEnsembleForecaster, data
+                        )
+                        
+                        st.subheader("🚀 Enhanced Model Performance")
+                        
+                        # Enhanced metrics display
+                        cols = st.columns(len(enhanced_results))
+                        for i, (category, metrics) in enumerate(enhanced_results.items()):
+                            with cols[i]:
+                                dir_acc = metrics.get('direction_accuracy', 0)
+                                mape = metrics.get('mape', 0)
+                                
+                                # Improved color coding
+                                if dir_acc > 60:
+                                    status_color = "🟢"
+                                elif dir_acc > 55:
+                                    status_color = "🟡" 
+                                elif dir_acc > 50:
+                                    status_color = "🔵"
+                                else:
+                                    status_color = "🔴"
+                                
+                                improvement = dir_acc - 50
+                                st.metric(
+                                    label=f"{status_color} {category}",
+                                    value=f"{dir_acc:.1f}%",
+                                    delta=f"+{improvement:.1f}% vs random"
+                                )
+                                st.caption(f"MAPE: {mape:.1f}%")
+                        
+                        # Summary comparison
+                        summary_lines = []
+                        for cat, metrics in enhanced_results.items():
                             dir_acc = metrics.get('direction_accuracy', 0)
                             mape = metrics.get('mape', 0)
-                            
-                            # Color coding based on performance
-                            if dir_acc > 55:
-                                status_color = "🟢"
-                            elif dir_acc > 50:
-                                status_color = "🟡"
-                            else:
-                                status_color = "🔴"
-                            
-                            st.metric(
-                                label=f"{status_color} {category}",
-                                value=f"{dir_acc:.1f}%",
-                                delta=f"{dir_acc - 50:.1f}% vs random"
-                            )
-                            st.caption(f"MAPE: {mape:.1f}%")
-                    
-                    # Summary text
-                    summary_lines = []
-                    for cat, metrics in all_results.items():
-                        dir_acc = metrics.get('direction_accuracy', 0)
-                        mape = metrics.get('mape', 0)
-                        status = "ABOVE RANDOM" if dir_acc > 50 else "BELOW RANDOM"
-                        summary_lines.append(f"{cat}: {dir_acc:.1f}% direction accuracy ({status}), {mape:.1f}% MAPE")
-                    
-                    summary = "\n".join(summary_lines)
-                    st.text_area("All Categories Summary", summary, height=300)
-                    
-                    st.session_state.all_validation_results = all_results
-                    st.success("Fast validation completed for all categories!")
-                    
-                except Exception as e:
-                    st.error(f"Cross-category validation error: {str(e)}")
+                            status = "ENHANCED" if dir_acc > 55 else "IMPROVED" if dir_acc > 50 else "BASELINE"
+                            summary_lines.append(f"{cat}: {dir_acc:.1f}% direction accuracy ({status}), {mape:.1f}% MAPE")
+                        
+                        summary = "\n".join(summary_lines)
+                        st.text_area("Enhanced Model Results", summary, height=200)
+                        
+                        st.session_state.enhanced_results = enhanced_results
+                        st.success("Enhanced ensemble testing completed!")
+                        
+                    except Exception as e:
+                        st.error(f"Enhanced model test error: {str(e)}")
+        
+        with col_b:
+            # Cross-category validation comparison
+            if st.button("Compare All Categories", key="compare_all"):
+                with st.spinner("Running fast validation across all categories..."):
+                    try:
+                        validator = FixedModelValidation()
+                        all_results = validator.run_all_categories_fast(
+                            FastDirectionalForecaster, data
+                        )
+                        
+                        # Simple metrics display without complex visualizations
+                        st.subheader("Direction Accuracy Performance")
+                        
+                        # Create simple metrics display
+                        cols = st.columns(len(all_results))
+                        for i, (category, metrics) in enumerate(all_results.items()):
+                            with cols[i]:
+                                dir_acc = metrics.get('direction_accuracy', 0)
+                                mape = metrics.get('mape', 0)
+                                
+                                # Color coding based on performance
+                                if dir_acc > 55:
+                                    status_color = "🟢"
+                                elif dir_acc > 50:
+                                    status_color = "🟡"
+                                else:
+                                    status_color = "🔴"
+                                
+                                st.metric(
+                                    label=f"{status_color} {category}",
+                                    value=f"{dir_acc:.1f}%",
+                                    delta=f"{dir_acc - 50:.1f}% vs random"
+                                )
+                                st.caption(f"MAPE: {mape:.1f}%")
+                        
+                        # Summary text
+                        summary_lines = []
+                        for cat, metrics in all_results.items():
+                            dir_acc = metrics.get('direction_accuracy', 0)
+                            mape = metrics.get('mape', 0)
+                            status = "ABOVE RANDOM" if dir_acc > 50 else "BELOW RANDOM"
+                            summary_lines.append(f"{cat}: {dir_acc:.1f}% direction accuracy ({status}), {mape:.1f}% MAPE")
+                        
+                        summary = "\n".join(summary_lines)
+                        st.text_area("All Categories Summary", summary, height=300)
+                        
+                        st.session_state.all_validation_results = all_results
+                        st.success("Fast validation completed for all categories!")
+                        
+                    except Exception as e:
+                        st.error(f"Cross-category validation error: {str(e)}")
         
         with col2:
             st.subheader("Market Insights")
