@@ -20,7 +20,8 @@ class COEEnsembleModel:
         self.performance_metrics = {}
         self.categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E']
         self.feature_cols = ['quota', 'bids_received', 'bids_success', 'premium_lag1', 'premium_lag2', 
-                           'premium_ma3', 'bid_quota_ratio', 'success_rate', 'month', 'bidding_no']
+                           'premium_ma3', 'premium_ma6', 'bid_quota_ratio', 'success_rate', 'month', 
+                           'quarter', 'premium_trend_ma3', 'month_sin', 'month_cos', 'is_december']
         
     def create_features(self, data):
         """Create engineered features for the model"""
@@ -29,24 +30,55 @@ class COEEnsembleModel:
         # Sort by date and vehicle class
         df = df.sort_values(['vehicle_class', 'date']).reset_index(drop=True)
         
-        # Create lagged features
+        # Create lagged and rolling features for each category
         for category in self.categories:
             mask = df['vehicle_class'] == category
-            df.loc[mask, 'premium_lag1'] = df.loc[mask, 'premium'].shift(1)
-            df.loc[mask, 'premium_lag2'] = df.loc[mask, 'premium'].shift(2)
-            df.loc[mask, 'premium_ma3'] = df.loc[mask, 'premium'].rolling(window=3).mean()
+            category_data = df[mask].copy()
+            
+            if len(category_data) > 0:
+                # Lagged features
+                df.loc[mask, 'premium_lag1'] = category_data['premium'].shift(1)
+                df.loc[mask, 'premium_lag2'] = category_data['premium'].shift(2)
+                df.loc[mask, 'premium_lag3'] = category_data['premium'].shift(3)
+                
+                # Rolling averages
+                df.loc[mask, 'premium_ma3'] = category_data['premium'].rolling(window=3, min_periods=1).mean()
+                df.loc[mask, 'premium_ma6'] = category_data['premium'].rolling(window=6, min_periods=1).mean()
+                
+                # Volatility features
+                df.loc[mask, 'premium_std3'] = category_data['premium'].rolling(window=3, min_periods=1).std()
+                
+                # Trend features
+                df.loc[mask, 'premium_trend'] = category_data['premium'].diff()
+                df.loc[mask, 'premium_trend_ma3'] = category_data['premium'].diff().rolling(window=3, min_periods=1).mean()
+                
+                # Quota and bids features
+                df.loc[mask, 'quota_lag1'] = category_data['quota'].shift(1)
+                df.loc[mask, 'bids_received_lag1'] = category_data['bids_received'].shift(1)
         
         # Calculate ratios
         df['bid_quota_ratio'] = df['bids_received'] / df['quota']
         df['success_rate'] = df['bids_success'] / df['bids_received']
+        df['premium_to_lag1_ratio'] = df['premium'] / (df['premium_lag1'] + 1)  # Avoid division by zero
         
         # Time-based features
         df['month'] = df['date'].dt.month
         df['year'] = df['date'].dt.year
         df['quarter'] = df['date'].dt.quarter
+        df['is_december'] = (df['month'] == 12).astype(int)  # Year-end effect
+        df['is_q4'] = (df['quarter'] == 4).astype(int)
         
-        # Fill missing values
+        # Cyclical encoding for seasonality
+        df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
+        df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
+        
+        # Fill missing values with forward/backward fill
         df = df.fillna(method='bfill').fillna(method='ffill')
+        
+        # Replace any remaining NaN with median values
+        for col in df.select_dtypes(include=[np.number]).columns:
+            if df[col].isna().any():
+                df[col] = df[col].fillna(df[col].median())
         
         return df
     
@@ -252,11 +284,28 @@ class COEEnsembleModel:
                 for model_name, pred in step_predictions.items():
                     predictions[model_name].append(pred)
                 
-                # Update latest_data for next iteration
+                # Update latest_data for next iteration with more realistic adjustments
                 new_row = latest_data.copy()
-                new_row['premium'] = ensemble_pred
+                
+                # Apply conservative prediction adjustment based on historical volatility
+                recent_premiums = df.tail(6)['premium'].values
+                volatility = np.std(recent_premiums)
+                trend = np.mean(np.diff(recent_premiums[-3:]))
+                
+                # Constrain prediction to reasonable bounds
+                base_premium = float(latest_data['premium'].iloc[0])
+                vol_bound = float(volatility * 2) if not np.isnan(volatility) else base_premium * 0.1
+                pct_bound = base_premium * 0.3
+                max_change = vol_bound if vol_bound < pct_bound else pct_bound
+                
+                adjusted_pred = np.clip(ensemble_pred, 
+                                      base_premium - max_change, 
+                                      base_premium + max_change)
+                
+                new_row['premium'] = adjusted_pred
                 new_row['premium_lag1'] = latest_data['premium'].iloc[0]
-                new_row['premium_lag2'] = latest_data['premium_lag1'].iloc[0]
+                new_row['premium_lag2'] = latest_data['premium_lag1'].iloc[0] if 'premium_lag1' in latest_data.columns else latest_data['premium'].iloc[0]
+                new_row['premium_ma3'] = np.mean([adjusted_pred, latest_data['premium'].iloc[0], latest_data.get('premium_lag1', latest_data['premium'].iloc[0])])
                 new_row['date'] = new_row['date'].iloc[0] + pd.DateOffset(days=15)
                 
                 latest_data = new_row
@@ -322,8 +371,16 @@ class COEEnsembleModel:
             
             # Get predictions from available models
             if 'xgboost' in self.models[category]:
-                xgb_preds = self.models[category]['xgboost'].predict(X_val_scaled)
+                xgb_preds = self.models[category]['xgboost'].predict(X_val)
                 predictions.append(xgb_preds)
+            
+            if 'random_forest' in self.models[category]:
+                rf_preds = self.models[category]['random_forest'].predict(X_val)
+                predictions.append(rf_preds)
+            
+            if 'gradient_boosting' in self.models[category]:
+                gb_preds = self.models[category]['gradient_boosting'].predict(X_val)
+                predictions.append(gb_preds)
             
             if 'prophet' in self.models[category]:
                 try:
