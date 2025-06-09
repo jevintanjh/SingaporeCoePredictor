@@ -538,7 +538,7 @@ def main():
                 try:
                     validator = FastModelValidation()
                     all_results = validator.run_all_categories_fast(
-                        ImprovedCOEForecaster, data
+                        RobustCOEForecaster, data
                     )
                     
                     # Direction accuracy comparison
