@@ -543,16 +543,30 @@ def main():
                         FastDirectionalForecaster, data
                     )
                     
-                    # Direction accuracy comparison
-                    dir_accuracy_chart = create_direction_accuracy_chart(all_results)
-                    if dir_accuracy_chart:
-                        st.plotly_chart(dir_accuracy_chart, use_container_width=True)
+                    # Simple metrics display without complex visualizations
+                    st.subheader("Direction Accuracy Performance")
                     
-                    # Validation metrics table
-                    metrics_table = create_validation_metrics_table(all_results)
-                    if not metrics_table.empty:
-                        st.subheader("Fast Validation Metrics")
-                        st.dataframe(metrics_table, use_container_width=True)
+                    # Create simple metrics display
+                    cols = st.columns(len(all_results))
+                    for i, (category, metrics) in enumerate(all_results.items()):
+                        with cols[i]:
+                            dir_acc = metrics.get('direction_accuracy', 0)
+                            mape = metrics.get('mape', 0)
+                            
+                            # Color coding based on performance
+                            if dir_acc > 55:
+                                status_color = "🟢"
+                            elif dir_acc > 50:
+                                status_color = "🟡"
+                            else:
+                                status_color = "🔴"
+                            
+                            st.metric(
+                                label=f"{status_color} {category}",
+                                value=f"{dir_acc:.1f}%",
+                                delta=f"{dir_acc - 50:.1f}% vs random"
+                            )
+                            st.caption(f"MAPE: {mape:.1f}%")
                     
                     # Summary text
                     summary_lines = []

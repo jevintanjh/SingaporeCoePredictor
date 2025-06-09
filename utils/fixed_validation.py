@@ -58,13 +58,18 @@ class FixedModelValidation:
                     'walk_forward': {
                         'direction_accuracy': float(direction_acc),
                         'mape': float(mape),
-                        'r2': float(r2)
+                        'r2': float(r2),
+                        'dates': [],
+                        'actuals': [],
+                        'predictions': [],
+                        'n_predictions': int(n_test)
                     },
                     'backtest': {
                         'direction_accuracy': float(direction_acc),
                         'mape': float(mape),
                         'mae': float(mae),
-                        'rmse': float(rmse)
+                        'rmse': float(rmse),
+                        'n_predictions': int(n_test)
                     }
                 }
             else:
@@ -140,13 +145,18 @@ class FixedModelValidation:
             'walk_forward': {
                 'direction_accuracy': float(direction_accuracy),
                 'mape': float(np.clip(mape, 0, 100)),
-                'r2': float(np.clip(r2, -5, 1))
+                'r2': float(np.clip(r2, -5, 1)),
+                'dates': [],
+                'actuals': [],
+                'predictions': [],
+                'n_predictions': int(len(test_prices))
             },
             'backtest': {
                 'direction_accuracy': float(direction_accuracy),
                 'mape': float(np.clip(mape, 0, 100)),
                 'mae': float(mae),
-                'rmse': float(rmse)
+                'rmse': float(rmse),
+                'n_predictions': int(len(test_prices))
             }
         }
     
