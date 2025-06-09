@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-from models.improved_forecaster import ImprovedCOEForecaster
+from models.robust_forecaster import RobustCOEForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -58,7 +58,7 @@ def initialize_model():
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            model = ImprovedCOEForecaster()
+            model = RobustCOEForecaster()
             model.fit(data)
             return model
         except Exception as e:
@@ -319,7 +319,7 @@ def main():
                         
                         # Run fast validation
                         validation_result = validator.run_fast_validation(
-                            ImprovedCOEForecaster, data, validation_category
+                            RobustCOEForecaster, data, validation_category
                         )
                         
                         if validation_result:
@@ -386,7 +386,7 @@ def main():
                     try:
                         advanced_validator = AdvancedModelValidation()
                         bootstrap_results = advanced_validator.bootstrap_validation(
-                            ImprovedCOEForecaster, data, validation_category
+                            RobustCOEForecaster, data, validation_category
                         )
                         
                         if bootstrap_results:
@@ -411,7 +411,7 @@ def main():
                     try:
                         advanced_validator = AdvancedModelValidation()
                         regime_results = advanced_validator.regime_change_validation(
-                            ImprovedCOEForecaster, data, validation_category
+                            RobustCOEForecaster, data, validation_category
                         )
                         
                         if regime_results:
@@ -441,7 +441,7 @@ def main():
                     try:
                         advanced_validator = AdvancedModelValidation()
                         stress_results = advanced_validator.stress_testing(
-                            ImprovedCOEForecaster, data, validation_category
+                            RobustCOEForecaster, data, validation_category
                         )
                         
                         if stress_results:
@@ -474,7 +474,7 @@ def main():
                     try:
                         advanced_validator = AdvancedModelValidation()
                         rolling_results = advanced_validator.rolling_origin_validation(
-                            ImprovedCOEForecaster, data, validation_category
+                            RobustCOEForecaster, data, validation_category
                         )
                         
                         if rolling_results:
@@ -518,7 +518,7 @@ def main():
                 try:
                     advanced_validator = AdvancedModelValidation()
                     comprehensive_results = advanced_validator.run_comprehensive_validation(
-                        ImprovedCOEForecaster, data, validation_category
+                        RobustCOEForecaster, data, validation_category
                     )
                     
                     # Format and display report
