@@ -234,6 +234,24 @@ def main():
                     st.metric("Volatility (6 cycles)", f"${volatility:,.0f}")
                     st.metric("Success Rate", f"{avg_success_rate:.1f}%")
                     st.metric("Bid-to-Quota Ratio", f"{avg_bid_quota_ratio:.2f}")
+                    
+                    # Add volatility-specific insights
+                    if hasattr(model, 'get_volatility_insights'):
+                        vol_insights = model.get_volatility_insights(category)
+                        if vol_insights:
+                            current_vol = vol_insights.get('current_volatility', 0)
+                            avg_vol = vol_insights.get('average_volatility', 0)
+                            regime = vol_insights.get('regime', 'normal')
+                            
+                            st.markdown("**Volatility Analysis**")
+                            st.metric("Current vs Avg Vol", f"{current_vol/avg_vol:.2f}x" if avg_vol > 0 else "N/A")
+                            
+                            if regime == 'high':
+                                st.error(f"High Volatility Regime - Increased uncertainty")
+                            elif regime == 'low':
+                                st.success(f"Low Volatility Regime - Stable conditions")
+                            else:
+                                st.info(f"Normal Volatility Regime - Standard conditions")
         
         # Model performance section
         st.header("🎯 Model Performance")
@@ -256,7 +274,8 @@ def main():
                                 'MAPE': f"{metrics.get('mape', 0):.2f}%",
                                 'RMSE': f"${metrics.get('rmse', 0):,.0f}",
                                 'MAE': f"${metrics.get('mae', 0):,.0f}",
-                                'R²': f"{metrics.get('r2', 0):.3f}"
+                                'R²': f"{metrics.get('r2', 0):.3f}",
+                                'Vol Correlation': f"{metrics.get('volatility_correlation', 0):.3f}"
                             })
                 
                 if performance_data:
