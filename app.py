@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-from models.directional_forecaster import DirectionalCOEForecaster
+from models.improved_forecaster import ImprovedCOEForecaster
 from utils.data_processor import DataProcessor
 from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
 from utils.metrics import calculate_metrics, format_metrics
@@ -57,7 +57,7 @@ def initialize_model():
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            model = DirectionalCOEForecaster()
+            model = ImprovedCOEForecaster()
             model.fit(data)
             return model
         except Exception as e:
@@ -318,7 +318,7 @@ def main():
                         
                         # Run fast validation
                         validation_result = validator.run_fast_validation(
-                            DirectionalCOEForecaster, data, validation_category
+                            ImprovedCOEForecaster, data, validation_category
                         )
                         
                         if validation_result:
@@ -378,7 +378,7 @@ def main():
                 try:
                     validator = FastModelValidation()
                     all_results = validator.run_all_categories_fast(
-                        DirectionalCOEForecaster, data
+                        ImprovedCOEForecaster, data
                     )
                     
                     # Direction accuracy comparison
