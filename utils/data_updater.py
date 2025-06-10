@@ -7,6 +7,7 @@ import os
 import time
 import warnings
 warnings.filterwarnings('ignore')
+from .model_ranker import COEModelRanker
 
 class COEDataUpdater:
     """
@@ -23,6 +24,7 @@ class COEDataUpdater:
         ]
         self.data_file_path = "data/COE_Clean_2002_2025.csv"
         self.backup_file_path = "data/COE_Clean_backup.csv"
+        self.model_ranker = COEModelRanker()
         
     def fetch_latest_coe_data(self, limit=1000):
         """
@@ -436,6 +438,80 @@ class COEDataUpdater:
         except Exception as e:
             print(f"Error creating simulated data: {str(e)}")
             return None
+    
+    def evaluate_model_predictions(self, new_data):
+        """
+        Evaluate model predictions against new actual COE results
+        """
+        try:
+            if new_data is None or len(new_data) == 0:
+                return False
+            
+            # Extract actual results from new data
+            actual_results = {}
+            for _, row in new_data.iterrows():
+                category = row['vehicle_class']
+                actual_price = row['premium']
+                actual_results[category] = actual_price
+            
+            # Evaluate predictions using the model ranker
+            evaluation_success = self.model_ranker.evaluate_predictions(actual_results)
+            
+            if evaluation_success:
+                print(f"Successfully evaluated model predictions against {len(actual_results)} new COE results")
+                
+                # Get updated rankings
+                rankings = self.model_ranker.get_current_rankings()
+                if rankings:
+                    print("Updated Model Rankings:")
+                    for rank_data in rankings:
+                        print(f"  {rank_data['rank']}. {rank_data['model_name']} "
+                              f"(Score: {rank_data['average_score']:.3f}, "
+                              f"Evaluations: {rank_data['total_evaluations']})")
+            
+            return evaluation_success
+            
+        except Exception as e:
+            print(f"Error evaluating model predictions: {str(e)}")
+            return False
+    
+    def log_current_predictions(self, models, exercise_date):
+        """
+        Log current model predictions for future evaluation
+        """
+        try:
+            prediction_date = datetime.now()
+            
+            # Get predictions from all models for all categories
+            categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E']
+            
+            for model_name, model in models.items():
+                try:
+                    # Generate predictions for next cycle
+                    predictions = model.predict(steps=1)
+                    
+                    for category in categories:
+                        if category in predictions:
+                            predicted_price = predictions[category][0]  # First prediction
+                            
+                            self.model_ranker.log_prediction(
+                                model_name=model_name,
+                                category=category,
+                                predicted_price=predicted_price,
+                                prediction_date=prediction_date,
+                                exercise_date=exercise_date
+                            )
+                            
+                except Exception as e:
+                    print(f"Error getting predictions from {model_name}: {str(e)}")
+                    continue
+            
+            print(f"Logged predictions for {len(models)} models for exercise {exercise_date}")
+            return True
+            
+        except Exception as e:
+            print(f"Error logging predictions: {str(e)}")
+            return False
 
 
 def run_coe_update():

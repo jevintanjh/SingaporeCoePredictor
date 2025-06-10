@@ -15,6 +15,7 @@ from models.nbeatsx import NBEATSx
 # Import data updater and scheduler
 from utils.data_updater import COEDataUpdater
 from utils.coe_scheduler import start_coe_scheduler, get_scheduler_status
+from utils.model_ranker import COEModelRanker
 
 @st.cache_data
 def load_and_process_data():
@@ -834,6 +835,54 @@ def main():
     if not selected_categories:
         st.warning("Please select at least one COE category to view predictions.")
         return
+    
+    # Display model performance rankings
+    try:
+        model_ranker = COEModelRanker()
+        rankings = model_ranker.get_current_rankings()
+        
+        if rankings:
+            st.subheader("🏆 Model Performance Rankings")
+            
+            # Create ranking display with metrics
+            ranking_data = []
+            for rank_info in rankings:
+                ranking_data.append({
+                    "Rank": f"#{rank_info['rank']}",
+                    "Model": rank_info['model_name'],
+                    "Overall Score": f"{rank_info['average_score']:.3f}",
+                    "Evaluations": rank_info['total_evaluations'],
+                    "Last Updated": datetime.fromisoformat(rank_info['last_updated']).strftime("%d-%m-%Y %H:%M")
+                })
+            
+            if ranking_data:
+                ranking_df = pd.DataFrame(ranking_data)
+                st.dataframe(ranking_df, use_container_width=True, hide_index=True)
+                
+                # Show performance summary
+                performance_summary = model_ranker.get_model_performance_summary()
+                if performance_summary and 'models' in performance_summary:
+                    with st.expander("📊 Detailed Performance Analysis"):
+                        for model, metrics in performance_summary['models'].items():
+                            col1, col2, col3, col4 = st.columns(4)
+                            with col1:
+                                st.metric("Overall Score", f"{metrics['overall_score']:.3f}")
+                            with col2:
+                                st.metric("Recent Score", f"{metrics['recent_score']:.3f}")
+                            with col3:
+                                st.metric("Total Evaluations", metrics['total_evaluations'])
+                            with col4:
+                                trend_icon = "📈" if metrics['trend'] == 'improving' else "📉" if metrics['trend'] == 'declining' else "➡️"
+                                st.metric("Trend", f"{trend_icon} {metrics['trend'].title()}")
+                            st.markdown(f"**{model}**")
+                            st.markdown("---")
+            else:
+                st.info("Model rankings will appear after predictions are evaluated against actual COE results.")
+        else:
+            st.info("Model performance rankings will be available after predictions are evaluated against actual COE results.")
+    
+    except Exception as e:
+        st.info("Model performance tracking will be available after predictions are made and evaluated.")
     
     # Create tabs for model comparison
     tab1, tab2, tab3 = st.tabs(["🚀 Fast Directional Forecasting", "🧠 Interpretable N-BEATS", "⚡ N-BEATSx"])
