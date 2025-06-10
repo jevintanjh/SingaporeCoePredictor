@@ -12,6 +12,9 @@ from models.fast_directional_forecaster import FastDirectionalForecaster
 from models.interpretable_nbeats_v2 import InterpretableNBEATS
 from models.nbeatsx import NBEATSx
 
+# Import data updater
+from utils.data_updater import COEDataUpdater
+
 @st.cache_data
 def load_and_process_data():
     """Load and process the COE data"""
@@ -758,9 +761,30 @@ def main():
     
     with col3:
         st.markdown("<br>", unsafe_allow_html=True)
-        refresh_predictions = st.button("🔄 Refresh", type="primary")
+        col3a, col3b = st.columns(2)
+        with col3a:
+            refresh_predictions = st.button("🔄 Refresh", type="primary")
+        with col3b:
+            update_data = st.button("📊 Update Data", help="Fetch latest COE results from government API")
     
     st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Handle data update button
+    if update_data:
+        with st.spinner('Fetching latest COE results from Singapore Government API...'):
+            try:
+                updater = COEDataUpdater()
+                update_success = updater.update_coe_database()
+                
+                if update_success:
+                    st.success("✅ COE database updated successfully with latest results!")
+                    st.info("📝 New data has been integrated. The models will use updated data on next refresh.")
+                    # Clear cache to force reload of data
+                    st.cache_data.clear()
+                else:
+                    st.error("❌ Failed to update COE database. Please check API connectivity.")
+            except Exception as e:
+                st.error(f"❌ Error updating database: {str(e)}")
     
     if not selected_categories:
         st.warning("Please select at least one COE category to view predictions.")
