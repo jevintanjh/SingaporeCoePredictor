@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 
 # Import models
 from models.fast_directional_forecaster import FastDirectionalForecaster
-from models.simple_nbeats import SimpleNBEATS
+from models.interpretable_nbeats_v2 import InterpretableNBEATS
 
 @st.cache_data
 def load_and_process_data():
@@ -555,8 +555,8 @@ def initialize_models():
             fast_model.fit(data)
             models['Fast Directional'] = fast_model
             
-            # Initialize Simple N-BEATS Forecaster
-            nbeats_model = SimpleNBEATS()
+            # Initialize Interpretable N-BEATS Forecaster
+            nbeats_model = InterpretableNBEATS()
             nbeats_model.fit(data)
             models['N-BEATS'] = nbeats_model
             
@@ -761,7 +761,7 @@ def main():
         return
     
     # Create tabs for model comparison
-    tab1, tab2 = st.tabs(["🚀 Fast Directional Forecasting", "🧠 N-BEATS Neural Network"])
+    tab1, tab2 = st.tabs(["🚀 Fast Directional Forecasting", "🧠 Interpretable N-BEATS"])
     
     # Tab 1: Fast Directional Forecasting
     with tab1:
