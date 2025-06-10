@@ -1,0 +1,41 @@
+Designing the N-BEATS model with an interpretable configuration for COE price forecasting involves several key steps, from meticulous data preparation to careful model architecture and training. The goal is not only to predict prices accurately but also to understand the underlying trend and seasonal drivers.
+
+Here's a detailed approach:
+
+1. Data Preparation
+The COEBiddingResultsPrices.csv dataset  is the foundation.   
+
+Time Series Construction: The month and bidding_no columns need to be combined to create a precise bi-monthly datetime index. Since there are typically two bidding exercises per month , treating the data as simply "monthly" would lose crucial intra-month patterns. A granular datetime index (e.g., assigning specific dates like the 1st and 15th of each month for the two bidding sessions) is essential for N-BEATS to accurately capture temporal frequencies.   
+Multi-Series Transformation: The vehicle_class column identifies five distinct categories (Category A to Category E). N-BEATS is a "global forecasting model" capable of being trained on multiple related time series simultaneously. This means a single N-BEATS model can learn patterns across all five COE categories, leveraging shared dynamics and potentially improving forecasts for categories with less data or higher volatility. The premium column will be the primary target variable for forecasting.   
+Data Normalization: Given the significant differences in premium values across categories (e.g., Category D premiums are in the thousands, while others are in the tens of thousands) , it is crucial to normalize the data. Techniques like min-max scaling or z-score standardization are essential preprocessing steps to ensure numerical stability during training and prevent features with larger magnitudes from dominating the learning process.   
+Exogenous Covariates: The quota, bids_success, and bids_received columns are vital exogenous variables that reflect supply and demand dynamics. To incorporate these, the NBEATSx variant of N-BEATS should be utilized. This allows the model to leverage these external factors, which are expected to significantly enhance predictive accuracy beyond relying solely on historical premium values. These covariates must be known for the forecast horizon at prediction time.   
+Outlier Management: COE prices can experience abrupt changes. While N-BEATS is robust to noise , explicit outlier management during preprocessing can further mitigate the disproportionate influence of extreme values on model training.   
+2. Model Architecture (Interpretable N-BEATS)
+The interpretable configuration of N-BEATS is designed to explicitly decompose time series into distinct components like trend and seasonality, offering transparency and insights.   
+
+Stacks and Blocks:
+For interpretability, N-BEATS typically uses two stacks: one specifically for trend and another for seasonality.   
+Each stack is usually composed of three blocks.   
+Each block consists of fully connected layers with residual connections, where each successive block learns to approximate the residual error from the previous block.   
+Basis Functions:
+The trend stack will employ a polynomial basis (e.g., trend_polynomial_degree=3 for a cubic polynomial) to capture long-term directional changes.   
+The seasonality stack will use a Fourier series basis to model repeating patterns. The expansion_coefficient_length for seasonality should be set to a value that allows capturing the bi-monthly frequency (e.g., 24 for yearly seasonality with bi-monthly data points, or higher to capture finer intra-month patterns).   
+Hyperparameters:
+stack_types: ["trend", "seasonality"].   
+num_blocks: [3, 3] (3 blocks for each of the trend and seasonality stacks).   
+num_block_layers: [4, 4] (4 fully connected layers per block in each stack).   
+width: Recommended values for interpretable mode are `` for the trend and seasonality stacks respectively. These define the number of neurons in the fully connected layers.   
+sharing: True (weights are shared across blocks within a stack for interpretability).   
+context_length (lookback period): This should be chosen carefully. It is generally recommended to be between 1 and 10 times the prediction_length. For bi-monthly COE data, if forecasting 6 months ahead (12 data points), a context_length of 24 to 120 data points (1-5 years of history) would be appropriate.   
+prediction_length (forecast horizon): This defines how many future time steps the model will predict at once. For COE, this could be 2 (one month ahead), 12 (six months ahead), or 24 (one year ahead), depending on the forecasting objective.   
+backcast_loss_ratio: This parameter controls the weight of the backcast loss in the total loss calculation. A value of 0.0 (default) means only the forecast loss is considered.   
+3. Training Strategy
+Loss Function: While the original N-BEATS paper used MASE (Mean Absolute Scaled Error) , other options like MSELoss (Mean Squared Error) or SMAPE (Symmetric Mean Absolute Percentage Error) are also common. The choice should align with the specific forecasting objective (e.g., MAE for easy interpretability of average error, RMSE for penalizing larger errors more heavily).   
+Optimizer: Standard optimizers like Adam (torch.optim.Adam) are typically used.   
+Learning Rate: An appropriate learning rate (e.g., 1e-3 or found via a learning rate finder) and learning rate decay schedule are important for stable training.   
+Batching: When training on multiple series, the batch_size parameter will determine the number of different series included in each batch.   
+Early Stopping: To prevent overfitting, early stopping should be implemented. This monitors a validation metric (e.g., val_loss) and stops training if the metric does not improve for a specified number of epochs (patience).   
+4. Evaluation
+Performance Metrics: The model's performance should be evaluated using standard time series forecasting metrics such as Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), Symmetric Mean Absolute Percentage Error (SMAPE), and R-squared.   
+Interpretability Visualization: A key advantage of the interpretable N-BEATS is the ability to visualize the decomposed trend and seasonality components using functions like plot_interpretation(). This provides valuable insights into the drivers of COE price movements, which is crucial for policymakers and market participants.   
+By following these steps, the N-BEATS interpretable configuration can be effectively designed and implemented to forecast COE prices, offering both accurate predictions and a deeper understanding of market dynamics.

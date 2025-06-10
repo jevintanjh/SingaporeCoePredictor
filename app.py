@@ -9,6 +9,7 @@ warnings.filterwarnings('ignore')
 
 # Import models
 from models.fast_directional_forecaster import FastDirectionalForecaster
+from models.nbeats_forecaster import NBEATSForecaster
 
 @st.cache_data
 def load_and_process_data():
@@ -132,19 +133,324 @@ def standardize_category(cat):
         return 'Category E'
     return None
 
+def render_model_dashboard(model, model_name, data, selected_categories, prediction_cycles):
+    """Render the dashboard for a specific model"""
+    
+    # Filter data for selected categories
+    filtered_data = data[data['vehicle_class'].isin(selected_categories)]
+    
+    # Train model with filtered data
+    try:
+        model.fit(filtered_data)
+    except Exception as e:
+        st.error(f"Error training {model_name} model: {str(e)}")
+        return
+    
+    # Generate predictions
+    try:
+        predictions = model.predict(prediction_cycles)
+    except Exception as e:
+        st.error(f"Error generating predictions with {model_name}: {str(e)}")
+        return
+    
+    # Current Predictions Section
+    st.markdown(f"## 🔮 {model_name} Predictions")
+    
+    if predictions:
+        cols = st.columns(len(selected_categories))
+        for i, category in enumerate(selected_categories):
+            if category in predictions:
+                with cols[i]:
+                    category_data = data[data['vehicle_class'] == category]
+                    if len(category_data) > 0:
+                        latest_actual = category_data['premium'].iloc[-1]
+                        
+                        # Handle prediction format
+                        if isinstance(predictions[category], dict) and 'mean' in predictions[category]:
+                            pred_value = float(predictions[category]['mean'][0])
+                            confidence_lower = float(predictions[category].get('lower', [pred_value * 0.9])[0])
+                            confidence_upper = float(predictions[category].get('upper', [pred_value * 1.1])[0])
+                        elif isinstance(predictions[category], list):
+                            pred_raw = predictions[category][0]
+                            pred_value = float(pred_raw.item() if hasattr(pred_raw, 'item') else pred_raw)
+                            confidence_lower = pred_value * 0.9
+                            confidence_upper = pred_value * 1.1
+                        else:
+                            continue
+                        
+                        change = ((pred_value - latest_actual) / latest_actual) * 100
+                        change_class = "positive" if change >= 0 else "negative"
+                        change_symbol = "▲" if change >= 0 else "▼"
+                        
+                        st.markdown(f"""
+                        <div class="prediction-card">
+                            <div class="metric-label">{category}</div>
+                            <div class="metric-value">${pred_value:,.0f}</div>
+                            <div class="metric-change {change_class}">{change_symbol} {abs(change):.1f}%</div>
+                            <small style="color: #6b7280;">Range: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}</small>
+                        </div>
+                        """, unsafe_allow_html=True)
+    
+    # Extended Predictions Table
+    st.markdown("## 📅 Extended Price Predictions (Next 6 Bidding Cycles)")
+    
+    if predictions:
+        # Generate extended predictions for 6 cycles (3 months)
+        extended_predictions = {}
+        try:
+            extended_predictions = model.predict(6)
+        except:
+            extended_predictions = predictions
+        
+        # Create date range for next 6 bidding cycles
+        latest_date = data['date'].max()
+        prediction_dates = []
+        for i in range(6):
+            # Assuming 2 cycles per month, alternate between 1st and 2nd cycle
+            cycle_num = (i % 2) + 1
+            month_offset = i // 2
+            pred_date = latest_date + pd.DateOffset(months=month_offset+1)
+            prediction_dates.append({
+                'cycle': i + 1,
+                'date': pred_date,
+                'month': pred_date.strftime('%Y-%m'),
+                'cycle_label': f"{pred_date.strftime('%Y-%m')} Cycle {cycle_num}"
+            })
+        
+        # Create tabs for each category
+        category_tabs = st.tabs(selected_categories)
+        
+        for tab_idx, category in enumerate(selected_categories):
+            with category_tabs[tab_idx]:
+                if category in extended_predictions:
+                    # Get prediction values
+                    if isinstance(extended_predictions[category], dict) and 'mean' in extended_predictions[category]:
+                        pred_values = extended_predictions[category]['mean']
+                    elif isinstance(extended_predictions[category], list):
+                        pred_values = [float(p.item() if hasattr(p, 'item') else p) for p in extended_predictions[category]]
+                    else:
+                        continue
+                    
+                    # Create prediction table
+                    prediction_data = []
+                    category_data = data[data['vehicle_class'] == category]
+                    if len(category_data) > 0:
+                        latest_price = category_data['premium'].iloc[-1]
+                        prev_price = latest_price
+                        
+                        for i, date_info in enumerate(prediction_dates[:len(pred_values)]):
+                            pred_price = pred_values[i]
+                            change_amount = pred_price - prev_price
+                            change_percent = (change_amount / prev_price) * 100
+                            
+                            # Determine confidence level based on cycle distance
+                            if i < 2:
+                                confidence = "High"
+                            elif i < 4:
+                                confidence = "Medium"
+                            else:
+                                confidence = "Low"
+                            
+                            prediction_data.append({
+                                'Cycle': date_info['cycle_label'],
+                                'Predicted Premium': f"${pred_price:,.0f}",
+                                'Change from Previous': f"${change_amount:+,.0f} ({change_percent:+.1f}%)",
+                                'Confidence': confidence
+                            })
+                            
+                            prev_price = pred_price
+                        
+                        # Display as styled dataframe
+                        pred_df = pd.DataFrame(prediction_data)
+                        
+                        st.dataframe(
+                            pred_df,
+                            use_container_width=True,
+                            hide_index=True,
+                            column_config={
+                                "Cycle": st.column_config.TextColumn("Bidding Cycle", width="medium"),
+                                "Predicted Premium": st.column_config.TextColumn("Predicted Premium", width="medium"),
+                                "Change from Previous": st.column_config.TextColumn("Change from Previous", width="medium"),
+                                "Confidence": st.column_config.TextColumn("Confidence", width="small")
+                            }
+                        )
+    
+    # Model Performance Section
+    st.markdown(f"## 🎯 {model_name} Performance")
+    
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+    st.markdown("### Performance Metrics")
+    
+    # Create performance metrics table
+    performance_data = []
+    for category in selected_categories:
+        if hasattr(model, 'get_performance_metrics'):
+            metrics = model.get_performance_metrics(category)
+            if metrics:
+                # Calculate additional metrics
+                mape = metrics.get('mape', 0)
+                rmse = metrics.get('rmse', 0)
+                mae = metrics.get('mae', 0)
+                r2 = metrics.get('r2', 0)
+                direction_accuracy = metrics.get('direction_accuracy', 50)
+                vol_correlation = metrics.get('volatility_correlation', 0)
+                
+                performance_data.append({
+                    'Category': category,
+                    'MAPE': f"{mape:.2f}%",
+                    'RMSE': f"${rmse:,.0f}",
+                    'MAE': f"${mae:,.0f}",
+                    'R²': f"{r2:.3f}",
+                    'Vol Correlation': f"{vol_correlation:.3f}",
+                    'Direction Accuracy': f"{direction_accuracy:.1f}%"
+                })
+    
+    if performance_data:
+        perf_df = pd.DataFrame(performance_data)
+        
+        st.dataframe(
+            perf_df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Category": st.column_config.TextColumn("Category", width="small"),
+                "MAPE": st.column_config.TextColumn("MAPE", width="small", help="Mean Absolute Percentage Error"),
+                "RMSE": st.column_config.TextColumn("RMSE", width="small", help="Root Mean Square Error"),
+                "MAE": st.column_config.TextColumn("MAE", width="small", help="Mean Absolute Error"),
+                "R²": st.column_config.TextColumn("R²", width="small", help="Coefficient of Determination"),
+                "Vol Correlation": st.column_config.TextColumn("Vol Correlation", width="small", help="Volatility Correlation"),
+                "Direction Accuracy": st.column_config.TextColumn("Direction Accuracy", width="small", help="Directional Prediction Accuracy")
+            }
+        )
+        
+        # Performance insights
+        if len(performance_data) > 0:
+            avg_direction_accuracy = sum([float(row['Direction Accuracy'].replace('%', '')) for row in performance_data]) / len(performance_data)
+            best_category = max(performance_data, key=lambda x: float(x['Direction Accuracy'].replace('%', '')))
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Average Direction Accuracy", f"{avg_direction_accuracy:.1f}%")
+            with col2:
+                st.metric("Best Performing Category", best_category['Category'])
+            with col3:
+                st.metric("Model Type", model_name)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Historical Analysis and Charts
+    st.markdown("## 📈 Historical Analysis & Trends")
+    
+    for category in selected_categories:
+        st.markdown(f'<div class="chart-container">', unsafe_allow_html=True)
+        
+        # Get category data
+        category_data = data[data['vehicle_class'] == category].copy()
+        if len(category_data) == 0:
+            continue
+            
+        category_data = category_data.sort_values('date')
+        
+        st.markdown(f"### {category} Price Trends")
+        
+        # Create the chart
+        fig = go.Figure()
+        
+        # Historical data
+        fig.add_trace(go.Scatter(
+            x=category_data['date'],
+            y=category_data['premium'],
+            mode='lines+markers',
+            name='Historical Prices',
+            line=dict(color='#667eea', width=2),
+            marker=dict(size=4),
+            hovertemplate='<b>%{x}</b><br>Price: $%{y:,.0f}<extra></extra>'
+        ))
+        
+        # Add predictions if available
+        if category in predictions:
+            last_date = category_data['date'].max()
+            future_dates = [last_date + pd.DateOffset(months=i//2+1) for i in range(len(predictions[category]))]
+            
+            if isinstance(predictions[category], list):
+                pred_values = [float(p.item() if hasattr(p, 'item') else p) for p in predictions[category]]
+            else:
+                pred_values = list(predictions[category])
+                
+            fig.add_trace(go.Scatter(
+                x=future_dates,
+                y=pred_values,
+                mode='lines+markers',
+                name=f'{model_name} Predictions',
+                line=dict(color='#ff6b6b', width=2, dash='dash'),
+                marker=dict(size=6),
+                hovertemplate='<b>%{x}</b><br>Predicted: $%{y:,.0f}<extra></extra>'
+            ))
+        
+        # Styling
+        fig.update_layout(
+            title="",
+            xaxis_title="Date",
+            yaxis_title="Premium (SGD)",
+            font=dict(family="Inter, sans-serif", size=12, color="#374151"),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            height=400,
+            hovermode='x unified',
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
+        fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#f3f4f6')
+        fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#f3f4f6')
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Key statistics
+        latest_price = category_data['premium'].iloc[-1]
+        avg_price = category_data['premium'].mean()
+        max_price = category_data['premium'].max()
+        min_price = category_data['premium'].min()
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Latest Price", f"${latest_price:,.0f}")
+        with col2:
+            st.metric("Average Price", f"${avg_price:,.0f}")
+        with col3:
+            st.metric("Highest Price", f"${max_price:,.0f}")
+        with col4:
+            st.metric("Lowest Price", f"${min_price:,.0f}")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
 @st.cache_resource
-def initialize_model():
-    """Initialize and train the directional forecasting model"""
+def initialize_models():
+    """Initialize and train both forecasting models"""
     data, processor = load_and_process_data()
     if data is not None:
+        models = {}
         try:
-            model = FastDirectionalForecaster()
-            model.fit(data)
-            return model
+            # Initialize Fast Directional Forecaster
+            fast_model = FastDirectionalForecaster()
+            fast_model.fit(data)
+            models['Fast Directional'] = fast_model
+            
+            # Initialize N-BEATS Forecaster
+            nbeats_model = NBEATSForecaster()
+            nbeats_model.fit(data)
+            models['N-BEATS'] = nbeats_model
+            
+            return models
         except Exception as e:
-            st.error(f"Error initializing model: {str(e)}")
-            return None
-    return None
+            st.error(f"Error initializing models: {str(e)}")
+            return {}
+    return {}
 
 def main():
     # Configure page
@@ -296,20 +602,23 @@ def main():
         st.error("Failed to load data. Please check your data file.")
         return
     
-    # Initialize model
-    model = initialize_model()
+    # Initialize models
+    models = initialize_models()
     
-    if model is None:
-        st.error("Failed to initialize prediction model.")
+    if not models:
+        st.error("Failed to initialize prediction models.")
         return
     
     # Main header
     st.markdown("""
     <div class="main-header">
         <h1>Singapore COE Price Predictor</h1>
-        <p>AI-powered predictions for Certificate of Entitlement bidding cycles</p>
+        <p>Compare advanced machine learning models for Certificate of Entitlement price forecasting</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Create tabs for model comparison
+    tab1, tab2 = st.tabs(["🚀 Fast Directional Forecasting", "🧠 N-BEATS Neural Network"])
     
     # Data info banner
     total_records = len(data)
