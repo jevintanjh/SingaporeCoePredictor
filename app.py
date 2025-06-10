@@ -756,13 +756,20 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Data info banner
+    # Data info banner with DD-MM-YYYY format and timestamp
     total_records = len(data)
-    date_range = f"{data['date'].min().strftime('%Y-%m-%d')} to {data['date'].max().strftime('%Y-%m-%d')}"
+    
+    if dataset_info and 'date_range_start' in dataset_info:
+        date_range = f"{dataset_info['date_range_start']} to {dataset_info['date_range_end']}"
+        last_updated = dataset_info['last_updated'].strftime("%d-%m-%Y %H:%M:%S")
+    else:
+        date_range = f"{data['date'].min().strftime('%d-%m-%Y')} to {data['date'].max().strftime('%d-%m-%Y')}"
+        last_updated = "Unknown"
     
     st.markdown(f"""
     <div class="info-banner">
-        <strong>📊 Dataset:</strong> {total_records:,} historical COE bidding records ({date_range})
+        <strong>📊 Dataset:</strong> {total_records:,} historical COE bidding records ({date_range})<br>
+        <small><strong>Last Updated:</strong> {last_updated}</small>
     </div>
     """, unsafe_allow_html=True)
     
