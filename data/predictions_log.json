@@ -1483,5 +1483,140 @@
     "exercise_date": "2025-06-01",
     "actual_price": 96999,
     "evaluated": true
+  },
+  "N-BEATSx_Category A_2025-06-18": {
+    "model_name": "N-BEATSx",
+    "category": "Category A",
+    "predicted_price": 97800.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 98500,
+    "evaluated": true
+  },
+  "N-BEATSx_Category B_2025-06-18": {
+    "model_name": "N-BEATSx",
+    "category": "Category B",
+    "predicted_price": 117500.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 118000,
+    "evaluated": true
+  },
+  "N-BEATSx_Category C_2025-06-18": {
+    "model_name": "N-BEATSx",
+    "category": "Category C",
+    "predicted_price": 86200.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 85500,
+    "evaluated": true
+  },
+  "N-BEATSx_Category D_2025-06-18": {
+    "model_name": "N-BEATSx",
+    "category": "Category D",
+    "predicted_price": 50500.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 52000,
+    "evaluated": true
+  },
+  "N-BEATSx_Category E_2025-06-18": {
+    "model_name": "N-BEATSx",
+    "category": "Category E",
+    "predicted_price": 101500.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 102000,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category A_2025-06-18": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category A",
+    "predicted_price": 96500.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 98500,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category B_2025-06-18": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category B",
+    "predicted_price": 116000.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 118000,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category C_2025-06-18": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category C",
+    "predicted_price": 87000.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 85500,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category D_2025-06-18": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category D",
+    "predicted_price": 49800.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 52000,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category E_2025-06-18": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category E",
+    "predicted_price": 103000.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 102000,
+    "evaluated": true
+  },
+  "Fast Directional Forecaster_Category A_2025-06-18": {
+    "model_name": "Fast Directional Forecaster",
+    "category": "Category A",
+    "predicted_price": 99200.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 98500,
+    "evaluated": true
+  },
+  "Fast Directional Forecaster_Category B_2025-06-18": {
+    "model_name": "Fast Directional Forecaster",
+    "category": "Category B",
+    "predicted_price": 119000.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 118000,
+    "evaluated": true
+  },
+  "Fast Directional Forecaster_Category C_2025-06-18": {
+    "model_name": "Fast Directional Forecaster",
+    "category": "Category C",
+    "predicted_price": 84800.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 85500,
+    "evaluated": true
+  },
+  "Fast Directional Forecaster_Category D_2025-06-18": {
+    "model_name": "Fast Directional Forecaster",
+    "category": "Category D",
+    "predicted_price": 51800.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 52000,
+    "evaluated": true
+  },
+  "Fast Directional Forecaster_Category E_2025-06-18": {
+    "model_name": "Fast Directional Forecaster",
+    "category": "Category E",
+    "predicted_price": 100800.0,
+    "prediction_date": "2025-06-17T00:00:00",
+    "exercise_date": "2025-06-18",
+    "actual_price": 102000,
+    "evaluated": true
   }
 }

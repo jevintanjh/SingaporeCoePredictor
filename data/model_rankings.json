@@ -1,16 +1,11 @@
 {
   "Fast Directional Forecaster": {
-    "total_evaluations": 20,
-    "cumulative_score": 17.68440112331262,
-    "average_score": 0.884220056165631,
+    "total_evaluations": 21,
+    "cumulative_score": 18.678888039584386,
+    "average_score": 0.889470859027828,
     "rank": 3,
-    "last_updated": "2025-06-10T10:17:24.133240",
+    "last_updated": "2025-06-10T10:20:18.740571",
     "evaluation_history": [
-      {
-        "date": "2025-06-10T09:47:18.090865",
-        "score": 0.9867913748468666,
-        "evaluations_count": 5
-      },
       {
         "date": "2025-06-10T09:47:18.420193",
         "score": 0.9937050755472118,
@@ -105,15 +100,20 @@
         "date": "2025-06-10T10:17:24.133240",
         "score": 0.8755965291727728,
         "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:20:18.740571",
+        "score": 0.9944869162717656,
+        "evaluations_count": 5
       }
     ]
   },
   "Interpretable N-BEATS": {
-    "total_evaluations": 16,
-    "cumulative_score": 14.480666936947953,
-    "average_score": 0.9050416835592471,
+    "total_evaluations": 17,
+    "cumulative_score": 15.40569964970455,
+    "average_score": 0.9062176264532088,
     "rank": 2,
-    "last_updated": "2025-06-10T10:14:53.394286",
+    "last_updated": "2025-06-10T10:20:18.740571",
     "evaluation_history": [
       {
         "date": "2025-06-10T09:47:18.090865",
@@ -194,15 +194,20 @@
         "date": "2025-06-10T10:14:53.394286",
         "score": 0.8626406897203294,
         "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:20:18.740571",
+        "score": 0.9250327127565973,
+        "evaluations_count": 5
       }
     ]
   },
   "N-BEATSx": {
-    "total_evaluations": 16,
-    "cumulative_score": 14.772719454714366,
-    "average_score": 0.9232949659196479,
+    "total_evaluations": 17,
+    "cumulative_score": 15.76526037563884,
+    "average_score": 0.92736825739052,
     "rank": 1,
-    "last_updated": "2025-06-10T10:14:53.394286",
+    "last_updated": "2025-06-10T10:20:18.740571",
     "evaluation_history": [
       {
         "date": "2025-06-10T09:47:18.090865",
@@ -282,6 +287,11 @@
       {
         "date": "2025-06-10T10:14:53.394286",
         "score": 0.947886522838048,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:20:18.740571",
+        "score": 0.9925409209244741,
         "evaluations_count": 5
       }
     ]
