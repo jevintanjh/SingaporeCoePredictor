@@ -44,9 +44,9 @@ class COEScheduler:
         Scrape COE bidding dates from official sources
         """
         urls_to_try = [
+            "https://onemotoring.lta.gov.sg/content/dam/onemotoring/Buying/PDF/COE/COE_Bidding_Schedule_for_Year_2025.pdf",
             "https://www.dbs.com.sg/personal/marketplaces/content/article/articles-car-coe-open-bidding-dates-for-2025",
-            "https://onemotoring.lta.gov.sg/content/onemotoring/home/buying/coe.html",
-            "https://www.lta.gov.sg/content/ltagov/en/roads-and-motoring/owning-a-vehicle/costs-of-owning-a-vehicle/certificate-of-entitlement-coe.html"
+            "https://onemotoring.lta.gov.sg/content/onemotoring/home/buying/coe.html"
         ]
         
         logger.info("Scraping COE bidding schedule from official sources...")
@@ -150,12 +150,12 @@ class COEScheduler:
         # Start with scraped dates
         all_dates = set(scraped_dates)
         
-        # Add missing dates from fallback schedule if current year is 2025
-        if current_year == 2025:
-            for date_str in self.fallback_2025_dates:
-                date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-                if date_obj > current_date:
-                    all_dates.add(date_str)
+        # Add accurate LTA schedule dates for complete coverage
+        accurate_schedule = self.generate_coe_schedule(current_year)
+        for date_str in accurate_schedule:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            if date_obj > current_date:
+                all_dates.add(date_str)
         
         # Convert back to sorted list
         merged_dates = sorted(list(all_dates))
@@ -174,42 +174,55 @@ class COEScheduler:
         
         return final_dates
     
+    def generate_coe_schedule(self, year):
+        """
+        Generate COE bidding schedule based on LTA's official pattern:
+        - First and third Mondays of each month at 12 noon
+        - Bidding closes on Wednesday at 4 pm
+        - Results released at 12 noon the following Wednesday
+        """
+        bidding_dates = []
+        
+        for month in range(1, 13):
+            # Find first and third Mondays of the month
+            first_day = datetime(year, month, 1)
+            
+            # Find first Monday
+            days_until_monday = (7 - first_day.weekday()) % 7
+            first_monday = first_day + timedelta(days=days_until_monday)
+            
+            # Third Monday is 14 days after first Monday
+            third_monday = first_monday + timedelta(days=14)
+            
+            # Check if third Monday is still in the same month
+            if third_monday.month == month:
+                bidding_dates.extend([first_monday, third_monday])
+            else:
+                bidding_dates.append(first_monday)
+        
+        return [date.strftime("%Y-%m-%d") for date in bidding_dates]
+    
     def get_fallback_dates(self):
         """
-        Generate fallback dates based on typical COE schedule
+        Generate fallback dates based on official LTA COE schedule pattern
         """
         current_date = datetime.now()
         current_year = current_date.year
         
-        # Use 2025 fallback if current year is 2025
-        if current_year == 2025:
-            return [date for date in self.fallback_2025_dates if datetime.strptime(date, "%Y-%m-%d") > current_date]
-        
-        # Generate dates for current and next year
+        # Generate accurate COE schedule for current and next year
         dates = []
         for year in [current_year, current_year + 1]:
-            for month in range(1, 13):
-                # First exercise around 1st-7th
-                for day in [2, 3, 4, 5]:
-                    try:
-                        date_obj = datetime(year, month, day)
-                        if date_obj >= current_date:
-                            dates.append(date_obj.strftime("%Y-%m-%d"))
-                        break
-                    except ValueError:
-                        continue
-                
-                # Second exercise around 15th-21st
-                for day in [15, 16, 17, 18]:
-                    try:
-                        date_obj = datetime(year, month, day)
-                        if date_obj >= current_date:
-                            dates.append(date_obj.strftime("%Y-%m-%d"))
-                        break
-                    except ValueError:
-                        continue
+            year_dates = self.generate_coe_schedule(year)
+            dates.extend(year_dates)
         
-        return dates
+        # Filter to future dates only
+        future_dates = []
+        for date_str in dates:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            if date_obj > current_date:
+                future_dates.append(date_str)
+        
+        return future_dates
     
     def schedule_updates(self):
         """
@@ -226,11 +239,19 @@ class COEScheduler:
         # Clear existing scheduled jobs
         schedule.clear()
         
-        # Schedule updates 2-3 hours after each bidding date (results typically available by then)
+        # Schedule updates after bidding results are released (12 noon on Wednesday following bidding)
         for date_str in self.bidding_dates:
             try:
                 bidding_date = datetime.strptime(date_str, "%Y-%m-%d")
-                update_time = bidding_date + timedelta(hours=3)  # Results usually available 2-3 hours after bidding
+                
+                # Calculate results release date: Wednesday following the bidding Monday
+                # Bidding starts on Monday, results released following Wednesday at 12 noon
+                days_to_wednesday = (2 - bidding_date.weekday()) % 7  # Days to next Wednesday
+                if days_to_wednesday == 0:  # If today is Wednesday, get next Wednesday
+                    days_to_wednesday = 7
+                
+                results_date = bidding_date + timedelta(days=days_to_wednesday)
+                update_time = results_date.replace(hour=13, minute=0, second=0, microsecond=0)  # 1 PM after results at 12 noon
                 
                 # Only schedule future updates
                 if update_time > datetime.now():
