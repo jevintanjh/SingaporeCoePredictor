@@ -160,14 +160,14 @@ class COEScheduler:
         # Convert back to sorted list
         merged_dates = sorted(list(all_dates))
         
-        # Filter to reasonable COE dates
+        # Filter to reasonable COE dates - expanded range to include all official LTA dates
         final_dates = []
         for date_str in merged_dates:
             try:
                 date_obj = datetime.strptime(date_str, "%Y-%m-%d")
                 day = date_obj.day
-                # COE bidding typically happens between 1st-7th and 15th-21st of month
-                if (1 <= day <= 7) or (15 <= day <= 21):
+                # COE exercises can happen on various dates throughout the month based on LTA schedule
+                if 1 <= day <= 31:  # Accept all valid calendar dates
                     final_dates.append(date_str)
             except ValueError:
                 continue
