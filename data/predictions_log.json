@@ -407,7 +407,7 @@
   "Fast Directional Forecaster_Category A_2025-05-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category A",
-    "predicted_price": 100843.0,
+    "predicted_price": 98053.0,
     "prediction_date": "2025-04-30T00:00:00",
     "exercise_date": "2025-05-01",
     "actual_price": 103009,
@@ -416,7 +416,7 @@
   "Fast Directional Forecaster_Category B_2025-05-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category B",
-    "predicted_price": 108477.0,
+    "predicted_price": 103284.0,
     "prediction_date": "2025-04-30T00:00:00",
     "exercise_date": "2025-05-01",
     "actual_price": 119890,
@@ -425,7 +425,7 @@
   "Fast Directional Forecaster_Category C_2025-05-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category C",
-    "predicted_price": 53670.0,
+    "predicted_price": 60718.0,
     "prediction_date": "2025-04-30T00:00:00",
     "exercise_date": "2025-05-01",
     "actual_price": 62590,
@@ -434,7 +434,7 @@
   "Fast Directional Forecaster_Category D_2025-05-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category D",
-    "predicted_price": 7275.0,
+    "predicted_price": 7935.0,
     "prediction_date": "2025-04-30T00:00:00",
     "exercise_date": "2025-05-01",
     "actual_price": 8709,
@@ -443,7 +443,7 @@
   "Fast Directional Forecaster_Category E_2025-05-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category E",
-    "predicted_price": 102833.0,
+    "predicted_price": 106183.0,
     "prediction_date": "2025-04-30T00:00:00",
     "exercise_date": "2025-05-01",
     "actual_price": 118889,
@@ -1082,7 +1082,7 @@
   "Fast Directional Forecaster_Category E_2025-03-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category E",
-    "predicted_price": 112610.0,
+    "predicted_price": 100764.0,
     "prediction_date": "2025-03-15T00:00:00",
     "exercise_date": "2025-03-16",
     "actual_price": 116991,
@@ -1091,7 +1091,7 @@
   "Fast Directional Forecaster_Category C_2025-03-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category C",
-    "predicted_price": 68006.0,
+    "predicted_price": 66505.0,
     "prediction_date": "2025-03-15T00:00:00",
     "exercise_date": "2025-03-16",
     "actual_price": 70089,
@@ -1100,7 +1100,7 @@
   "Fast Directional Forecaster_Category B_2025-03-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category B",
-    "predicted_price": 104125.0,
+    "predicted_price": 103923.0,
     "prediction_date": "2025-03-15T00:00:00",
     "exercise_date": "2025-03-16",
     "actual_price": 116890,
@@ -1109,7 +1109,7 @@
   "Fast Directional Forecaster_Category A_2025-03-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category A",
-    "predicted_price": 81983.0,
+    "predicted_price": 94274.0,
     "prediction_date": "2025-03-15T00:00:00",
     "exercise_date": "2025-03-16",
     "actual_price": 94502,
@@ -1118,7 +1118,7 @@
   "Fast Directional Forecaster_Category D_2025-03-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category D",
-    "predicted_price": 8011.0,
+    "predicted_price": 8231.0,
     "prediction_date": "2025-03-15T00:00:00",
     "exercise_date": "2025-03-16",
     "actual_price": 9511,
@@ -1217,7 +1217,7 @@
   "Fast Directional Forecaster_Category A_2025-04-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category A",
-    "predicted_price": 98131.0,
+    "predicted_price": 81975.0,
     "prediction_date": "2025-03-31T00:00:00",
     "exercise_date": "2025-04-01",
     "actual_price": 97724,
@@ -1226,7 +1226,7 @@
   "Fast Directional Forecaster_Category C_2025-04-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category C",
-    "predicted_price": 56444.0,
+    "predicted_price": 69175.0,
     "prediction_date": "2025-03-31T00:00:00",
     "exercise_date": "2025-04-01",
     "actual_price": 68782,
@@ -1235,7 +1235,7 @@
   "Fast Directional Forecaster_Category B_2025-04-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category B",
-    "predicted_price": 107775.0,
+    "predicted_price": 113773.0,
     "prediction_date": "2025-03-31T00:00:00",
     "exercise_date": "2025-04-01",
     "actual_price": 117899,
@@ -1244,7 +1244,7 @@
   "Fast Directional Forecaster_Category E_2025-04-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category E",
-    "predicted_price": 100406.0,
+    "predicted_price": 106531.0,
     "prediction_date": "2025-03-31T00:00:00",
     "exercise_date": "2025-04-01",
     "actual_price": 117002,
@@ -1253,7 +1253,7 @@
   "Fast Directional Forecaster_Category D_2025-04-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category D",
-    "predicted_price": 9588.0,
+    "predicted_price": 8982.0,
     "prediction_date": "2025-03-31T00:00:00",
     "exercise_date": "2025-04-01",
     "actual_price": 9889,
@@ -1352,7 +1352,7 @@
   "Fast Directional Forecaster_Category E_2025-04-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category E",
-    "predicted_price": 97757.0,
+    "predicted_price": 107413.0,
     "prediction_date": "2025-04-15T00:00:00",
     "exercise_date": "2025-04-16",
     "actual_price": 118001,
@@ -1361,7 +1361,7 @@
   "Fast Directional Forecaster_Category D_2025-04-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category D",
-    "predicted_price": 8302.0,
+    "predicted_price": 9167.0,
     "prediction_date": "2025-04-15T00:00:00",
     "exercise_date": "2025-04-16",
     "actual_price": 9309,
@@ -1370,7 +1370,7 @@
   "Fast Directional Forecaster_Category C_2025-04-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category C",
-    "predicted_price": 59633.0,
+    "predicted_price": 56883.0,
     "prediction_date": "2025-04-15T00:00:00",
     "exercise_date": "2025-04-16",
     "actual_price": 65001,
@@ -1379,7 +1379,7 @@
   "Fast Directional Forecaster_Category B_2025-04-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category B",
-    "predicted_price": 101181.0,
+    "predicted_price": 116575.0,
     "prediction_date": "2025-04-15T00:00:00",
     "exercise_date": "2025-04-16",
     "actual_price": 117003,
@@ -1388,7 +1388,7 @@
   "Fast Directional Forecaster_Category A_2025-04-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category A",
-    "predicted_price": 94421.0,
+    "predicted_price": 96114.0,
     "prediction_date": "2025-04-15T00:00:00",
     "exercise_date": "2025-04-16",
     "actual_price": 99500,
@@ -1397,7 +1397,7 @@
   "Fast Directional Forecaster_Category E_2025-05-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category E",
-    "predicted_price": 107028.0,
+    "predicted_price": 101512.0,
     "prediction_date": "2025-05-15T00:00:00",
     "exercise_date": "2025-05-16",
     "actual_price": 118010,
@@ -1406,7 +1406,7 @@
   "Fast Directional Forecaster_Category D_2025-05-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category D",
-    "predicted_price": 8128.0,
+    "predicted_price": 8694.0,
     "prediction_date": "2025-05-15T00:00:00",
     "exercise_date": "2025-05-16",
     "actual_price": 8707,
@@ -1415,7 +1415,7 @@
   "Fast Directional Forecaster_Category C_2025-05-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category C",
-    "predicted_price": 62955.0,
+    "predicted_price": 58295.0,
     "prediction_date": "2025-05-15T00:00:00",
     "exercise_date": "2025-05-16",
     "actual_price": 63189,
@@ -1424,7 +1424,7 @@
   "Fast Directional Forecaster_Category B_2025-05-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category B",
-    "predicted_price": 104025.0,
+    "predicted_price": 102130.0,
     "prediction_date": "2025-05-15T00:00:00",
     "exercise_date": "2025-05-16",
     "actual_price": 116988,
@@ -1433,7 +1433,7 @@
   "Fast Directional Forecaster_Category A_2025-05-16": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category A",
-    "predicted_price": 100114.0,
+    "predicted_price": 92263.0,
     "prediction_date": "2025-05-15T00:00:00",
     "exercise_date": "2025-05-16",
     "actual_price": 102501,
@@ -1442,7 +1442,7 @@
   "Fast Directional Forecaster_Category B_2025-06-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category B",
-    "predicted_price": 111352.0,
+    "predicted_price": 99460.0,
     "prediction_date": "2025-05-31T00:00:00",
     "exercise_date": "2025-06-01",
     "actual_price": 113000,
@@ -1451,7 +1451,7 @@
   "Fast Directional Forecaster_Category E_2025-06-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category E",
-    "predicted_price": 95724.0,
+    "predicted_price": 97057.0,
     "prediction_date": "2025-05-31T00:00:00",
     "exercise_date": "2025-06-01",
     "actual_price": 113900,
@@ -1460,7 +1460,7 @@
   "Fast Directional Forecaster_Category D_2025-06-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category D",
-    "predicted_price": 7883.0,
+    "predicted_price": 7979.0,
     "prediction_date": "2025-05-31T00:00:00",
     "exercise_date": "2025-06-01",
     "actual_price": 9000,
@@ -1469,7 +1469,7 @@
   "Fast Directional Forecaster_Category C_2025-06-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category C",
-    "predicted_price": 59184.0,
+    "predicted_price": 59512.0,
     "prediction_date": "2025-05-31T00:00:00",
     "exercise_date": "2025-06-01",
     "actual_price": 62000,
@@ -1478,7 +1478,7 @@
   "Fast Directional Forecaster_Category A_2025-06-01": {
     "model_name": "Fast Directional Forecaster",
     "category": "Category A",
-    "predicted_price": 89668.0,
+    "predicted_price": 93240.0,
     "prediction_date": "2025-05-31T00:00:00",
     "exercise_date": "2025-06-01",
     "actual_price": 96999,

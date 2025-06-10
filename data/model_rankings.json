@@ -1,10 +1,10 @@
 {
   "Fast Directional Forecaster": {
-    "total_evaluations": 14,
-    "cumulative_score": 12.921288683597943,
-    "average_score": 0.9229491916855673,
-    "rank": 2,
-    "last_updated": "2025-06-10T10:14:53.394286",
+    "total_evaluations": 20,
+    "cumulative_score": 17.68440112331262,
+    "average_score": 0.884220056165631,
+    "rank": 3,
+    "last_updated": "2025-06-10T10:17:24.133240",
     "evaluation_history": [
       {
         "date": "2025-06-10T09:47:18.090865",
@@ -75,6 +75,36 @@
         "date": "2025-06-10T10:14:53.394286",
         "score": 0.8813020301534975,
         "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:17:23.569172",
+        "score": 0.6987129031319261,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:17:23.667704",
+        "score": 0.7063688024592464,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:17:23.771610",
+        "score": 0.8425415060200191,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:17:23.866117",
+        "score": 0.7622810926718597,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:17:24.006153",
+        "score": 0.877611606258856,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:17:24.133240",
+        "score": 0.8755965291727728,
+        "evaluations_count": 5
       }
     ]
   },
@@ -82,7 +112,7 @@
     "total_evaluations": 16,
     "cumulative_score": 14.480666936947953,
     "average_score": 0.9050416835592471,
-    "rank": 3,
+    "rank": 2,
     "last_updated": "2025-06-10T10:14:53.394286",
     "evaluation_history": [
       {
