@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 
 # Import models
 from models.fast_directional_forecaster import FastDirectionalForecaster
-from models.enhanced_nbeats import EnhancedNBEATS
+from models.simple_nbeats import SimpleNBEATS
 
 @st.cache_data
 def load_and_process_data():
@@ -509,8 +509,8 @@ def initialize_models():
             fast_model.fit(data)
             models['Fast Directional'] = fast_model
             
-            # Initialize Enhanced N-BEATS Forecaster
-            nbeats_model = EnhancedNBEATS()
+            # Initialize Simple N-BEATS Forecaster
+            nbeats_model = SimpleNBEATS()
             nbeats_model.fit(data)
             models['N-BEATS'] = nbeats_model
             
