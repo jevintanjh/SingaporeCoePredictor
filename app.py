@@ -10,6 +10,7 @@ warnings.filterwarnings('ignore')
 # Import models
 from models.fast_directional_forecaster import FastDirectionalForecaster
 from models.interpretable_nbeats_v2 import InterpretableNBEATS
+from models.nbeatsx import NBEATSx
 
 @st.cache_data
 def load_and_process_data():
@@ -560,6 +561,11 @@ def initialize_models():
             nbeats_model.fit(data)
             models['N-BEATS'] = nbeats_model
             
+            # Initialize N-BEATSx Forecaster
+            nbeatsx_model = NBEATSx()
+            nbeatsx_model.fit(data)
+            models['N-BEATSx'] = nbeatsx_model
+            
             return models
         except Exception as e:
             st.error(f"Error initializing models: {str(e)}")
@@ -761,7 +767,7 @@ def main():
         return
     
     # Create tabs for model comparison
-    tab1, tab2 = st.tabs(["🚀 Fast Directional Forecasting", "🧠 Interpretable N-BEATS"])
+    tab1, tab2, tab3 = st.tabs(["🚀 Fast Directional Forecasting", "🧠 Interpretable N-BEATS", "⚡ N-BEATSx"])
     
     # Tab 1: Fast Directional Forecasting
     with tab1:
@@ -773,11 +779,21 @@ def main():
             prediction_cycles
         )
     
-    # Tab 2: N-BEATS Neural Network
+    # Tab 2: Interpretable N-BEATS
     with tab2:
         render_model_dashboard(
             models['N-BEATS'], 
-            "N-BEATS", 
+            "Interpretable N-BEATS", 
+            data, 
+            selected_categories, 
+            prediction_cycles
+        )
+    
+    # Tab 3: N-BEATSx with Exogenous Variables
+    with tab3:
+        render_model_dashboard(
+            models['N-BEATSx'], 
+            "N-BEATSx", 
             data, 
             selected_categories, 
             prediction_cycles
