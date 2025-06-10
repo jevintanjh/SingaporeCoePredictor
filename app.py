@@ -483,8 +483,8 @@ def main():
             )
         )
         
-        fig.update_xaxis(showgrid=True, gridwidth=1, gridcolor='#f3f4f6')
-        fig.update_yaxis(showgrid=True, gridwidth=1, gridcolor='#f3f4f6')
+        fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#f3f4f6')
+        fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#f3f4f6')
         
         st.plotly_chart(fig, use_container_width=True)
         
