@@ -28,9 +28,20 @@ def load_and_process_data():
         ]
         
         data = None
+        dataset_info = None
         for file_path in file_paths:
             try:
                 data = pd.read_csv(file_path)
+                # Get dataset metadata
+                import os
+                file_stat = os.stat(file_path)
+                last_modified = datetime.fromtimestamp(file_stat.st_mtime)
+                
+                dataset_info = {
+                    'file_path': file_path,
+                    'record_count': len(data),
+                    'last_updated': last_modified
+                }
                 break
             except:
                 continue
@@ -77,7 +88,24 @@ def load_and_process_data():
         # Sort by date
         data = data.sort_values('date')
         
-        return data, None
+        # Get date range for dataset info
+        if len(data) > 0:
+            min_date = data['date'].min()
+            max_date = data['date'].max()
+            if dataset_info is not None:
+                dataset_info.update({
+                    'date_range_start': min_date.strftime("%d-%m-%Y"),
+                    'date_range_end': max_date.strftime("%d-%m-%Y")
+                })
+            else:
+                dataset_info = {
+                    'record_count': len(data),
+                    'date_range_start': min_date.strftime("%d-%m-%Y"),
+                    'date_range_end': max_date.strftime("%d-%m-%Y"),
+                    'last_updated': datetime.now()
+                }
+        
+        return data, dataset_info
     except Exception as e:
         st.error(f"Error loading data: {str(e)}")
         return None, None
@@ -707,7 +735,7 @@ def main():
     """, unsafe_allow_html=True)
     
     # Load data
-    data, processor = load_and_process_data()
+    data, dataset_info = load_and_process_data()
     
     if data is None:
         st.error("Failed to load data. Please check your data file.")
