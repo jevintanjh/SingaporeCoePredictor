@@ -110,7 +110,8 @@ class COEScheduler:
                             date_str = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
                             try:
                                 date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-                                if date_obj >= datetime.now() - timedelta(days=30):  # Include recent past
+                                # Only include future dates (not past dates)
+                                if date_obj >= datetime.now():
                                     dates.append(date_str)
                             except ValueError:
                                 continue
@@ -141,7 +142,7 @@ class COEScheduler:
         
         # Use 2025 fallback if current year is 2025
         if current_year == 2025:
-            return [date for date in self.fallback_2025_dates if datetime.strptime(date, "%Y-%m-%d") >= current_date]
+            return [date for date in self.fallback_2025_dates if datetime.strptime(date, "%Y-%m-%d") > current_date]
         
         # Generate dates for current and next year
         dates = []
@@ -307,10 +308,17 @@ class COEScheduler:
         """
         Get scheduler status information
         """
+        # Filter future dates only for display
+        current_date = datetime.now()
+        future_dates = [
+            date for date in self.bidding_dates 
+            if datetime.strptime(date, "%Y-%m-%d") > current_date
+        ]
+        
         return {
             'is_running': self.is_running,
-            'bidding_dates_count': len(self.bidding_dates),
-            'next_bidding_dates': self.bidding_dates[:5],  # Next 5 dates
+            'bidding_dates_count': len(future_dates),
+            'next_bidding_dates': future_dates[:5],  # Next 5 future dates
             'scheduled_jobs_count': len(schedule.get_jobs()),
             'next_update_time': self.get_next_update_time()
         }

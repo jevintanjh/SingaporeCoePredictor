@@ -781,7 +781,15 @@ def main():
             st.success("🔄 Automated COE data updates are running. System monitors official bidding schedule and updates database automatically after each exercise.")
             
             if scheduler_status['next_bidding_dates']:
-                next_dates = ", ".join(scheduler_status['next_bidding_dates'][:3])
+                # Convert dates to DD-MM-YYYY format
+                formatted_dates = []
+                for date_str in scheduler_status['next_bidding_dates'][:3]:
+                    try:
+                        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+                        formatted_dates.append(date_obj.strftime("%d-%m-%Y"))
+                    except:
+                        formatted_dates.append(date_str)
+                next_dates = ", ".join(formatted_dates)
                 st.info(f"📅 Next COE bidding dates: {next_dates}")
         else:
             st.info("📊 Using historical COE database with 2,569+ records for forecasting. Automated updates will activate when bidding schedule is available.")
