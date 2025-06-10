@@ -231,19 +231,34 @@ def render_model_dashboard(model, model_name, data, selected_categories, predict
         except:
             extended_predictions = predictions
         
-        # Create date range for next 6 bidding cycles
+        # Create date range for next 6 bidding cycles following COE schedule (1st and 15th)
         latest_date = data['date'].max()
         prediction_dates = []
+        current_date = latest_date
+        
         for i in range(6):
-            # Assuming 2 cycles per month, alternate between 1st and 2nd cycle
-            cycle_num = (i % 2) + 1
-            month_offset = i // 2
-            pred_date = latest_date + pd.DateOffset(months=month_offset+1)
+            # Move to next bidding cycle
+            if current_date.day <= 15:
+                if current_date.day == 15:
+                    # If exactly 15th, next is 1st of next month
+                    next_month = current_date.replace(day=1) + pd.DateOffset(months=1)
+                    current_date = next_month
+                else:
+                    # Move to 15th of current month
+                    current_date = current_date.replace(day=15)
+            else:
+                # If after 15th, next cycle is 1st of next month
+                next_month = current_date.replace(day=1) + pd.DateOffset(months=1)
+                current_date = next_month
+            
+            # Determine cycle number (1 for 1st, 2 for 15th)
+            cycle_num = 1 if current_date.day == 1 else 2
+            
             prediction_dates.append({
                 'cycle': i + 1,
-                'date': pred_date,
-                'month': pred_date.strftime('%Y-%m'),
-                'cycle_label': f"{pred_date.strftime('%Y-%m')} Cycle {cycle_num}"
+                'date': current_date,
+                'month': current_date.strftime('%Y-%m'),
+                'cycle_label': f"{current_date.strftime('%Y-%m')} Cycle {cycle_num}"
             })
         
         # Create tabs for each category
@@ -399,6 +414,7 @@ def render_model_dashboard(model, model_name, data, selected_categories, predict
         # Add predictions if available
         if category in predictions and predictions[category]:
             last_date = category_data['date'].max()
+            last_price = category_data['premium'].iloc[-1]
             
             # Handle different prediction formats
             if isinstance(predictions[category], dict) and 'mean' in predictions[category]:
@@ -417,42 +433,72 @@ def render_model_dashboard(model, model_name, data, selected_categories, predict
                 upper_bounds = []
             
             if pred_values:
-                future_dates = [last_date + pd.DateOffset(months=i//2+1) for i in range(len(pred_values))]
+                # Generate future dates following COE bidding schedule (1st and 15th of each month)
+                future_dates = []
+                current_date = last_date
                 
-                # Add main prediction line
+                for i in range(len(pred_values)):
+                    # Move to next bidding cycle
+                    if current_date.day <= 15:
+                        # If current date is before 15th, next cycle is 15th of same month
+                        if current_date.day == 15:
+                            # If exactly 15th, next is 1st of next month
+                            next_month = current_date.replace(day=1) + pd.DateOffset(months=1)
+                            current_date = next_month
+                        else:
+                            # Move to 15th of current month
+                            current_date = current_date.replace(day=15)
+                    else:
+                        # If after 15th, next cycle is 1st of next month
+                        next_month = current_date.replace(day=1) + pd.DateOffset(months=1)
+                        current_date = next_month
+                    
+                    future_dates.append(current_date)
+                
+                # Create connected prediction line starting from last historical point
+                prediction_x = [last_date] + future_dates
+                prediction_y = [last_price] + pred_values
+                
+                # Add main prediction line (connected to historical data)
                 fig.add_trace(go.Scatter(
-                    x=future_dates,
-                    y=pred_values,
+                    x=prediction_x,
+                    y=prediction_y,
                     mode='lines+markers',
                     name=f'{model_name} Predictions',
                     line=dict(color='#ff6b6b', width=2, dash='dash'),
-                    marker=dict(size=6),
+                    marker=dict(size=6, symbol='circle'),
                     hovertemplate='<b>%{x}</b><br>Predicted: $%{y:,.0f}<extra></extra>'
                 ))
                 
                 # Add confidence intervals if available
                 if lower_bounds and upper_bounds and len(lower_bounds) == len(upper_bounds) == len(pred_values):
+                    # Create confidence interval bands
+                    upper_x = [last_date] + future_dates
+                    upper_y = [last_price] + upper_bounds
+                    lower_x = [last_date] + future_dates
+                    lower_y = [last_price] + lower_bounds
+                    
                     # Upper bound
                     fig.add_trace(go.Scatter(
-                        x=future_dates,
-                        y=upper_bounds,
+                        x=upper_x,
+                        y=upper_y,
                         mode='lines',
                         name='Upper Bound',
-                        line=dict(width=0),
+                        line=dict(width=0, color='rgba(255, 107, 107, 0)'),
                         showlegend=False,
                         hoverinfo='skip'
                     ))
                     
                     # Lower bound with fill
                     fig.add_trace(go.Scatter(
-                        x=future_dates,
-                        y=lower_bounds,
+                        x=lower_x,
+                        y=lower_y,
                         mode='lines',
-                        name='Confidence Interval',
-                        line=dict(width=0),
+                        name='95% Confidence Interval',
+                        line=dict(width=0, color='rgba(255, 107, 107, 0)'),
                         fill='tonexty',
                         fillcolor='rgba(255, 107, 107, 0.2)',
-                        hovertemplate='<b>%{x}</b><br>Lower: $%{y:,.0f}<extra></extra>'
+                        hovertemplate='<b>%{x}</b><br>Range: $%{y:,.0f}<extra></extra>'
                     ))
         
         # Styling
