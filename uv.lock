@@ -1263,6 +1263,7 @@ name = "repl-nix-workspace"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "keras" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "plotly" },
@@ -1276,6 +1277,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "keras", specifier = ">=2.14.0" },
     { name = "numpy", specifier = ">=2.3.0" },
     { name = "pandas", specifier = ">=2.3.0" },
     { name = "plotly", specifier = ">=6.1.2" },
