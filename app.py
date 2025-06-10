@@ -125,17 +125,39 @@ def extract_date_info(exercise):
 
 def standardize_category(cat):
     """Standardize category names"""
-    cat_str = str(cat).upper()
-    if 'A' in cat_str and ('CARS' in cat_str or 'SMALL' in cat_str):
+    if pd.isna(cat):
+        return None
+    
+    cat_str = str(cat).upper().strip()
+    
+    # Handle exact matches first
+    if cat_str == 'CATEGORY A' or cat_str == 'A':
         return 'Category A'
-    elif 'B' in cat_str:
+    elif cat_str == 'CATEGORY B' or cat_str == 'B':
         return 'Category B'
-    elif 'C' in cat_str and ('GOODS' in cat_str or 'LIGHT' in cat_str):
+    elif cat_str == 'CATEGORY C' or cat_str == 'C':
         return 'Category C'
-    elif 'D' in cat_str:
+    elif cat_str == 'CATEGORY D' or cat_str == 'D':
         return 'Category D'
-    elif 'E' in cat_str and ('OPEN' in cat_str or 'BIG' in cat_str):
+    elif cat_str == 'CATEGORY E' or cat_str == 'E':
         return 'Category E'
+    
+    # Handle pattern matches for different formats
+    elif 'CATEGORY A' in cat_str or ('A' in cat_str and ('CARS' in cat_str or 'SMALL' in cat_str)):
+        return 'Category A'
+    elif 'CATEGORY B' in cat_str or ('B' in cat_str and 'CATEGORY' in cat_str):
+        return 'Category B'
+    elif 'CATEGORY C' in cat_str or ('C' in cat_str and ('GOODS' in cat_str or 'LIGHT' in cat_str)):
+        return 'Category C'
+    elif 'CATEGORY D' in cat_str or ('D' in cat_str and 'CATEGORY' in cat_str):
+        return 'Category D'
+    elif 'CATEGORY E' in cat_str or ('E' in cat_str and ('OPEN' in cat_str or 'BIG' in cat_str)):
+        return 'Category E'
+    
+    # Return the original if it already looks like a proper category
+    if cat_str.startswith('CATEGORY'):
+        return cat_str.title()
+    
     return None
 
 def render_model_dashboard(model, model_name, data, selected_categories, prediction_cycles):
