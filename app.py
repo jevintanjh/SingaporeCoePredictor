@@ -973,38 +973,133 @@ def main():
     except Exception as e:
         st.info("Model performance tracking will be available after predictions are made and evaluated.")
     
-    # Create tabs for model comparison
-    tab1, tab2, tab3 = st.tabs(["🚀 Fast Directional Forecasting", "🧠 Interpretable N-BEATS", "⚡ N-BEATSx"])
+    # Create tabs ordered by performance ranking
+    def get_ordered_models_by_ranking():
+        """Get models ordered by their performance ranking"""
+        try:
+            model_ranker = COEModelRanker()
+            rankings = model_ranker.get_current_rankings()
+            
+            if rankings:
+                # Create mapping of model names to display info
+                model_mapping = {
+                    'Fast Directional Forecaster': {
+                        'model_key': 'Fast Directional',
+                        'display_name': 'Fast Directional',
+                        'tab_label': '🚀 Fast Directional Forecasting',
+                        'rank': None
+                    },
+                    'Interpretable N-BEATS': {
+                        'model_key': 'N-BEATS',
+                        'display_name': 'Interpretable N-BEATS', 
+                        'tab_label': '🧠 Interpretable N-BEATS',
+                        'rank': None
+                    },
+                    'N-BEATSx': {
+                        'model_key': 'N-BEATSx',
+                        'display_name': 'N-BEATSx',
+                        'tab_label': '⚡ N-BEATSx',
+                        'rank': None
+                    }
+                }
+                
+                # Update ranks based on current rankings
+                for rank_info in rankings:
+                    model_name = rank_info['model_name']
+                    if model_name in model_mapping:
+                        model_mapping[model_name]['rank'] = rank_info['rank']
+                        model_mapping[model_name]['score'] = rank_info['average_score']
+                
+                # Sort by rank (lower rank number = better performance = leftmost position)
+                sorted_models = []
+                for model_name, info in model_mapping.items():
+                    if info['rank'] is not None:
+                        sorted_models.append((info['rank'], model_name, info))
+                
+                # Add any models without rankings at the end
+                unranked_models = []
+                for model_name, info in model_mapping.items():
+                    if info['rank'] is None:
+                        unranked_models.append((999, model_name, info))  # High rank number for unranked
+                
+                # Combine and sort
+                all_models = sorted_models + unranked_models
+                all_models.sort(key=lambda x: x[0])  # Sort by rank
+                
+                # Add rank indicators to tab labels
+                ordered_models = []
+                for rank, model_name, info in all_models:
+                    if info['rank'] is not None:
+                        # Add rank badge to tab label
+                        rank_badge = f"#{info['rank']} "
+                        score_badge = f" ({info['score']:.3f})"
+                        enhanced_label = rank_badge + info['tab_label'] + score_badge
+                    else:
+                        enhanced_label = info['tab_label']
+                    
+                    ordered_models.append({
+                        'tab_label': enhanced_label,
+                        'model_key': info['model_key'],
+                        'display_name': info['display_name'],
+                        'rank': info['rank']
+                    })
+                
+                return ordered_models
+            
+        except Exception as e:
+            # Fallback to default order if ranking fails
+            pass
+        
+        # Default order if no rankings available
+        return [
+            {
+                'tab_label': '🚀 Fast Directional Forecasting',
+                'model_key': 'Fast Directional',
+                'display_name': 'Fast Directional',
+                'rank': None
+            },
+            {
+                'tab_label': '🧠 Interpretable N-BEATS',
+                'model_key': 'N-BEATS', 
+                'display_name': 'Interpretable N-BEATS',
+                'rank': None
+            },
+            {
+                'tab_label': '⚡ N-BEATSx',
+                'model_key': 'N-BEATSx',
+                'display_name': 'N-BEATSx',
+                'rank': None
+            }
+        ]
     
-    # Tab 1: Fast Directional Forecasting
-    with tab1:
-        render_model_dashboard(
-            models['Fast Directional'], 
-            "Fast Directional", 
-            data, 
-            selected_categories, 
-            prediction_cycles
-        )
+    # Get models ordered by performance
+    ordered_models = get_ordered_models_by_ranking()
     
-    # Tab 2: Interpretable N-BEATS
-    with tab2:
-        render_model_dashboard(
-            models['N-BEATS'], 
-            "Interpretable N-BEATS", 
-            data, 
-            selected_categories, 
-            prediction_cycles
-        )
+    # Extract tab labels and create tabs
+    tab_labels = [model['tab_label'] for model in ordered_models]
+    tabs = st.tabs(tab_labels)
     
-    # Tab 3: N-BEATSx with Exogenous Variables
-    with tab3:
-        render_model_dashboard(
-            models['N-BEATSx'], 
-            "N-BEATSx", 
-            data, 
-            selected_categories, 
-            prediction_cycles
-        )
+    # Render each tab with the corresponding model
+    for i, (tab, model_info) in enumerate(zip(tabs, ordered_models)):
+        with tab:
+            # Add ranking information at the top if available
+            if model_info['rank'] is not None:
+                if model_info['rank'] == 1:
+                    st.success(f"🏆 **Top Performing Model** - Ranked #{model_info['rank']} based on recent COE prediction accuracy")
+                elif model_info['rank'] == 2:
+                    st.info(f"🥈 **Strong Performer** - Ranked #{model_info['rank']} based on recent COE prediction accuracy")
+                elif model_info['rank'] == 3:
+                    st.warning(f"🥉 **Good Performance** - Ranked #{model_info['rank']} based on recent COE prediction accuracy")
+                else:
+                    st.info(f"📊 **Ranked #{model_info['rank']}** based on recent COE prediction accuracy")
+            
+            render_model_dashboard(
+                models[model_info['model_key']], 
+                model_info['display_name'], 
+                data, 
+                selected_categories, 
+                prediction_cycles
+            )
 
 if __name__ == "__main__":
     main()
