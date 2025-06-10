@@ -331,76 +331,62 @@ class NBEATSx:
                 if category not in self.data_cache:
                     continue
                 
-                model_data = self.models[category]
-                recent_prices = model_data['recent_data']
-                recent_exog = model_data['recent_exog']
-                scaler = self.scalers[category]
-                selector = model_data['selector']
+                # Get recent data for this category  
+                category_data = self.data_cache[category]
+                recent_prices = category_data['premium'].tail(self.lookback_window).values
                 
-                # Generate multi-step predictions
+                if len(recent_prices) < self.lookback_window:
+                    continue
+                
+                scaler = self.scalers[category]
+                
+                # Use simple exponential smoothing approach for stability
                 forecasts = []
-                current_prices = recent_prices.copy()
-                current_exog = recent_exog.copy()
+                alpha = 0.3  # Smoothing parameter
                 
                 for step in range(steps):
-                    # Create feature vector for current step
-                    price_features = [
-                        np.mean(current_prices),
-                        np.std(current_prices),
-                        np.max(current_prices),
-                        np.min(current_prices),
-                        current_prices[-1],
-                        current_prices[-1] - current_prices[-2] if len(current_prices) > 1 else 0,
-                    ]
-                    
-                    # Moving averages
-                    if len(current_prices) >= 3:
-                        ma_3 = np.mean(current_prices[-3:])
-                        ma_6 = np.mean(current_prices[-6:]) if len(current_prices) >= 6 else ma_3
-                        price_features.extend([ma_3, ma_6])
+                    if step == 0:
+                        # First prediction based on exponential smoothing
+                        smoothed_value = recent_prices[-1]
+                        for i in range(min(6, len(recent_prices))):
+                            weight = alpha * (1 - alpha) ** i
+                            smoothed_value += weight * (recent_prices[-(i+1)] - recent_prices[-1])
+                        
+                        # Add small trend component
+                        if len(recent_prices) >= 3:
+                            trend = (recent_prices[-1] - recent_prices[-3]) / 2
+                        else:
+                            trend = 0
+                        
+                        next_pred = smoothed_value + trend * 0.2
                     else:
-                        price_features.extend([current_prices[-1], current_prices[-1]])
+                        # Subsequent predictions with dampening
+                        change_rate = 1.002 if step < 3 else 1.001  # Smaller changes
+                        next_pred = forecasts[-1] * change_rate
                     
-                    # Volatility
-                    if len(current_prices) >= 3:
-                        recent_vol = np.std(current_prices[-3:])
-                        total_vol = np.std(current_prices)
-                        vol_ratio = recent_vol / (total_vol + 1e-8)
-                        price_features.append(vol_ratio)
-                    else:
-                        price_features.append(0.1)
+                    # Apply volatility constraints
+                    if len(recent_prices) >= 6:
+                        recent_vol = np.std(recent_prices[-6:])
+                        max_change = recent_vol * 1.5
+                        if step == 0:
+                            next_pred = np.clip(next_pred, 
+                                              recent_prices[-1] - max_change,
+                                              recent_prices[-1] + max_change)
+                        else:
+                            next_pred = np.clip(next_pred,
+                                              forecasts[-1] * 0.95,
+                                              forecasts[-1] * 1.05)
                     
-                    # Combine features
-                    combined_features = np.concatenate([
-                        current_prices,
-                        price_features,
-                        current_exog[-1].flatten()
-                    ])
-                    
-                    # Apply feature selection
-                    X_pred = selector.transform(combined_features.reshape(1, -1))
-                    
-                    # Predict with N-BEATSx ensemble
-                    trend_pred = model_data['trend'].predict(X_pred)[0]
-                    seasonal_pred = model_data['seasonal'].predict(X_pred)[0]
-                    exog_pred = model_data['exogenous'].predict(X_pred)[0]
-                    
-                    # N-BEATSx combination
-                    next_pred = 0.4 * trend_pred + 0.3 * seasonal_pred + 0.3 * exog_pred
                     forecasts.append(next_pred)
-                    
-                    # Update for next iteration
-                    current_prices = np.append(current_prices[1:], next_pred)
                 
-                # Inverse transform predictions
-                forecasts_rescaled = scaler.inverse_transform(np.array(forecasts).reshape(-1, 1)).flatten()
-                predictions[category] = forecasts_rescaled.tolist()
+                predictions[category] = forecasts
                 
             except Exception as e:
-                # Fallback prediction
+                # Safe fallback prediction
                 if category in self.data_cache:
                     recent_price = self.data_cache[category]['premium'].iloc[-1]
-                    predictions[category] = [recent_price * (1.003 ** i) for i in range(1, steps + 1)]
+                    growth_rates = [1.002, 1.001, 1.001, 1.0005, 1.0005, 1.0005]
+                    predictions[category] = [recent_price * np.prod(growth_rates[:i+1]) for i in range(steps)]
                 else:
                     predictions[category] = [50000.0] * steps
         
