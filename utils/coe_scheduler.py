@@ -24,7 +24,7 @@ class COEScheduler:
         self.is_running = False
         self.scheduler_thread = None
         
-        # 2025 COE bidding dates (backup if scraping fails)
+        # Complete 2025 COE bidding dates (backup if scraping fails)
         self.fallback_2025_dates = [
             "2025-01-02", "2025-01-15", "2025-02-05", "2025-02-19",
             "2025-03-05", "2025-03-19", "2025-04-02", "2025-04-16",
@@ -32,6 +32,11 @@ class COEScheduler:
             "2025-07-02", "2025-07-16", "2025-08-06", "2025-08-20",
             "2025-09-03", "2025-09-17", "2025-10-01", "2025-10-15",
             "2025-11-05", "2025-11-19", "2025-12-03", "2025-12-17"
+        ]
+        
+        # Complete set of missing dates that should be included
+        self.additional_2025_dates = [
+            "2025-07-02", "2025-07-16", "2025-10-01", "2025-10-15"
         ]
     
     def scrape_bidding_schedule(self):
@@ -56,8 +61,10 @@ class COEScheduler:
                     if text_content:
                         dates = self.extract_dates_from_content(text_content)
                         if dates:
-                            logger.info(f"Successfully extracted {len(dates)} bidding dates")
-                            return dates
+                            # Merge with additional known dates to ensure complete coverage
+                            merged_dates = self.merge_with_complete_schedule(dates)
+                            logger.info(f"Successfully extracted {len(merged_dates)} bidding dates")
+                            return merged_dates
                             
             except Exception as e:
                 logger.error(f"Error scraping {url}: {str(e)}")
@@ -132,6 +139,40 @@ class COEScheduler:
                 filtered_dates.append(date_str)
         
         return filtered_dates[:50]  # Limit to reasonable number
+    
+    def merge_with_complete_schedule(self, scraped_dates):
+        """
+        Merge scraped dates with complete known schedule to fill gaps
+        """
+        current_date = datetime.now()
+        current_year = current_date.year
+        
+        # Start with scraped dates
+        all_dates = set(scraped_dates)
+        
+        # Add missing dates from fallback schedule if current year is 2025
+        if current_year == 2025:
+            for date_str in self.fallback_2025_dates:
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+                if date_obj > current_date:
+                    all_dates.add(date_str)
+        
+        # Convert back to sorted list
+        merged_dates = sorted(list(all_dates))
+        
+        # Filter to reasonable COE dates
+        final_dates = []
+        for date_str in merged_dates:
+            try:
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+                day = date_obj.day
+                # COE bidding typically happens between 1st-7th and 15th-21st of month
+                if (1 <= day <= 7) or (15 <= day <= 21):
+                    final_dates.append(date_str)
+            except ValueError:
+                continue
+        
+        return final_dates
     
     def get_fallback_dates(self):
         """
