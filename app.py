@@ -749,6 +749,29 @@ def main():
         st.error("Failed to initialize prediction models.")
         return
     
+    # Log predictions for next COE exercise (for future evaluation)
+    try:
+        # Get next COE exercise date from scheduler
+        scheduler_status = get_scheduler_status()
+        if scheduler_status['is_running'] and scheduler_status['next_bidding_dates']:
+            next_exercise_date = scheduler_status['next_bidding_dates'][0]  # Next exercise date
+            
+            # Initialize data updater with model ranker
+            data_updater = COEDataUpdater()
+            
+            # Log predictions for the next exercise
+            model_dict = {
+                'Fast Directional Forecaster': models['Fast Directional'],
+                'Interpretable N-BEATS': models['Interpretable N-BEATS'],
+                'N-BEATSx': models['N-BEATSx']
+            }
+            
+            data_updater.log_current_predictions(model_dict, next_exercise_date)
+            
+    except Exception as e:
+        # Silently continue if prediction logging fails
+        pass
+    
     # Main header
     st.markdown("""
     <div class="main-header">

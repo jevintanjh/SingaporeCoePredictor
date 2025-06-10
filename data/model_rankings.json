@@ -1,0 +1,59 @@
+{
+  "Fast Directional Forecaster": {
+    "total_evaluations": 2,
+    "cumulative_score": 1.9804964503940785,
+    "average_score": 0.9902482251970393,
+    "rank": 1,
+    "last_updated": "2025-06-10T09:47:18.420193",
+    "evaluation_history": [
+      {
+        "date": "2025-06-10T09:47:18.090865",
+        "score": 0.9867913748468666,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:47:18.420193",
+        "score": 0.9937050755472118,
+        "evaluations_count": 5
+      }
+    ]
+  },
+  "Interpretable N-BEATS": {
+    "total_evaluations": 2,
+    "cumulative_score": 1.9758481456819301,
+    "average_score": 0.9879240728409651,
+    "rank": 2,
+    "last_updated": "2025-06-10T09:47:18.420193",
+    "evaluation_history": [
+      {
+        "date": "2025-06-10T09:47:18.090865",
+        "score": 0.9875063333564477,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:47:18.420193",
+        "score": 0.9883418123254826,
+        "evaluations_count": 5
+      }
+    ]
+  },
+  "N-BEATSx": {
+    "total_evaluations": 2,
+    "cumulative_score": 1.968480617424528,
+    "average_score": 0.984240308712264,
+    "rank": 3,
+    "last_updated": "2025-06-10T09:47:18.420193",
+    "evaluation_history": [
+      {
+        "date": "2025-06-10T09:47:18.090865",
+        "score": 0.9817980953701777,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:47:18.420193",
+        "score": 0.9866825220543503,
+        "evaluations_count": 5
+      }
+    ]
+  }
+}
