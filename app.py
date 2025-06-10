@@ -1032,8 +1032,7 @@ def main():
                     if info['rank'] is not None:
                         # Add rank badge to tab label
                         rank_badge = f"#{info['rank']} "
-                        score_badge = f" ({info['score']:.3f})"
-                        enhanced_label = rank_badge + info['tab_label'] + score_badge
+                        enhanced_label = rank_badge + info['tab_label']
                     else:
                         enhanced_label = info['tab_label']
                     
