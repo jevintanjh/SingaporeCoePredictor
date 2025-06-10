@@ -3,820 +3,532 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
-from plotly.subplots import make_subplots
+from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
+# Import models
 from models.fast_directional_forecaster import FastDirectionalForecaster
-from models.adaptive_ensemble import AdaptiveEnsembleForecaster
-from models.quota_enhanced_forecaster import QuotaEnhancedForecaster
-from utils.data_processor import DataProcessor
-from utils.visualizations import create_historical_chart, create_prediction_chart, create_performance_chart
-from utils.metrics import calculate_metrics, format_metrics
-from utils.fixed_validation import FixedModelValidation
-from utils.advanced_validation import AdvancedModelValidation
-from utils.validation_visualizations import (
-    create_walk_forward_chart, create_backtest_chart, create_direction_accuracy_chart,
-    create_volatility_tracking_chart, create_validation_metrics_table, create_prediction_error_distribution
-)
-
-# Page configuration
-st.set_page_config(
-    page_title="Singapore COE Price Predictor",
-    page_icon="🚗",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# Main title
-st.title("🚗 Singapore COE Price Prediction Dashboard")
-st.markdown("Advanced ML ensemble model for predicting Certificate of Entitlement prices across all vehicle categories")
 
 @st.cache_data
 def load_and_process_data():
     """Load and process the COE data"""
     try:
-        processor = DataProcessor()
-        data = processor.load_data('data/COE_Clean_2002_2025.csv')
-        processed_data = processor.preprocess_data(data)
-        st.success(f"Loaded {len(processed_data)} records from {processed_data['date'].min()} to {processed_data['date'].max()} (23-year historical dataset)")
-        return processed_data, processor
+        # Try primary data source
+        data = pd.read_csv("data/COE_Extended_2002_2025.csv")
+        # Convert date column if needed
+        if 'date' not in data.columns and 'month' in data.columns:
+            data['date'] = pd.to_datetime(data['month'], format='%Y-%m')
+        else:
+            data['date'] = pd.to_datetime(data['date'])
+        return data, None
     except Exception as e:
-        st.error(f"Error loading data: {str(e)}")
-        # Try alternative path
         try:
-            processor = DataProcessor()
-            data = processor.load_data('attached_assets/COEBiddingResultsPrices_1749430265007.csv')
-            processed_data = processor.preprocess_data(data)
-            st.success(f"Loaded {len(processed_data)} records from alternative path")
-            return processed_data, processor
+            # Try alternative data source
+            data = pd.read_csv("attached_assets/Results of COE Bidding Exercise - Results_1749485110740.csv")
+            
+            # Process the raw data
+            data_processed = []
+            for _, row in data.iterrows():
+                try:
+                    exercise = str(row.get('Exercise', ''))
+                    category = str(row.get('Category', ''))
+                    premium = str(row.get('Quota Premium', ''))
+                    quota = str(row.get('Quota', ''))
+                    
+                    # Extract date info
+                    month, year, bidding_no = extract_date_info(exercise)
+                    
+                    # Clean premium
+                    premium_clean = clean_price(premium)
+                    quota_clean = clean_numeric(quota)
+                    
+                    # Standardize category
+                    category_clean = standardize_category(category)
+                    
+                    if premium_clean > 0 and category_clean:
+                        data_processed.append({
+                            'month': f"{year}-{month:02d}",
+                            'date': pd.to_datetime(f"{year}-{month:02d}"),
+                            'bidding_no': bidding_no,
+                            'vehicle_class': category_clean,
+                            'premium': premium_clean,
+                            'quota': quota_clean
+                        })
+                except:
+                    continue
+            
+            return pd.DataFrame(data_processed), None
         except Exception as e2:
-            st.error(f"Alternative path also failed: {str(e2)}")
             return None, None
 
+def clean_price(price_str):
+    """Clean price string to numeric value"""
+    if pd.isna(price_str): 
+        return 0
+    import re
+    cleaned = re.sub(r'[\$,"]', '', str(price_str))
+    try:
+        return int(cleaned)
+    except:
+        return 0
+
+def clean_numeric(val):
+    """Clean numeric string"""
+    if pd.isna(val):
+        return 0
+    import re
+    cleaned = re.sub(r'[,"]', '', str(val))
+    try:
+        return int(cleaned)
+    except:
+        return 0
+
+def extract_date_info(exercise):
+    """Extract date information from exercise string"""
+    months = {
+        'january': 1, 'february': 2, 'march': 3, 'april': 4,
+        'may': 5, 'june': 6, 'july': 7, 'august': 8,
+        'september': 9, 'october': 10, 'november': 11, 'december': 12
+    }
+    
+    parts = exercise.lower().split()
+    
+    # Find month
+    month = 1
+    for part in parts:
+        if part in months:
+            month = months[part]
+            break
+    
+    # Find year
+    year = 2000
+    for part in parts:
+        if part.isdigit() and len(part) == 4:
+            year = int(part)
+            break
+    
+    # Find bidding number
+    bidding_no = 1
+    for part in parts:
+        if part.isdigit() and len(part) == 1:
+            bidding_no = int(part)
+            break
+    
+    return month, year, bidding_no
+
+def standardize_category(cat):
+    """Standardize category names"""
+    cat_str = str(cat).upper()
+    if 'A' in cat_str and ('CARS' in cat_str or 'SMALL' in cat_str):
+        return 'Category A'
+    elif 'B' in cat_str:
+        return 'Category B'
+    elif 'C' in cat_str and ('GOODS' in cat_str or 'LIGHT' in cat_str):
+        return 'Category C'
+    elif 'D' in cat_str:
+        return 'Category D'
+    elif 'E' in cat_str and ('OPEN' in cat_str or 'BIG' in cat_str):
+        return 'Category E'
+    return None
+
 @st.cache_resource
-def initialize_model(model_type="Fast Directional (Current)"):
-    """Initialize and train the selected model"""
+def initialize_model():
+    """Initialize and train the directional forecasting model"""
     data, processor = load_and_process_data()
     if data is not None:
         try:
-            if model_type == "Quota-Enhanced Model":
-                model = QuotaEnhancedForecaster()
-            elif model_type == "Advanced Ensemble":
-                model = AdaptiveEnsembleForecaster()
-            else:
-                model = FastDirectionalForecaster()
-            
+            model = FastDirectionalForecaster()
             model.fit(data)
             return model
         except Exception as e:
-            st.error(f"Error initializing {model_type}: {str(e)}")
+            st.error(f"Error initializing model: {str(e)}")
             return None
     return None
 
 def main():
-    # Load data first
+    # Configure page
+    st.set_page_config(
+        page_title="Singapore COE Price Predictor",
+        page_icon="🚗",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+    
+    # Custom CSS for modern UI
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    .stApp {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .main-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2.5rem;
+        border-radius: 16px;
+        color: white;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    }
+    
+    .main-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .main-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .prediction-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
+        margin: 1rem 0;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .prediction-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .metric-label {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-change {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+    
+    .metric-change.positive {
+        color: #059669;
+    }
+    
+    .metric-change.negative {
+        color: #dc2626;
+    }
+    
+    .info-banner {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid #0ea5e9;
+        margin: 1rem 0;
+    }
+    
+    .controls-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+    
+    .chart-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin: 1rem 0;
+    }
+    
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .stSelectbox > div > div {
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+    }
+    
+    .stMultiSelect > div > div {
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+    }
+    
+    .stSlider > div > div > div {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* Hide streamlit style */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Load data
     data, processor = load_and_process_data()
     
     if data is None:
         st.error("Failed to load data. Please check your data file.")
         return
     
-    # Sidebar controls
-    st.sidebar.header("Dashboard Controls")
-    
-    # Model selection
-    st.sidebar.subheader("Model Selection")
-    model_type = st.sidebar.selectbox(
-        "Choose Prediction Model",
-        [
-            "Fast Directional (Current)",
-            "Quota-Enhanced Model",
-            "Advanced Ensemble"
-        ],
-        help="Select the ML model for predictions"
-    )
-    
-    # Initialize model based on selection
-    model = initialize_model(model_type)
+    # Initialize model
+    model = initialize_model()
     
     if model is None:
-        st.error(f"Failed to initialize {model_type}. Please try a different model.")
+        st.error("Failed to initialize prediction model.")
         return
     
-    # Category selection
-    categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E']
-    selected_categories = st.sidebar.multiselect(
-        "Select COE Categories",
-        categories,
-        default=categories
-    )
+    # Main header
+    st.markdown("""
+    <div class="main-header">
+        <h1>Singapore COE Price Predictor</h1>
+        <p>AI-powered predictions for Certificate of Entitlement bidding cycles</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Time range selection for historical data
-    min_date = data['date'].min()
-    max_date = data['date'].max()
+    # Data info banner
+    total_records = len(data)
+    date_range = f"{data['date'].min().strftime('%Y-%m-%d')} to {data['date'].max().strftime('%Y-%m-%d')}"
     
-    st.sidebar.subheader("Historical Data Range")
-    start_date = st.sidebar.date_input(
-        "Start Date",
-        value=max_date - pd.DateOffset(months=12),
-        min_value=min_date,
-        max_value=max_date
-    )
+    st.markdown(f"""
+    <div class="info-banner">
+        <strong>📊 Dataset:</strong> {total_records:,} historical COE bidding records ({date_range})
+    </div>
+    """, unsafe_allow_html=True)
     
-    end_date = st.sidebar.date_input(
-        "End Date",
-        value=max_date,
-        min_value=min_date,
-        max_value=max_date
-    )
+    # Controls section
+    st.markdown('<div class="controls-section">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([3, 2, 1])
     
-    # Prediction horizon
-    prediction_cycles = st.sidebar.slider(
-        "Prediction Cycles Ahead",
-        min_value=1,
-        max_value=6,
-        value=3,
-        help="Number of bidding cycles to predict"
-    )
+    with col1:
+        available_categories = sorted(data['vehicle_class'].unique())
+        selected_categories = st.multiselect(
+            "Select COE Categories",
+            available_categories,
+            default=available_categories[:3],
+            help="Choose which COE categories to analyze"
+        )
     
-    # Filter data based on selection
-    filtered_data = data[
-        (data['date'] >= pd.to_datetime(start_date)) &
-        (data['date'] <= pd.to_datetime(end_date)) &
-        (data['vehicle_class'].isin(selected_categories))
-    ]
+    with col2:
+        prediction_cycles = st.slider(
+            "Prediction Cycles Ahead",
+            min_value=1,
+            max_value=6,
+            value=3,
+            help="Number of bidding cycles to predict"
+        )
     
-    # Main dashboard layout
-    if len(selected_categories) > 0:
-        # Current predictions section
-        st.header("🔮 Current Predictions")
-        
-        # Generate predictions
-        predictions = {}
-        try:
-            if hasattr(model, 'predict'):
-                if model_type == "Quota-Enhanced Model":
-                    predictions = model.predict(data, prediction_cycles)
-                elif model_type == "Advanced Ensemble":
-                    predictions = model.predict(prediction_cycles)
-                else:
-                    predictions = model.predict(prediction_cycles)
-            
-
-            if predictions:
-                # Display predictions in cards
-                cols = st.columns(len(selected_categories))
-                for i, category in enumerate(selected_categories):
-                    if category in predictions:
-                        with cols[i]:
-                            latest_actual = data[data['vehicle_class'] == category]['premium'].iloc[-1]
-                            
-                            # Handle different prediction formats
-                            if isinstance(predictions[category], dict):
-                                # Dictionary format with mean/lower/upper
-                                if 'mean' in predictions[category] and len(predictions[category]['mean']) > 0:
-                                    pred_raw = predictions[category]['mean'][0]
-                                    if hasattr(pred_raw, 'item'):  # numpy scalar
-                                        pred_value = float(pred_raw.item())
-                                    else:
-                                        pred_value = float(pred_raw)
-                                    
-                                    # Use confidence intervals if available
-                                    if 'lower' in predictions[category] and 'upper' in predictions[category]:
-                                        confidence_lower = float(predictions[category]['lower'][0])
-                                        confidence_upper = float(predictions[category]['upper'][0])
-                                    else:
-                                        confidence_lower = pred_value * 0.9
-                                        confidence_upper = pred_value * 1.1
-                                else:
-                                    continue  # Skip if no valid data
-                            elif isinstance(predictions[category], list) and len(predictions[category]) > 0:
-                                # Simple list format
-                                pred_raw = predictions[category][0]
-                                if hasattr(pred_raw, 'item'):  # numpy scalar
-                                    pred_value = float(pred_raw.item())
-                                else:
-                                    pred_value = float(pred_raw)
-                                confidence_lower = pred_value * 0.9
-                                confidence_upper = pred_value * 1.1
-                            else:
-                                continue  # Skip if invalid format
-                            
-                            change = ((pred_value - latest_actual) / latest_actual) * 100
-                            
-                            st.metric(
-                                label=category,
-                                value=f"${pred_value:,.0f}",
-                                delta=f"{change:+.1f}%"
-                            )
-                            
-                            st.caption(f"Est. range: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}")
-                            
-                            # Show model type
-                            if model_type == "Quota-Enhanced Model":
-                                st.caption("Uses quota features")
-                            elif model_type == "Advanced Ensemble":
-                                st.caption("Multi-model ensemble")
-                            else:
-                                st.caption("Directional analysis")
+    with col3:
+        st.markdown("<br>", unsafe_allow_html=True)
+        refresh_predictions = st.button("🔄 Refresh", type="primary")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    if not selected_categories:
+        st.warning("Please select at least one COE category to view predictions.")
+        return
+    
+    # Generate predictions
+    predictions = {}
+    try:
+        predictions = model.predict(prediction_cycles)
+    except Exception as e:
+        st.error(f"Error generating predictions: {str(e)}")
+        return
+    
+    # Current Predictions Section
+    st.markdown("## 🔮 Current Predictions")
+    
+    if predictions:
+        cols = st.columns(len(selected_categories))
+        for i, category in enumerate(selected_categories):
+            if category in predictions:
+                with cols[i]:
+                    latest_actual = data[data['vehicle_class'] == category]['premium'].iloc[-1]
+                    
+                    # Handle prediction format
+                    if isinstance(predictions[category], dict) and 'mean' in predictions[category]:
+                        pred_value = float(predictions[category]['mean'][0])
+                        confidence_lower = float(predictions[category].get('lower', [pred_value * 0.9])[0])
+                        confidence_upper = float(predictions[category].get('upper', [pred_value * 1.1])[0])
+                    elif isinstance(predictions[category], list):
+                        pred_raw = predictions[category][0]
+                        pred_value = float(pred_raw.item() if hasattr(pred_raw, 'item') else pred_raw)
+                        confidence_lower = pred_value * 0.9
+                        confidence_upper = pred_value * 1.1
                     else:
-                        with cols[i]:
-                            st.metric(
-                                label=category,
-                                value="N/A",
-                                help="Insufficient data for prediction"
-                            )
+                        continue
+                    
+                    change = ((pred_value - latest_actual) / latest_actual) * 100
+                    change_class = "positive" if change >= 0 else "negative"
+                    change_symbol = "▲" if change >= 0 else "▼"
+                    
+                    st.markdown(f"""
+                    <div class="prediction-card">
+                        <div class="metric-label">{category}</div>
+                        <div class="metric-value">${pred_value:,.0f}</div>
+                        <div class="metric-change {change_class}">{change_symbol} {abs(change):.1f}%</div>
+                        <small style="color: #6b7280;">Range: ${confidence_lower:,.0f} - ${confidence_upper:,.0f}</small>
+                    </div>
+                    """, unsafe_allow_html=True)
+    
+    # Historical Analysis and Charts
+    st.markdown("## 📈 Historical Analysis & Trends")
+    
+    for category in selected_categories:
+        st.markdown(f'<div class="chart-container">', unsafe_allow_html=True)
+        
+        # Filter data for category
+        category_data = data[data['vehicle_class'] == category].copy()
+        category_data = category_data.sort_values('date')
+        
+        # Create comprehensive chart
+        fig = go.Figure()
+        
+        # Historical prices
+        fig.add_trace(go.Scatter(
+            x=category_data['date'],
+            y=category_data['premium'],
+            mode='lines+markers',
+            name='Historical Prices',
+            line=dict(color='#667eea', width=2),
+            marker=dict(size=4),
+            hovertemplate='<b>%{y:$,.0f}</b><br>%{x}<extra></extra>'
+        ))
+        
+        # Add predictions if available
+        if category in predictions:
+            last_date = category_data['date'].iloc[-1]
+            pred_dates = [last_date + pd.DateOffset(months=2*i) for i in range(1, prediction_cycles + 1)]
+            
+            if isinstance(predictions[category], dict) and 'mean' in predictions[category]:
+                pred_values = predictions[category]['mean']
+                
+                fig.add_trace(go.Scatter(
+                    x=pred_dates,
+                    y=pred_values,
+                    mode='lines+markers',
+                    name='Predictions',
+                    line=dict(color='#f59e0b', width=3, dash='dash'),
+                    marker=dict(size=6, color='#f59e0b'),
+                    hovertemplate='<b>Predicted: $%{y:,.0f}</b><br>%{x}<extra></extra>'
+                ))
+                
+                # Add confidence intervals if available
+                if 'lower' in predictions[category] and 'upper' in predictions[category]:
+                    fig.add_trace(go.Scatter(
+                        x=pred_dates + pred_dates[::-1],
+                        y=predictions[category]['upper'] + predictions[category]['lower'][::-1],
+                        fill='toself',
+                        fillcolor='rgba(245, 158, 11, 0.2)',
+                        line=dict(color='rgba(255,255,255,0)'),
+                        name='Confidence Interval',
+                        showlegend=False,
+                        hoverinfo='skip'
+                    ))
+            elif isinstance(predictions[category], list):
+                pred_values = [float(p.item() if hasattr(p, 'item') else p) for p in predictions[category]]
+                
+                fig.add_trace(go.Scatter(
+                    x=pred_dates,
+                    y=pred_values,
+                    mode='lines+markers',
+                    name='Predictions',
+                    line=dict(color='#f59e0b', width=3, dash='dash'),
+                    marker=dict(size=6, color='#f59e0b'),
+                    hovertemplate='<b>Predicted: $%{y:,.0f}</b><br>%{x}<extra></extra>'
+                ))
+        
+        # Update layout
+        fig.update_layout(
+            title=f'{category} - Price Trends & Predictions',
+            title_font_size=18,
+            title_font_weight='bold',
+            xaxis_title='Date',
+            yaxis_title='Price (SGD)',
+            template='plotly_white',
+            height=500,
+            hovermode='x unified',
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
+        fig.update_xaxis(showgrid=True, gridwidth=1, gridcolor='#f3f4f6')
+        fig.update_yaxis(showgrid=True, gridwidth=1, gridcolor='#f3f4f6')
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Key statistics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        latest_price = category_data['premium'].iloc[-1]
+        avg_price = category_data['premium'].tail(6).mean()
+        volatility = category_data['premium'].tail(6).std()
+        
+        # Get model performance metrics
+        if hasattr(model, 'get_performance_metrics'):
+            metrics = model.get_performance_metrics(category)
+            if metrics:
+                success_rate = metrics.get('direction_accuracy', 50)
             else:
-                st.info("Generating predictions...")
-        except Exception as e:
-            st.error(f"Error generating predictions: {str(e)}")
-            st.info("Showing historical data only")
-        
-        # Historical trends and predictions
-        st.header("📈 Historical Trends & Predictions")
-        
-        for category in selected_categories:
-            st.subheader(f"{category} Analysis")
-            
-            # Get category-specific data
-            category_data = filtered_data[filtered_data['vehicle_class'] == category].copy()
-            
-            if len(category_data) > 0:
-                col1, col2 = st.columns([2, 1])
-                
-                with col1:
-                    # Historical and prediction chart
-                    try:
-                        if predictions and category in predictions and len(category_data) > 0:
-                            # Ensure we have at least 6 months of historical data
-                            if len(category_data) >= 12:  # At least 12 bidding cycles (6 months)
-                                fig = create_prediction_chart(
-                                    category_data, 
-                                    predictions[category], 
-                                    category,
-                                    prediction_cycles
-                                )
-                                st.plotly_chart(fig, use_container_width=True, key=f"pred_chart_{category.replace(' ', '_')}")
-                            else:
-                                st.warning(f"Insufficient historical data for {category} predictions. Showing available data.")
-                                fig = create_historical_chart(category_data, category, show_volume=False)
-                                st.plotly_chart(fig, use_container_width=True, key=f"hist_chart_{category.replace(' ', '_')}_insufficient")
-                        elif len(category_data) > 0:
-                            fig = create_historical_chart(category_data, category, show_volume=False)
-                            st.plotly_chart(fig, use_container_width=True, key=f"hist_chart_{category.replace(' ', '_')}_main")
-                        else:
-                            st.warning(f"No data available for {category}")
-                    except Exception as e:
-                        st.error(f"Chart error for {category}: {str(e)}")
-                        # Show basic data table as fallback
-                        if len(category_data) > 0:
-                            st.dataframe(category_data[['date', 'premium', 'quota', 'bids_received']].tail(10))
-                
-                with col2:
-                    # Key statistics
-                    st.markdown("**Key Statistics**")
-                    
-                    recent_data = category_data.tail(6)  # Last 6 cycles
-                    
-                    avg_premium = recent_data['premium'].mean()
-                    volatility = recent_data['premium'].std()
-                    avg_success_rate = (recent_data['bids_success'] / recent_data['bids_received']).mean() * 100
-                    avg_bid_quota_ratio = (recent_data['bids_received'] / recent_data['quota']).mean()
-                    
-                    st.metric("Avg Premium (6 cycles)", f"${avg_premium:,.0f}")
-                    st.metric("Volatility (6 cycles)", f"${volatility:,.0f}")
-                    st.metric("Success Rate", f"{avg_success_rate:.1f}%")
-                    st.metric("Bid-to-Quota Ratio", f"{avg_bid_quota_ratio:.2f}")
-                    
-                    # Add directional analysis insights
-                    if hasattr(model, 'get_performance_metrics'):
-                        metrics = model.get_performance_metrics(category)
-                        if metrics:
-                            st.markdown("**Directional Analysis**")
-                            
-                            if 'top_features' in metrics:
-                                top_features = metrics['top_features']
-                                if top_features:
-                                    st.caption("Key Direction Indicators:")
-                                    for feat, importance in top_features[:3]:
-                                        st.caption(f"• {feat}: {importance:.3f}")
-                            
-                            if 'model_type' in metrics:
-                                st.info(f"Using {metrics['model_type']} with {metrics.get('features_used', 0)} indicators")
-        
-        # Model performance section
-        st.header("🎯 Model Performance")
-        
-        col1, col2 = st.columns(2)
+                success_rate = 50
+        else:
+            success_rate = 50
         
         with col1:
-            st.subheader("Performance Metrics")
-            try:
-                # Calculate performance metrics for each category
-                performance_data = []
-                for category in categories:
-                    category_data = data[data['vehicle_class'] == category].copy()
-                    if len(category_data) > 20:  # Ensure sufficient data
-                        # Get model performance for this category
-                        metrics = model.get_performance_metrics(category)
-                        if metrics:
-                            performance_data.append({
-                                'Category': category,
-                                'MAPE': f"{metrics.get('mape', 0):.2f}%",
-                                'RMSE': f"${metrics.get('rmse', 0):,.0f}",
-                                'MAE': f"${metrics.get('mae', 0):,.0f}",
-                                'R²': f"{metrics.get('r2', 0):.3f}",
-                                'Vol Correlation': f"{metrics.get('volatility_correlation', 0):.3f}"
-                            })
-                
-                if performance_data:
-                    perf_df = pd.DataFrame(performance_data)
-                    st.dataframe(perf_df, use_container_width=True)
-                else:
-                    st.info("Performance metrics are being calculated...")
-            except Exception as e:
-                st.error(f"Error calculating performance metrics: {str(e)}")
-        
-        # Model Validation Section
-        st.header("🔬 Model Stability & Validation")
-        st.markdown("Walk-forward validation and backtesting results")
-        
-        validation_col1, validation_col2 = st.columns([3, 1])
-        
-        with validation_col2:
-            st.subheader("Validation Controls")
-            
-            # Category selection for validation
-            validation_category = st.selectbox(
-                "Select Category for Validation",
-                categories,
-                key="validation_category"
-            )
-            
-            # Validation parameters
-            validation_cycles = st.slider(
-                "Backtest Cycles",
-                min_value=6,
-                max_value=24,
-                value=12,
-                help="Number of past cycles to backtest"
-            )
-            
-            # Run validation button
-            run_validation = st.button("Run Validation", type="primary")
-        
-        with validation_col1:
-            if run_validation:
-                with st.spinner(f"Running fast validation for {validation_category}..."):
-                    try:
-                        validator = FixedModelValidation()
-                        
-                        # Run fast validation
-                        validation_result = validator.run_fast_validation(
-                            FastDirectionalForecaster, data, validation_category
-                        )
-                        
-                        if validation_result:
-                            validation_results = {validation_category: validation_result}
-                            
-                            # Display validation summary
-                            summary_lines = []
-                            for cat, metrics in validation_results.items():
-                                dir_acc = metrics.get('direction_accuracy', 0)
-                                mape = metrics.get('mape', 0)
-                                status = "ABOVE RANDOM" if dir_acc > 50 else "BELOW RANDOM"
-                                summary_lines.append(f"{cat}: {dir_acc:.1f}% direction accuracy ({status}), {mape:.1f}% MAPE")
-                            
-                            summary = "\n".join(summary_lines)
-                            st.text_area("Validation Summary", summary, height=200)
-                            
-                            # Create visualizations
-                            if validation_result['walk_forward']:
-                                wf_chart = create_walk_forward_chart(validation_results, validation_category)
-                                if wf_chart:
-                                    st.plotly_chart(wf_chart, use_container_width=True)
-                            
-                            if validation_result['backtest']:
-                                bt_chart = create_backtest_chart(validation_results, validation_category)
-                                if bt_chart:
-                                    st.plotly_chart(bt_chart, use_container_width=True)
-                                
-                                # Volatility tracking
-                                vol_chart = create_volatility_tracking_chart(validation_results, validation_category)
-                                if vol_chart:
-                                    st.plotly_chart(vol_chart, use_container_width=True)
-                            
-                            # Store results for comparison
-                            st.session_state[f'validation_{validation_category}'] = validation_results
-                            st.success("Fast validation completed successfully!")
-                        else:
-                            st.warning(f"Insufficient data for validation of {validation_category}")
-                        
-                    except Exception as e:
-                        st.error(f"Validation error: {str(e)}")
-            
-            # Display stored validation results if available
-            elif f'validation_{validation_category}' in st.session_state:
-                stored_results = st.session_state[f'validation_{validation_category}']
-                
-                st.info("Previous validation results (click 'Run Validation' for fresh results)")
-                
-                # Show charts from stored results
-                if validation_category in stored_results and stored_results[validation_category].get('walk_forward'):
-                    wf_chart = create_walk_forward_chart(stored_results, validation_category)
-                    if wf_chart:
-                        st.plotly_chart(wf_chart, use_container_width=True)
-                
-                if validation_category in stored_results and stored_results[validation_category].get('backtest'):
-                    bt_chart = create_backtest_chart(stored_results, validation_category)
-                    if bt_chart:
-                        st.plotly_chart(bt_chart, use_container_width=True)
-            else:
-                st.info("Click 'Run Validation' to perform comprehensive model testing")
-        
-        # Streamlined comprehensive validation
-        st.subheader("Comprehensive Model Validation")
-        
-        if st.button("Run Complete Validation Suite", type="primary", help="Runs all validation tests in one optimized process"):
-            with st.spinner("Running comprehensive validation suite..."):
-                try:
-                    # Run fast validation first
-                    validator = FixedModelValidation()
-                    fast_results = validator.run_fast_validation(
-                        FastDirectionalForecaster, data, validation_category
-                    )
-                    
-                    if fast_results:
-                        st.success("✓ Comprehensive validation completed!")
-                        
-                        # Core performance metrics
-                        col1, col2, col3, col4 = st.columns(4)
-                        
-                        with col1:
-                            direction_acc = fast_results.get('direction_accuracy', 0)
-                            status = "✓" if direction_acc > 50 else "✗"
-                            st.metric("Direction Accuracy", f"{direction_acc:.1f}% {status}")
-                        
-                        with col2:
-                            mape = fast_results.get('mape', 0)
-                            quality = "Excellent" if mape < 5 else "Good" if mape < 10 else "Fair" if mape < 20 else "Poor"
-                            st.metric("MAPE", f"{mape:.1f}%", delta=quality)
-                        
-                        with col3:
-                            r2 = fast_results.get('r2', 0)
-                            r2_quality = "Good" if r2 > 0.3 else "Fair" if r2 > 0 else "Poor"
-                            st.metric("R² Score", f"{r2:.3f}", delta=r2_quality)
-                        
-                        with col4:
-                            rmse = fast_results.get('rmse', 0)
-                            st.metric("RMSE", f"${rmse:.0f}")
-                        
-                        # Enhanced model information
-                        st.subheader("Model Analysis")
-                        
-                        col_a, col_b = st.columns(2)
-                        
-                        with col_a:
-                            st.markdown("**Model Features:**")
-                            has_direction_model = fast_results.get('has_direction_model', False)
-                            if has_direction_model:
-                                st.success("✓ Enhanced directional prediction enabled")
-                                st.info("• Advanced technical indicators (RSI, Bollinger Bands)")
-                                st.info("• Ensemble classification (Random Forest + Gradient Boosting)")
-                                st.info("• Multi-timeframe momentum analysis")
-                            else:
-                                st.warning("⚠ Basic directional prediction (insufficient data for enhanced model)")
-                                st.info("• Simple trend-based forecasting")
-                                st.info("• Exponential smoothing")
-                        
-                        with col_b:
-                            st.markdown("**Validation Insights:**")
-                            
-                            # Direction accuracy assessment
-                            if direction_acc > 60:
-                                st.success("🎯 Excellent directional prediction")
-                            elif direction_acc > 50:
-                                st.success("✓ Above-random directional accuracy")
-                            else:
-                                st.error("✗ Below-random directional accuracy")
-                            
-                            # Data quality assessment
-                            n_test = fast_results.get('n_test_points', 0)
-                            if n_test > 20:
-                                st.success(f"✓ Robust validation ({n_test} test points)")
-                            elif n_test > 10:
-                                st.warning(f"⚠ Moderate validation ({n_test} test points)")
-                            else:
-                                st.error(f"✗ Limited validation ({n_test} test points)")
-                        
-                        # Performance comparison
-                        st.subheader("Performance Benchmark")
-                        
-                        # Create performance comparison chart
-                        import plotly.graph_objects as go
-                        fig = go.Figure()
-                        
-                        metrics = ['Direction Accuracy', 'MAPE Quality', 'R² Score']
-                        values = [
-                            direction_acc,
-                            max(0, 100 - mape),  # Inverse MAPE for better visualization
-                            max(0, r2 * 100)     # R² as percentage
-                        ]
-                        benchmarks = [50, 80, 30]  # Benchmark thresholds
-                        
-                        fig.add_trace(go.Bar(
-                            x=metrics,
-                            y=values,
-                            name='Current Model',
-                            marker_color=['green' if v > b else 'orange' if v > b*0.7 else 'red' 
-                                        for v, b in zip(values, benchmarks)]
-                        ))
-                        
-                        fig.add_trace(go.Scatter(
-                            x=metrics,
-                            y=benchmarks,
-                            mode='markers',
-                            name='Benchmark',
-                            marker=dict(color='blue', size=10, symbol='diamond')
-                        ))
-                        
-                        fig.update_layout(
-                            title=f'{validation_category} - Performance vs Benchmarks',
-                            yaxis_title='Performance Score',
-                            height=400,
-                            showlegend=True
-                        )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Detailed validation summary
-                        st.subheader("Validation Summary")
-                        
-                        summary_text = f"""
-**{validation_category} Validation Report**
-
-**Core Metrics:**
-• Direction Accuracy: {direction_acc:.1f}% ({'Above random' if direction_acc > 50 else 'Below random'})
-• Mean Absolute Percentage Error: {mape:.1f}%
-• R² Score: {r2:.3f} ({'Positive explanatory power' if r2 > 0 else 'No explanatory power'})
-• Root Mean Square Error: ${rmse:.0f}
-
-**Model Type:** {'Enhanced Directional' if has_direction_model else 'Basic Trend-based'}
-
-**Data Quality:** {n_test} test points for validation
-
-**Key Insights:**
-• Model {'successfully' if direction_acc > 50 else 'struggles to'} predict price directions above random chance
-• Price magnitude predictions show {'good' if mape < 15 else 'moderate' if mape < 25 else 'poor'} accuracy
-• {'Sufficient' if n_test > 15 else 'Limited'} data available for robust validation
-
-**Recommendations:**
-{'• Model performs well for directional prediction' if direction_acc > 55 else '• Consider additional feature engineering for better directional accuracy'}
-• {'Price forecasts are reliable for short-term planning' if mape < 20 else 'Use price forecasts with caution due to high error rates'}
-"""
-                        
-                        st.text_area("Detailed Report", summary_text, height=300)
-                        
-                        # Store results
-                        st.session_state[f'validation_{validation_category}'] = fast_results
-                    
-                    else:
-                        st.error("Validation failed - insufficient data for analysis")
-                        
-                except Exception as e:
-                    st.error(f"Validation error: {str(e)}")
-                    import traceback
-                    st.text(traceback.format_exc())
-        
-        # Enhanced model comparison
-        col_a, col_b = st.columns(2)
-        
-        with col_a:
-            if st.button("Test Enhanced Ensemble Model", key="test_enhanced"):
-                with st.spinner("Testing advanced ensemble forecaster..."):
-                    try:
-                        validator = FixedModelValidation()
-                        enhanced_results = validator.run_all_categories_fast(
-                            AdaptiveEnsembleForecaster, data
-                        )
-                        
-                        st.subheader("🚀 Enhanced Model Performance")
-                        
-                        # Enhanced metrics display
-                        cols = st.columns(len(enhanced_results))
-                        for i, (category, metrics) in enumerate(enhanced_results.items()):
-                            with cols[i]:
-                                dir_acc = metrics.get('direction_accuracy', 0)
-                                mape = metrics.get('mape', 0)
-                                
-                                # Improved color coding
-                                if dir_acc > 60:
-                                    status_color = "🟢"
-                                elif dir_acc > 55:
-                                    status_color = "🟡" 
-                                elif dir_acc > 50:
-                                    status_color = "🔵"
-                                else:
-                                    status_color = "🔴"
-                                
-                                improvement = dir_acc - 50
-                                st.metric(
-                                    label=f"{status_color} {category}",
-                                    value=f"{dir_acc:.1f}%",
-                                    delta=f"+{improvement:.1f}% vs random"
-                                )
-                                st.caption(f"MAPE: {mape:.1f}%")
-                        
-                        # Summary comparison
-                        summary_lines = []
-                        for cat, metrics in enhanced_results.items():
-                            dir_acc = metrics.get('direction_accuracy', 0)
-                            mape = metrics.get('mape', 0)
-                            status = "ENHANCED" if dir_acc > 55 else "IMPROVED" if dir_acc > 50 else "BASELINE"
-                            summary_lines.append(f"{cat}: {dir_acc:.1f}% direction accuracy ({status}), {mape:.1f}% MAPE")
-                        
-                        summary = "\n".join(summary_lines)
-                        st.text_area("Enhanced Model Results", summary, height=200)
-                        
-                        st.session_state.enhanced_results = enhanced_results
-                        st.success("Enhanced ensemble testing completed!")
-                        
-                    except Exception as e:
-                        st.error(f"Enhanced model test error: {str(e)}")
-        
-        with col_b:
-            # Cross-category validation comparison
-            if st.button("Compare All Categories", key="compare_all"):
-                with st.spinner("Running fast validation across all categories..."):
-                    try:
-                        validator = FixedModelValidation()
-                        all_results = validator.run_all_categories_fast(
-                            FastDirectionalForecaster, data
-                        )
-                        
-                        # Simple metrics display without complex visualizations
-                        st.subheader("Direction Accuracy Performance")
-                        
-                        # Create simple metrics display
-                        cols = st.columns(len(all_results))
-                        for i, (category, metrics) in enumerate(all_results.items()):
-                            with cols[i]:
-                                dir_acc = metrics.get('direction_accuracy', 0)
-                                mape = metrics.get('mape', 0)
-                                
-                                # Color coding based on performance
-                                if dir_acc > 55:
-                                    status_color = "🟢"
-                                elif dir_acc > 50:
-                                    status_color = "🟡"
-                                else:
-                                    status_color = "🔴"
-                                
-                                st.metric(
-                                    label=f"{status_color} {category}",
-                                    value=f"{dir_acc:.1f}%",
-                                    delta=f"{dir_acc - 50:.1f}% vs random"
-                                )
-                                st.caption(f"MAPE: {mape:.1f}%")
-                        
-                        # Summary text
-                        summary_lines = []
-                        for cat, metrics in all_results.items():
-                            dir_acc = metrics.get('direction_accuracy', 0)
-                            mape = metrics.get('mape', 0)
-                            status = "ABOVE RANDOM" if dir_acc > 50 else "BELOW RANDOM"
-                            summary_lines.append(f"{cat}: {dir_acc:.1f}% direction accuracy ({status}), {mape:.1f}% MAPE")
-                        
-                        summary = "\n".join(summary_lines)
-                        st.text_area("All Categories Summary", summary, height=300)
-                        
-                        st.session_state.all_validation_results = all_results
-                        st.success("Fast validation completed for all categories!")
-                        
-                    except Exception as e:
-                        st.error(f"Cross-category validation error: {str(e)}")
+            st.metric("Latest Price", f"${latest_price:,.0f}")
         
         with col2:
-            st.subheader("Market Insights")
-            
-            # Calculate market insights
-            try:
-                total_quota = filtered_data.groupby('date')['quota'].sum()
-                total_bids = filtered_data.groupby('date')['bids_received'].sum()
-                avg_premium = filtered_data.groupby('date')['premium'].mean()
-                
-                recent_quota_trend = ((total_quota.iloc[-1] - total_quota.iloc[-6]) / total_quota.iloc[-6]) * 100 if len(total_quota) >= 6 else 0
-                recent_demand_trend = ((total_bids.iloc[-1] - total_bids.iloc[-6]) / total_bids.iloc[-6]) * 100 if len(total_bids) >= 6 else 0
-                recent_price_trend = ((avg_premium.iloc[-1] - avg_premium.iloc[-6]) / avg_premium.iloc[-6]) * 100 if len(avg_premium) >= 6 else 0
-                
-                st.metric("Quota Trend (6 cycles)", f"{recent_quota_trend:+.1f}%")
-                st.metric("Demand Trend (6 cycles)", f"{recent_demand_trend:+.1f}%")
-                st.metric("Price Trend (6 cycles)", f"{recent_price_trend:+.1f}%")
-                
-                # Market insight text
-                if recent_price_trend > 5:
-                    trend_insight = "📈 Prices are trending upward significantly"
-                elif recent_price_trend > 2:
-                    trend_insight = "📊 Prices are moderately increasing"
-                elif recent_price_trend < -5:
-                    trend_insight = "📉 Prices are trending downward significantly"
-                elif recent_price_trend < -2:
-                    trend_insight = "📊 Prices are moderately decreasing"
-                else:
-                    trend_insight = "📊 Prices are relatively stable"
-                
-                st.info(trend_insight)
-                
-            except Exception as e:
-                st.error(f"Error calculating market insights: {str(e)}")
+            st.metric("6-Cycle Average", f"${avg_price:,.0f}")
         
-        # Seasonal patterns
-        st.header("🗓️ Seasonal Analysis")
+        with col3:
+            st.metric("Volatility", f"${volatility:,.0f}")
         
-        try:
-            # Create seasonal analysis chart
-            seasonal_data = data.copy()
-            seasonal_data['month'] = seasonal_data['date'].dt.month
-            seasonal_data['year'] = seasonal_data['date'].dt.year
-            
-            # Calculate monthly averages
-            monthly_avg = seasonal_data.groupby(['month', 'vehicle_class'])['premium'].mean().reset_index()
-            
-            fig = px.line(
-                monthly_avg[monthly_avg['vehicle_class'].isin(selected_categories)],
-                x='month',
-                y='premium',
-                color='vehicle_class',
-                title="Seasonal Price Patterns by Month",
-                labels={'month': 'Month', 'premium': 'Average Premium ($)', 'vehicle_class': 'Category'}
-            )
-            
-            fig.update_layout(
-                xaxis=dict(tickmode='array', tickvals=list(range(1, 13)), 
-                          ticktext=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-            
-        except Exception as e:
-            st.error(f"Error creating seasonal analysis: {str(e)}")
+        with col4:
+            st.metric("Model Accuracy", f"{success_rate:.1f}%")
         
-        # Data export section
-        st.header("📁 Data Export")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("Download Historical Data"):
-                csv = filtered_data.to_csv(index=False)
-                st.download_button(
-                    label="Download CSV",
-                    data=csv,
-                    file_name=f"coe_historical_data_{start_date}_{end_date}.csv",
-                    mime="text/csv"
-                )
-        
-        with col2:
-            if st.button("Download Predictions"):
-                try:
-                    pred_data = []
-                    if predictions:
-                        for category in selected_categories:
-                            if category in predictions:
-                                for i in range(prediction_cycles):
-                                    pred_data.append({
-                                        'category': category,
-                                        'cycle': i + 1,
-                                        'predicted_premium': predictions[category]['mean'][i],
-                                        'confidence_lower': predictions[category]['lower'][i],
-                                        'confidence_upper': predictions[category]['upper'][i]
-                                    })
-                    
-                    if pred_data:
-                        pred_df = pd.DataFrame(pred_data)
-                        csv = pred_df.to_csv(index=False)
-                        st.download_button(
-                            label="Download Predictions CSV",
-                            data=csv,
-                            file_name=f"coe_predictions_{prediction_cycles}cycles.csv",
-                            mime="text/csv"
-                        )
-                    else:
-                        st.warning("No prediction data available for download")
-                except Exception as e:
-                    st.error(f"Error preparing predictions for download: {str(e)}")
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    else:
-        st.warning("Please select at least one COE category to display data.")
-    
-    # Footer
-    st.markdown("---")
-    st.markdown(
-        "**Data Source:** Singapore Land Transport Authority (LTA) via data.gov.sg | "
-        "**Model:** Ensemble approach combining LSTM, Prophet, and XGBoost algorithms"
-    )
+    # Model Information
+    st.markdown("## ℹ️ Model Information")
+    st.markdown("""
+    <div class="info-banner">
+        <strong>Prediction Model:</strong> Fast Directional Forecaster<br>
+        <strong>Method:</strong> Technical momentum analysis with exponential smoothing<br>
+        <strong>Features:</strong> Price trends, volatility patterns, and directional indicators<br>
+        <strong>Update Frequency:</strong> Real-time with each new bidding cycle
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
