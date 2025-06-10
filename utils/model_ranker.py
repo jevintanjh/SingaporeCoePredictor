@@ -321,12 +321,33 @@ class COEModelRanker:
                     recent_scores = [eval_data['score'] for eval_data in data['evaluation_history'][-5:]]
                     recent_avg = np.mean(recent_scores) if recent_scores else 0.0
                     
+                    # Get last 6 cycles' scores
+                    last_6_scores = [eval_data['score'] for eval_data in data['evaluation_history'][-6:]]
+                    last_6_dates = [eval_data['date'] for eval_data in data['evaluation_history'][-6:]]
+                    
+                    # Calculate trend metrics
+                    trend = 'stable'
+                    if recent_avg > data['average_score']:
+                        trend = 'improving'
+                    elif recent_avg < data['average_score']:
+                        trend = 'declining'
+                    
+                    # Calculate performance consistency (standard deviation of last 6 scores)
+                    consistency_score = 0.0
+                    if len(last_6_scores) > 1:
+                        consistency_score = 1.0 - min(1.0, np.std(last_6_scores) / np.mean(last_6_scores))
+                    
                     summary['models'][model] = {
                         'rank': data['rank'],
                         'overall_score': data['average_score'],
                         'recent_score': recent_avg,
                         'total_evaluations': data['total_evaluations'],
-                        'trend': 'improving' if recent_avg > data['average_score'] else 'declining' if recent_avg < data['average_score'] else 'stable'
+                        'trend': trend,
+                        'last_6_scores': last_6_scores,
+                        'last_6_dates': last_6_dates,
+                        'consistency_score': consistency_score,
+                        'best_score': max(last_6_scores) if last_6_scores else 0.0,
+                        'worst_score': min(last_6_scores) if last_6_scores else 0.0
                     }
             
             return summary

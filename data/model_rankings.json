@@ -1,10 +1,10 @@
 {
   "Fast Directional Forecaster": {
-    "total_evaluations": 2,
-    "cumulative_score": 1.9804964503940785,
-    "average_score": 0.9902482251970393,
+    "total_evaluations": 8,
+    "cumulative_score": 7.963756427571487,
+    "average_score": 0.9954695534464358,
     "rank": 1,
-    "last_updated": "2025-06-10T09:47:18.420193",
+    "last_updated": "2025-06-10T09:53:15.872514",
     "evaluation_history": [
       {
         "date": "2025-06-10T09:47:18.090865",
@@ -15,15 +15,45 @@
         "date": "2025-06-10T09:47:18.420193",
         "score": 0.9937050755472118,
         "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:14.815576",
+        "score": 0.9944015419894228,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.016630",
+        "score": 0.997690659128106,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.237807",
+        "score": 0.9971995654485356,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.446945",
+        "score": 0.9979746716631702,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.643541",
+        "score": 0.9979592460943355,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.872514",
+        "score": 0.9980342928538379,
+        "evaluations_count": 5
       }
     ]
   },
   "Interpretable N-BEATS": {
-    "total_evaluations": 2,
-    "cumulative_score": 1.9758481456819301,
-    "average_score": 0.9879240728409651,
+    "total_evaluations": 8,
+    "cumulative_score": 7.854005996537003,
+    "average_score": 0.9817507495671254,
     "rank": 2,
-    "last_updated": "2025-06-10T09:47:18.420193",
+    "last_updated": "2025-06-10T09:53:15.872514",
     "evaluation_history": [
       {
         "date": "2025-06-10T09:47:18.090865",
@@ -34,15 +64,45 @@
         "date": "2025-06-10T09:47:18.420193",
         "score": 0.9883418123254826,
         "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:14.815576",
+        "score": 0.9909024118798744,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.016630",
+        "score": 0.990217356048207,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.237807",
+        "score": 0.9894626574671197,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.446945",
+        "score": 0.9890119912217834,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.643541",
+        "score": 0.9893126446130909,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.872514",
+        "score": 0.9292507896249983,
+        "evaluations_count": 5
       }
     ]
   },
   "N-BEATSx": {
-    "total_evaluations": 2,
-    "cumulative_score": 1.968480617424528,
-    "average_score": 0.984240308712264,
+    "total_evaluations": 8,
+    "cumulative_score": 7.829781100794091,
+    "average_score": 0.9787226375992614,
     "rank": 3,
-    "last_updated": "2025-06-10T09:47:18.420193",
+    "last_updated": "2025-06-10T09:53:15.872514",
     "evaluation_history": [
       {
         "date": "2025-06-10T09:47:18.090865",
@@ -52,6 +112,36 @@
       {
         "date": "2025-06-10T09:47:18.420193",
         "score": 0.9866825220543503,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:14.815576",
+        "score": 0.9822235101650205,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.016630",
+        "score": 0.9871841392649904,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.237807",
+        "score": 0.9865116785706031,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.446945",
+        "score": 0.9883281794195506,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.643541",
+        "score": 0.9284495809871407,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T09:53:15.872514",
+        "score": 0.9886033949622582,
         "evaluations_count": 5
       }
     ]

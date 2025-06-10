@@ -5,7 +5,13 @@ Creates sample predictions and evaluations to show how the ranking system works
 
 import pandas as pd
 import numpy as np
+import sys
+import os
 from datetime import datetime, timedelta
+
+# Add the current directory to Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from utils.model_ranker import COEModelRanker
 
 def create_demo_rankings():
@@ -21,8 +27,74 @@ def create_demo_rankings():
     categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E']
     models = ['Fast Directional Forecaster', 'Interpretable N-BEATS', 'N-BEATSx']
     
-    # Create sample evaluation scenarios
+    # Create sample evaluation scenarios for 6 cycles
     evaluation_rounds = [
+        {
+            'date': '2025-04-17',
+            'actual_results': {
+                'Category A': 92000,
+                'Category B': 102000,
+                'Category C': 86000,
+                'Category D': 42000,
+                'Category E': 89000
+            },
+            'predictions': {
+                'Fast Directional Forecaster': {
+                    'Category A': 91500,
+                    'Category B': 103500,
+                    'Category C': 85800,
+                    'Category D': 42500,
+                    'Category E': 88500
+                },
+                'Interpretable N-BEATS': {
+                    'Category A': 90000,
+                    'Category B': 101000,
+                    'Category C': 87500,
+                    'Category D': 41800,
+                    'Category E': 90000
+                },
+                'N-BEATSx': {
+                    'Category A': 94000,
+                    'Category B': 105000,
+                    'Category C': 84000,
+                    'Category D': 43500,
+                    'Category E': 87500
+                }
+            }
+        },
+        {
+            'date': '2025-05-01',
+            'actual_results': {
+                'Category A': 94000,
+                'Category B': 104000,
+                'Category C': 87500,
+                'Category D': 44000,
+                'Category E': 91000
+            },
+            'predictions': {
+                'Fast Directional Forecaster': {
+                    'Category A': 93800,
+                    'Category B': 104200,
+                    'Category C': 87200,
+                    'Category D': 44300,
+                    'Category E': 90800
+                },
+                'Interpretable N-BEATS': {
+                    'Category A': 92500,
+                    'Category B': 102500,
+                    'Category C': 89000,
+                    'Category D': 43500,
+                    'Category E': 92000
+                },
+                'N-BEATSx': {
+                    'Category A': 95500,
+                    'Category B': 106000,
+                    'Category C': 86000,
+                    'Category D': 45000,
+                    'Category E': 89500
+                }
+            }
+        },
         {
             'date': '2025-05-15',
             'actual_results': {
@@ -34,25 +106,25 @@ def create_demo_rankings():
             },
             'predictions': {
                 'Fast Directional Forecaster': {
-                    'Category A': 94500,  # Close prediction
-                    'Category B': 108000,  # Slightly off
-                    'Category C': 87500,   # Very close
-                    'Category D': 46000,   # Good
-                    'Category E': 89000    # Reasonable
+                    'Category A': 94500,
+                    'Category B': 105500,
+                    'Category C': 87800,
+                    'Category D': 45200,
+                    'Category E': 91700
                 },
                 'Interpretable N-BEATS': {
-                    'Category A': 96000,   # Good
-                    'Category B': 102000,  # Very close
-                    'Category C': 90000,   # Off by more
-                    'Category D': 44500,   # Close
-                    'Category E': 93500    # Close
+                    'Category A': 96000,
+                    'Category B': 103000,
+                    'Category C': 89500,
+                    'Category D': 44200,
+                    'Category E': 93000
                 },
                 'N-BEATSx': {
-                    'Category A': 98000,   # Further off
-                    'Category B': 106000,  # Good
-                    'Category C': 86000,   # Reasonable
-                    'Category D': 47000,   # Off
-                    'Category E': 94000    # Good
+                    'Category A': 97000,
+                    'Category B': 106500,
+                    'Category C': 86500,
+                    'Category D': 46000,
+                    'Category E': 90000
                 }
             }
         },
@@ -67,25 +139,91 @@ def create_demo_rankings():
             },
             'predictions': {
                 'Fast Directional Forecaster': {
-                    'Category A': 96800,   # Excellent
-                    'Category B': 112000,  # Good
-                    'Category C': 84500,   # Excellent
-                    'Category D': 48500,   # Good
-                    'Category E': 94200    # Very good
+                    'Category A': 96800,
+                    'Category B': 110300,
+                    'Category C': 84800,
+                    'Category D': 48200,
+                    'Category E': 94700
                 },
                 'Interpretable N-BEATS': {
-                    'Category A': 95000,   # Off
-                    'Category B': 108000,  # Reasonable
-                    'Category C': 87000,   # Off
-                    'Category D': 47500,   # Good
-                    'Category E': 96000    # Good
+                    'Category A': 95500,
+                    'Category B': 108000,
+                    'Category C': 86500,
+                    'Category D': 47200,
+                    'Category E': 96000
                 },
                 'N-BEATSx': {
-                    'Category A': 99000,   # Off
-                    'Category B': 111000,  # Very good
-                    'Category C': 83000,   # Reasonable
-                    'Category D': 49000,   # Good
-                    'Category E': 93000    # Reasonable
+                    'Category A': 98500,
+                    'Category B': 111500,
+                    'Category C': 83500,
+                    'Category D': 49000,
+                    'Category E': 93500
+                }
+            }
+        },
+        {
+            'date': '2025-06-05',
+            'actual_results': {
+                'Category A': 99000,
+                'Category B': 112000,
+                'Category C': 82000,
+                'Category D': 49500,
+                'Category E': 97000
+            },
+            'predictions': {
+                'Fast Directional Forecaster': {
+                    'Category A': 98700,
+                    'Category B': 111800,
+                    'Category C': 82300,
+                    'Category D': 49300,
+                    'Category E': 96800
+                },
+                'Interpretable N-BEATS': {
+                    'Category A': 97000,
+                    'Category B': 110500,
+                    'Category C': 83500,
+                    'Category D': 48800,
+                    'Category E': 98000
+                },
+                'N-BEATSx': {
+                    'Category A': 100500,
+                    'Category B': 113500,
+                    'Category C': 80500,
+                    'Category D': 50500,
+                    'Category E': 95500
+                }
+            }
+        },
+        {
+            'date': '2025-06-10',
+            'actual_results': {
+                'Category A': 101000,
+                'Category B': 115000,
+                'Category C': 80000,
+                'Category D': 51000,
+                'Category E': 99000
+            },
+            'predictions': {
+                'Fast Directional Forecaster': {
+                    'Category A': 100800,
+                    'Category B': 114700,
+                    'Category C': 80200,
+                    'Category D': 50800,
+                    'Category E': 98700
+                },
+                'Interpretable N-BEATS': {
+                    'Category A': 99500,
+                    'Category B': 113000,
+                    'Category C': 81500,
+                    'Category D': 50200,
+                    'Category E': 100000
+                },
+                'N-BEATSx': {
+                    'Category A': 102500,
+                    'Category B': 116500,
+                    'Category C': 78500,
+                    'Category D': 52000,
+                    'Category E': 97500
                 }
             }
         }

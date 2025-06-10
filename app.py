@@ -887,6 +887,9 @@ def main():
                 if performance_summary and 'models' in performance_summary:
                     with st.expander("📊 Detailed Performance Analysis"):
                         for model, metrics in performance_summary['models'].items():
+                            st.markdown(f"### {model}")
+                            
+                            # Basic metrics row
                             col1, col2, col3, col4 = st.columns(4)
                             with col1:
                                 st.metric("Overall Score", f"{metrics['overall_score']:.3f}")
@@ -897,7 +900,70 @@ def main():
                             with col4:
                                 trend_icon = "📈" if metrics['trend'] == 'improving' else "📉" if metrics['trend'] == 'declining' else "➡️"
                                 st.metric("Trend", f"{trend_icon} {metrics['trend'].title()}")
-                            st.markdown(f"**{model}**")
+                            
+                            # Additional metrics row
+                            if 'last_6_scores' in metrics and metrics['last_6_scores']:
+                                col5, col6, col7, col8 = st.columns(4)
+                                with col5:
+                                    st.metric("Best Score (Last 6)", f"{metrics['best_score']:.3f}")
+                                with col6:
+                                    st.metric("Worst Score (Last 6)", f"{metrics['worst_score']:.3f}")
+                                with col7:
+                                    st.metric("Consistency", f"{metrics['consistency_score']:.3f}")
+                                with col8:
+                                    score_range = metrics['best_score'] - metrics['worst_score']
+                                    st.metric("Score Range", f"{score_range:.3f}")
+                                
+                                # Last 6 cycles performance chart
+                                if len(metrics['last_6_scores']) > 1:
+                                    scores_df = pd.DataFrame({
+                                        'Cycle': range(1, len(metrics['last_6_scores']) + 1),
+                                        'Score': metrics['last_6_scores']
+                                    })
+                                    
+                                    import plotly.graph_objects as go
+                                    fig = go.Figure()
+                                    fig.add_trace(go.Scatter(
+                                        x=scores_df['Cycle'],
+                                        y=scores_df['Score'],
+                                        mode='lines+markers',
+                                        name='Performance Score',
+                                        line=dict(color='#1f77b4', width=3),
+                                        marker=dict(size=8)
+                                    ))
+                                    
+                                    fig.update_layout(
+                                        title=f"Last {len(metrics['last_6_scores'])} Cycles Performance",
+                                        xaxis_title="Cycle (Most Recent →)",
+                                        yaxis_title="Combined Score",
+                                        height=300,
+                                        showlegend=False,
+                                        margin=dict(l=0, r=0, t=40, b=0)
+                                    )
+                                    
+                                    fig.update_layout(yaxis=dict(range=[0, 1]))
+                                    st.plotly_chart(fig, use_container_width=True)
+                                
+                                # Detailed scores table
+                                if len(metrics['last_6_scores']) > 0:
+                                    scores_table_data = []
+                                    for i, (score, date) in enumerate(zip(metrics['last_6_scores'], metrics['last_6_dates'])):
+                                        try:
+                                            formatted_date = datetime.fromisoformat(date).strftime("%d-%m-%Y")
+                                        except:
+                                            formatted_date = str(date)[:10]
+                                        
+                                        scores_table_data.append({
+                                            'Cycle': f"Cycle {i+1}",
+                                            'Date': formatted_date,
+                                            'Score': f"{score:.3f}",
+                                            'Performance': "Excellent" if score >= 0.95 else "Good" if score >= 0.90 else "Fair" if score >= 0.80 else "Poor"
+                                        })
+                                    
+                                    scores_df_table = pd.DataFrame(scores_table_data)
+                                    st.markdown("**Recent Performance History:**")
+                                    st.dataframe(scores_df_table, use_container_width=True, hide_index=True)
+                            
                             st.markdown("---")
             else:
                 st.info("Model rankings will appear after predictions are evaluated against actual COE results.")
