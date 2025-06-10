@@ -49,11 +49,11 @@
     ]
   },
   "Interpretable N-BEATS": {
-    "total_evaluations": 8,
-    "cumulative_score": 7.854005996537003,
-    "average_score": 0.9817507495671254,
+    "total_evaluations": 10,
+    "cumulative_score": 9.674839512577565,
+    "average_score": 0.9674839512577564,
     "rank": 2,
-    "last_updated": "2025-06-10T09:53:15.872514",
+    "last_updated": "2025-06-10T10:05:18.822040",
     "evaluation_history": [
       {
         "date": "2025-06-10T09:47:18.090865",
@@ -94,15 +94,25 @@
         "date": "2025-06-10T09:53:15.872514",
         "score": 0.9292507896249983,
         "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:05:18.662915",
+        "score": 0.9029284073939969,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:05:18.822040",
+        "score": 0.9179051086465645,
+        "evaluations_count": 5
       }
     ]
   },
   "N-BEATSx": {
-    "total_evaluations": 8,
-    "cumulative_score": 7.829781100794091,
-    "average_score": 0.9787226375992614,
+    "total_evaluations": 10,
+    "cumulative_score": 9.614238619606464,
+    "average_score": 0.9614238619606464,
     "rank": 3,
-    "last_updated": "2025-06-10T09:53:15.872514",
+    "last_updated": "2025-06-10T10:05:18.822040",
     "evaluation_history": [
       {
         "date": "2025-06-10T09:47:18.090865",
@@ -142,6 +152,16 @@
       {
         "date": "2025-06-10T09:53:15.872514",
         "score": 0.9886033949622582,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:05:18.662915",
+        "score": 0.9267755594000133,
+        "evaluations_count": 5
+      },
+      {
+        "date": "2025-06-10T10:05:18.822040",
+        "score": 0.85768195941236,
         "evaluations_count": 5
       }
     ]

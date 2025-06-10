@@ -463,11 +463,20 @@ class COEDataUpdater:
                 # Get updated rankings
                 rankings = self.model_ranker.get_current_rankings()
                 if rankings:
-                    print("Updated Model Rankings:")
+                    print("Updated Model Rankings Based on Real COE Results:")
                     for rank_data in rankings:
                         print(f"  {rank_data['rank']}. {rank_data['model_name']} "
                               f"(Score: {rank_data['average_score']:.3f}, "
                               f"Evaluations: {rank_data['total_evaluations']})")
+                
+                # Log performance improvement details
+                performance_summary = self.model_ranker.get_model_performance_summary()
+                if performance_summary and 'models' in performance_summary:
+                    print("\nPerformance Trends After Latest COE Results:")
+                    for model, metrics in performance_summary['models'].items():
+                        trend_icon = "↗" if metrics['trend'] == 'improving' else "↘" if metrics['trend'] == 'declining' else "→"
+                        print(f"  {model}: {trend_icon} {metrics['trend']} "
+                              f"(Recent: {metrics['recent_score']:.3f}, Overall: {metrics['overall_score']:.3f})")
             
             return evaluation_success
             

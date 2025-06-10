@@ -808,5 +808,185 @@
     "exercise_date": "2025-06-10",
     "actual_price": 99000,
     "evaluated": true
+  },
+  "Interpretable N-BEATS_Category E_2025-05-16": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category E",
+    "predicted_price": 114248.47629447549,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 118010,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category D_2025-05-16": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category D",
+    "predicted_price": 9205.908474090105,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 8707,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category C_2025-05-16": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category C",
+    "predicted_price": 67772.72084204906,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 63189,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category B_2025-05-16": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category B",
+    "predicted_price": 114219.53158990062,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 116988,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category A_2025-05-16": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category A",
+    "predicted_price": 94360.53776816325,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 102501,
+    "evaluated": true
+  },
+  "N-BEATSx_Category E_2025-05-16": {
+    "model_name": "N-BEATSx",
+    "category": "Category E",
+    "predicted_price": 117539.119733,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 118010,
+    "evaluated": true
+  },
+  "N-BEATSx_Category D_2025-05-16": {
+    "model_name": "N-BEATSx",
+    "category": "Category D",
+    "predicted_price": 9012.559081999998,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 8707,
+    "evaluated": true
+  },
+  "N-BEATSx_Category C_2025-05-16": {
+    "model_name": "N-BEATSx",
+    "category": "Category C",
+    "predicted_price": 64607.749609,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 63189,
+    "evaluated": true
+  },
+  "N-BEATSx_Category B_2025-05-16": {
+    "model_name": "N-BEATSx",
+    "category": "Category B",
+    "predicted_price": 117866.23336800002,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 116988,
+    "evaluated": true
+  },
+  "N-BEATSx_Category A_2025-05-16": {
+    "model_name": "N-BEATSx",
+    "category": "Category A",
+    "predicted_price": 99895.721391,
+    "prediction_date": "2025-05-15T00:00:00",
+    "exercise_date": "2025-05-16",
+    "actual_price": 102501,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category E_2025-06-01": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category E",
+    "predicted_price": 114312.73492868578,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 113900,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category D_2025-06-01": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category D",
+    "predicted_price": 9132.696994732083,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 9000,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category C_2025-06-01": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category C",
+    "predicted_price": 68080.62249835995,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 62000,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category B_2025-06-01": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category B",
+    "predicted_price": 114245.280911488,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 113000,
+    "evaluated": true
+  },
+  "Interpretable N-BEATS_Category A_2025-06-01": {
+    "model_name": "Interpretable N-BEATS",
+    "category": "Category A",
+    "predicted_price": 94054.29077464266,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 96999,
+    "evaluated": true
+  },
+  "N-BEATSx_Category E_2025-06-01": {
+    "model_name": "N-BEATSx",
+    "category": "Category E",
+    "predicted_price": 117759.444341,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 113900,
+    "evaluated": true
+  },
+  "N-BEATSx_Category D_2025-06-01": {
+    "model_name": "N-BEATSx",
+    "category": "Category D",
+    "predicted_price": 8940.161894,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 9000,
+    "evaluated": true
+  },
+  "N-BEATSx_Category C_2025-06-01": {
+    "model_name": "N-BEATSx",
+    "category": "Category C",
+    "predicted_price": 64413.105552,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 62000,
+    "evaluated": true
+  },
+  "N-BEATSx_Category B_2025-06-01": {
+    "model_name": "N-BEATSx",
+    "category": "Category B",
+    "predicted_price": 117483.729012,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 113000,
+    "evaluated": true
+  },
+  "N-BEATSx_Category A_2025-06-01": {
+    "model_name": "N-BEATSx",
+    "category": "Category A",
+    "predicted_price": 100906.248139,
+    "prediction_date": "2025-05-31T00:00:00",
+    "exercise_date": "2025-06-01",
+    "actual_price": 96999,
+    "evaluated": true
   }
 }
