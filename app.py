@@ -397,6 +397,161 @@ def main():
                     </div>
                     """, unsafe_allow_html=True)
     
+    # Extended Predictions Table
+    st.markdown("## 📅 Extended Price Predictions (Next 6 Bidding Cycles)")
+    
+    if predictions:
+        # Generate extended predictions for 6 cycles (3 months)
+        extended_predictions = {}
+        try:
+            extended_predictions = model.predict(6)
+        except:
+            extended_predictions = predictions
+        
+        # Create date range for next 6 bidding cycles
+        latest_date = data['date'].max()
+        prediction_dates = []
+        for i in range(6):
+            # Assuming 2 cycles per month, alternate between 1st and 2nd cycle
+            cycle_num = (i % 2) + 1
+            month_offset = i // 2
+            pred_date = latest_date + pd.DateOffset(months=month_offset+1)
+            prediction_dates.append({
+                'cycle': i + 1,
+                'date': pred_date,
+                'month': pred_date.strftime('%Y-%m'),
+                'cycle_label': f"{pred_date.strftime('%Y-%m')} Cycle {cycle_num}"
+            })
+        
+        # Create tabs for each category
+        category_tabs = st.tabs(selected_categories)
+        
+        for tab_idx, category in enumerate(selected_categories):
+            with category_tabs[tab_idx]:
+                if category in extended_predictions:
+                    # Get prediction values
+                    if isinstance(extended_predictions[category], dict) and 'mean' in extended_predictions[category]:
+                        pred_values = extended_predictions[category]['mean']
+                    elif isinstance(extended_predictions[category], list):
+                        pred_values = [float(p.item() if hasattr(p, 'item') else p) for p in extended_predictions[category]]
+                    else:
+                        continue
+                    
+                    # Create prediction table
+                    prediction_data = []
+                    latest_price = data[data['vehicle_class'] == category]['premium'].iloc[-1]
+                    prev_price = latest_price
+                    
+                    for i, date_info in enumerate(prediction_dates[:len(pred_values)]):
+                        pred_price = pred_values[i]
+                        change_amount = pred_price - prev_price
+                        change_percent = (change_amount / prev_price) * 100
+                        
+                        # Determine confidence level based on cycle distance
+                        if i < 2:
+                            confidence = "High"
+                        elif i < 4:
+                            confidence = "Medium"
+                        else:
+                            confidence = "Low"
+                        
+                        prediction_data.append({
+                            'Cycle': date_info['cycle_label'],
+                            'Predicted Premium': f"${pred_price:,.0f}",
+                            'Change from Previous': f"${change_amount:+,.0f} ({change_percent:+.1f}%)",
+                            'Confidence': confidence
+                        })
+                        
+                        prev_price = pred_price
+                    
+                    # Display as styled dataframe
+                    pred_df = pd.DataFrame(prediction_data)
+                    
+                    st.markdown("""
+                    <style>
+                    .prediction-table {
+                        background: white;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
+                    
+                    st.dataframe(
+                        pred_df,
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={
+                            "Cycle": st.column_config.TextColumn("Bidding Cycle", width="medium"),
+                            "Predicted Premium": st.column_config.TextColumn("Predicted Premium", width="medium"),
+                            "Change from Previous": st.column_config.TextColumn("Change from Previous", width="medium"),
+                            "Confidence": st.column_config.TextColumn("Confidence", width="small")
+                        }
+                    )
+    
+    # Model Performance Section
+    st.markdown("## 🎯 Model Performance")
+    
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+    st.markdown("### Performance Metrics")
+    
+    # Create performance metrics table
+    performance_data = []
+    for category in selected_categories:
+        if hasattr(model, 'get_performance_metrics'):
+            metrics = model.get_performance_metrics(category)
+            if metrics:
+                # Calculate additional metrics
+                mape = metrics.get('mape', 0)
+                rmse = metrics.get('rmse', 0)
+                mae = metrics.get('mae', 0)
+                r2 = metrics.get('r2', 0)
+                direction_accuracy = metrics.get('direction_accuracy', 50)
+                vol_correlation = metrics.get('volatility_correlation', 0)
+                
+                performance_data.append({
+                    'Category': category,
+                    'MAPE': f"{mape:.2f}%",
+                    'RMSE': f"${rmse:,.0f}",
+                    'MAE': f"${mae:,.0f}",
+                    'R²': f"{r2:.3f}",
+                    'Vol Correlation': f"{vol_correlation:.3f}",
+                    'Direction Accuracy': f"{direction_accuracy:.1f}%"
+                })
+    
+    if performance_data:
+        perf_df = pd.DataFrame(performance_data)
+        
+        st.dataframe(
+            perf_df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Category": st.column_config.TextColumn("Category", width="small"),
+                "MAPE": st.column_config.TextColumn("MAPE", width="small", help="Mean Absolute Percentage Error"),
+                "RMSE": st.column_config.TextColumn("RMSE", width="small", help="Root Mean Square Error"),
+                "MAE": st.column_config.TextColumn("MAE", width="small", help="Mean Absolute Error"),
+                "R²": st.column_config.TextColumn("R²", width="small", help="Coefficient of Determination"),
+                "Vol Correlation": st.column_config.TextColumn("Vol Correlation", width="small", help="Volatility Correlation"),
+                "Direction Accuracy": st.column_config.TextColumn("Direction Accuracy", width="small", help="Directional Prediction Accuracy")
+            }
+        )
+        
+        # Performance insights
+        avg_direction_accuracy = sum([float(row['Direction Accuracy'].replace('%', '')) for row in performance_data]) / len(performance_data)
+        best_category = max(performance_data, key=lambda x: float(x['Direction Accuracy'].replace('%', '')))
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Average Direction Accuracy", f"{avg_direction_accuracy:.1f}%")
+        with col2:
+            st.metric("Best Performing Category", best_category['Category'])
+        with col3:
+            st.metric("Model Type", "Fast Directional Forecaster")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     # Historical Analysis and Charts
     st.markdown("## 📈 Historical Analysis & Trends")
     
