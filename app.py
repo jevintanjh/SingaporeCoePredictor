@@ -790,7 +790,7 @@ def main():
                     except:
                         formatted_dates.append(date_str)
                 next_dates = ", ".join(formatted_dates)
-                st.info(f"📅 Next COE bidding dates: {next_dates}")
+                st.info(f"📅 Next COE Exercise End Dates: {next_dates}")
         else:
             st.info("📊 Using historical COE database with 2,569+ records for forecasting. Automated updates will activate when bidding schedule is available.")
     except Exception as e:

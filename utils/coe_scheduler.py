@@ -176,31 +176,40 @@ class COEScheduler:
     
     def generate_coe_schedule(self, year):
         """
-        Generate COE bidding schedule based on LTA's official pattern:
-        - First and third Mondays of each month at 12 noon
-        - Bidding closes on Wednesday at 4 pm
-        - Results released at 12 noon the following Wednesday
+        Generate COE exercise end dates (Wednesdays at 4 PM) based on LTA's official schedule
         """
-        bidding_dates = []
+        # Official 2025 COE exercise end dates from LTA
+        if year == 2025:
+            end_dates = [
+                "2025-01-08", "2025-01-22", "2025-02-05", "2025-02-19",
+                "2025-03-05", "2025-03-19", "2025-04-09", "2025-04-23",
+                "2025-05-07", "2025-05-21", "2025-06-04", "2025-06-18",
+                "2025-07-09", "2025-07-23", "2025-08-06", "2025-08-20",
+                "2025-09-03", "2025-09-17", "2025-10-08", "2025-10-23",
+                "2025-11-05", "2025-11-19", "2025-12-03", "2025-12-17"
+            ]
+            return end_dates
         
+        # Generate approximate schedule for other years
+        end_dates = []
         for month in range(1, 13):
-            # Find first and third Mondays of the month
+            # Find first and third Wednesdays of the month (approximate)
             first_day = datetime(year, month, 1)
             
-            # Find first Monday
-            days_until_monday = (7 - first_day.weekday()) % 7
-            first_monday = first_day + timedelta(days=days_until_monday)
+            # Find first Wednesday
+            days_until_wednesday = (2 - first_day.weekday()) % 7
+            first_wednesday = first_day + timedelta(days=days_until_wednesday)
             
-            # Third Monday is 14 days after first Monday
-            third_monday = first_monday + timedelta(days=14)
+            # Third Wednesday is 14 days after first Wednesday
+            third_wednesday = first_wednesday + timedelta(days=14)
             
-            # Check if third Monday is still in the same month
-            if third_monday.month == month:
-                bidding_dates.extend([first_monday, third_monday])
+            # Check if third Wednesday is still in the same month
+            if third_wednesday.month == month:
+                end_dates.extend([first_wednesday, third_wednesday])
             else:
-                bidding_dates.append(first_monday)
+                end_dates.append(first_wednesday)
         
-        return [date.strftime("%Y-%m-%d") for date in bidding_dates]
+        return [date.strftime("%Y-%m-%d") for date in end_dates]
     
     def get_fallback_dates(self):
         """
@@ -239,19 +248,14 @@ class COEScheduler:
         # Clear existing scheduled jobs
         schedule.clear()
         
-        # Schedule updates after bidding results are released (12 noon on Wednesday following bidding)
+        # Schedule updates after COE exercise ends (Thursday 1 PM after Wednesday 4 PM exercise end)
         for date_str in self.bidding_dates:
             try:
-                bidding_date = datetime.strptime(date_str, "%Y-%m-%d")
+                exercise_end_date = datetime.strptime(date_str, "%Y-%m-%d")
                 
-                # Calculate results release date: Wednesday following the bidding Monday
-                # Bidding starts on Monday, results released following Wednesday at 12 noon
-                days_to_wednesday = (2 - bidding_date.weekday()) % 7  # Days to next Wednesday
-                if days_to_wednesday == 0:  # If today is Wednesday, get next Wednesday
-                    days_to_wednesday = 7
-                
-                results_date = bidding_date + timedelta(days=days_to_wednesday)
-                update_time = results_date.replace(hour=13, minute=0, second=0, microsecond=0)  # 1 PM after results at 12 noon
+                # Schedule update for the day after exercise ends
+                update_date = exercise_end_date + timedelta(days=1)
+                update_time = update_date.replace(hour=13, minute=0, second=0, microsecond=0)  # 1 PM next day
                 
                 # Only schedule future updates
                 if update_time > datetime.now():
@@ -259,7 +263,7 @@ class COEScheduler:
                         self.run_scheduled_update, date_str
                     ).tag(f"coe_update_{date_str}")
                     
-                    logger.info(f"Scheduled update for {date_str} at {update_time.strftime('%Y-%m-%d %H:%M')}")
+                    logger.info(f"Scheduled update for exercise ending {date_str} at {update_time.strftime('%Y-%m-%d %H:%M')}")
                     
             except Exception as e:
                 logger.error(f"Error scheduling update for {date_str}: {str(e)}")
