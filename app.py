@@ -468,8 +468,8 @@ def initialize_models():
             fast_model.fit(data)
             models['Fast Directional'] = fast_model
             
-            # Initialize Interpretable N-BEATS Forecaster
-            nbeats_model = InterpretableNBEATS()
+            # Initialize Enhanced N-BEATS Forecaster
+            nbeats_model = EnhancedNBEATS()
             nbeats_model.fit(data)
             models['N-BEATS'] = nbeats_model
             
