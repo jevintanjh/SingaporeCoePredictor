@@ -174,11 +174,13 @@ def render_model_dashboard(model, model_name, data, selected_categories, predict
         return
     
     # Generate predictions
+    predictions = {}
     try:
         predictions = model.predict(prediction_cycles)
     except Exception as e:
         st.error(f"Error generating predictions with {model_name}: {str(e)}")
-        return
+        # Use empty predictions but continue with the dashboard
+        predictions = {}
     
     # Current Predictions Section
     st.markdown(f"## 🔮 {model_name} Predictions")
@@ -395,24 +397,63 @@ def render_model_dashboard(model, model_name, data, selected_categories, predict
         ))
         
         # Add predictions if available
-        if category in predictions:
+        if category in predictions and predictions[category]:
             last_date = category_data['date'].max()
-            future_dates = [last_date + pd.DateOffset(months=i//2+1) for i in range(len(predictions[category]))]
             
-            if isinstance(predictions[category], list):
+            # Handle different prediction formats
+            if isinstance(predictions[category], dict) and 'mean' in predictions[category]:
+                # Fast Directional format: {'mean': [...], 'lower': [...], 'upper': [...]}
+                pred_values = predictions[category]['mean']
+                lower_bounds = predictions[category].get('lower', [])
+                upper_bounds = predictions[category].get('upper', [])
+            elif isinstance(predictions[category], list):
+                # N-BEATS format: [value1, value2, ...]
                 pred_values = [float(p.item() if hasattr(p, 'item') else p) for p in predictions[category]]
+                lower_bounds = []
+                upper_bounds = []
             else:
                 pred_values = list(predictions[category])
+                lower_bounds = []
+                upper_bounds = []
+            
+            if pred_values:
+                future_dates = [last_date + pd.DateOffset(months=i//2+1) for i in range(len(pred_values))]
                 
-            fig.add_trace(go.Scatter(
-                x=future_dates,
-                y=pred_values,
-                mode='lines+markers',
-                name=f'{model_name} Predictions',
-                line=dict(color='#ff6b6b', width=2, dash='dash'),
-                marker=dict(size=6),
-                hovertemplate='<b>%{x}</b><br>Predicted: $%{y:,.0f}<extra></extra>'
-            ))
+                # Add main prediction line
+                fig.add_trace(go.Scatter(
+                    x=future_dates,
+                    y=pred_values,
+                    mode='lines+markers',
+                    name=f'{model_name} Predictions',
+                    line=dict(color='#ff6b6b', width=2, dash='dash'),
+                    marker=dict(size=6),
+                    hovertemplate='<b>%{x}</b><br>Predicted: $%{y:,.0f}<extra></extra>'
+                ))
+                
+                # Add confidence intervals if available
+                if lower_bounds and upper_bounds and len(lower_bounds) == len(upper_bounds) == len(pred_values):
+                    # Upper bound
+                    fig.add_trace(go.Scatter(
+                        x=future_dates,
+                        y=upper_bounds,
+                        mode='lines',
+                        name='Upper Bound',
+                        line=dict(width=0),
+                        showlegend=False,
+                        hoverinfo='skip'
+                    ))
+                    
+                    # Lower bound with fill
+                    fig.add_trace(go.Scatter(
+                        x=future_dates,
+                        y=lower_bounds,
+                        mode='lines',
+                        name='Confidence Interval',
+                        line=dict(width=0),
+                        fill='tonexty',
+                        fillcolor='rgba(255, 107, 107, 0.2)',
+                        hovertemplate='<b>%{x}</b><br>Lower: $%{y:,.0f}<extra></extra>'
+                    ))
         
         # Styling
         fig.update_layout(
