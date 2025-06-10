@@ -12,8 +12,9 @@ from models.fast_directional_forecaster import FastDirectionalForecaster
 from models.interpretable_nbeats_v2 import InterpretableNBEATS
 from models.nbeatsx import NBEATSx
 
-# Import data updater
+# Import data updater and scheduler
 from utils.data_updater import COEDataUpdater
+from utils.coe_scheduler import start_coe_scheduler, get_scheduler_status
 
 @st.cache_data
 def load_and_process_data():
@@ -761,31 +762,31 @@ def main():
     
     with col3:
         st.markdown("<br>", unsafe_allow_html=True)
-        col3a, col3b = st.columns(2)
-        with col3a:
-            refresh_predictions = st.button("🔄 Refresh", type="primary")
-        with col3b:
-            update_data = st.button("📊 Update Data", help="Fetch latest COE results from government API")
+        refresh_predictions = st.button("🔄 Refresh", type="primary")
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Handle data update button
-    if update_data:
-        with st.spinner('Fetching latest COE results from Singapore Government API...'):
-            try:
-                updater = COEDataUpdater()
-                update_success = updater.update_coe_database()
-                
-                if update_success:
-                    st.success("✅ COE database validated with 2,569+ historical records available for forecasting!")
-                    st.info("📝 Models are using comprehensive historical data for accurate predictions.")
-                    # Clear cache to force reload of data
-                    st.cache_data.clear()
-                else:
-                    st.warning("⚠️ Unable to fetch new data from government API. Using existing historical database for predictions.")
-                    st.info("💡 The system contains extensive historical COE data to generate reliable forecasts.")
-            except Exception as e:
-                st.error(f"❌ Error updating database: {str(e)}")
+    # Initialize automated scheduler on first load
+    if 'scheduler_initialized' not in st.session_state:
+        try:
+            start_coe_scheduler()
+            st.session_state.scheduler_initialized = True
+        except Exception as e:
+            st.session_state.scheduler_initialized = False
+    
+    # Display automated update status
+    try:
+        scheduler_status = get_scheduler_status()
+        if scheduler_status['is_running']:
+            st.success("🔄 Automated COE data updates are running. System monitors official bidding schedule and updates database automatically after each exercise.")
+            
+            if scheduler_status['next_bidding_dates']:
+                next_dates = ", ".join(scheduler_status['next_bidding_dates'][:3])
+                st.info(f"📅 Next COE bidding dates: {next_dates}")
+        else:
+            st.info("📊 Using historical COE database with 2,569+ records for forecasting. Automated updates will activate when bidding schedule is available.")
+    except Exception as e:
+        st.info("📊 Using comprehensive historical COE database for forecasting predictions.")
     
     if not selected_categories:
         st.warning("Please select at least one COE category to view predictions.")
