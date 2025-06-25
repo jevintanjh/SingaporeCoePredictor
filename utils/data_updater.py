@@ -183,7 +183,23 @@ class COEDataUpdater:
         try:
             if os.path.exists(self.data_file_path):
                 df = pd.read_csv(self.data_file_path)
+                
+                # Handle different date formats
+                if 'date' in df.columns:
+                    df['date'] = pd.to_datetime(df['date'])
+                elif 'month' in df.columns and 'bidding_no' in df.columns:
+                    # Convert month (YYYY-MM) and bidding_no to date
+                    df['date'] = pd.to_datetime(df['month'] + '-01') + pd.to_timedelta((df['bidding_no'] - 1) * 15, unit='D')
+                elif 'exercise' in df.columns:
+                    # Handle exercise format
+                    df['date'] = df['exercise'].apply(self.parse_date)
+                else:
+                    # Default fallback
+                    df['date'] = pd.date_range(start='2002-01-01', periods=len(df), freq='2W')
+                
+                # Ensure date column is datetime
                 df['date'] = pd.to_datetime(df['date'])
+                
                 print(f"Loaded {len(df)} existing records")
                 return df
             else:
