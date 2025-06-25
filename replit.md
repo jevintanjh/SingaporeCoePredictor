@@ -4,11 +4,20 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 
 ## Recent Changes
 
+**Capstone Presentation (June 25, 2025)**:
+- Created comprehensive 15-minute presentation outline
+- Structured presentation following academic capstone standards
+- Detailed technical deep-dive sections for each model
+- Performance metrics and business impact analysis
+- Live demonstration guide for platform showcase
+
 **Data Update System (June 25, 2025)**:
 - Fixed automatic data updates on website load
 - Added manual "Update Data" button for immediate refresh
 - Resolved data loading issues with month/bidding_no format
 - System now properly detects when new COE results are available
+- Updated dataset with current June 25, 2025 COE exercise results (2574 total records)
+- Automated scheduler now monitoring remaining 12 COE exercises in 2025
 
 **Codebase Cleanup**:
 - Removed 17 unused model files to streamline project
