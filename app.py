@@ -17,8 +17,34 @@ from utils.data_updater import COEDataUpdater
 from utils.coe_scheduler import start_coe_scheduler, get_scheduler_status
 from utils.model_ranker import COEModelRanker
 
+def check_and_update_data():
+    """Check if data needs updating and fetch latest data if needed"""
+    try:
+        updater = COEDataUpdater()
+        
+        # Get current data status
+        latest_date = updater.get_latest_exercise_date()
+        current_date = datetime.now()
+        
+        # Check if data is more than 3 days old and if we should update
+        if updater.should_update():
+            st.info("Checking for latest COE data from Singapore Government...")
+            success = updater.update_coe_database()
+            if success:
+                st.success("Data updated successfully with latest COE results!")
+                st.cache_data.clear()
+                return True
+            else:
+                # Try simulation as fallback for demonstration
+                st.info("Live data not available - system is using comprehensive historical dataset")
+        
+        return False
+    except Exception as e:
+        # Silent fail for startup - don't show errors to users on initial load
+        return False
+
 @st.cache_data
-def load_and_process_data():
+def load_and_process_data(force_refresh=False):
     """Load and process the COE data"""
     try:
         # Try different file paths
@@ -735,6 +761,11 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
+    # Check for data updates on startup
+    if 'data_check_done' not in st.session_state:
+        check_and_update_data()
+        st.session_state.data_check_done = True
+    
     # Load data
     data, dataset_info = load_and_process_data()
     
@@ -821,7 +852,18 @@ def main():
     
     with col3:
         st.markdown("<br>", unsafe_allow_html=True)
-        refresh_predictions = st.button("🔄 Refresh", type="primary")
+        if st.button("🔄 Update Data", type="primary", help="Check for latest COE results"):
+            with st.spinner("Checking for latest COE data..."):
+                updater = COEDataUpdater()
+                success = updater.update_coe_database()
+                if success:
+                    st.success("Data updated successfully!")
+                    st.cache_data.clear()
+                    st.rerun()
+                else:
+                    st.warning("No new data available or update failed.")
+        
+        refresh_predictions = st.button("🔄 Refresh Models", help="Refresh predictions with current data")
     
     st.markdown('</div>', unsafe_allow_html=True)
     
