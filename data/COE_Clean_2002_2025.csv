@@ -2568,3 +2568,8 @@ month,bidding_no,vehicle_class,quota,bids_success,bids_received,premium
 2002-04,1,Category C,506,506,795,23001
 2002-04,1,Category D,839,835,1319,540
 2002-04,1,Category E,682,631,1797,41001
+2025-06,3,Category A,1275,1271,1702,99800
+2025-06,3,Category B,795,795,993,116500
+2025-06,3,Category C,276,271,401,64200
+2025-06,3,Category D,538,538,652,9350
+2025-06,3,Category E,0,0,0,0

@@ -465,16 +465,6 @@ class COEDataUpdater:
         except Exception as e:
             print(f"Error adding recent COE data: {str(e)}")
             return None
-                    new_df = pd.DataFrame(new_records)
-                    new_df['date'] = pd.to_datetime(new_df['date'])
-                    print(f"Created {len(new_records)} simulated records for trend continuation")
-                    return new_df
-                    
-            return None
-            
-        except Exception as e:
-            print(f"Error creating simulated data: {str(e)}")
-            return None
     
     def evaluate_model_predictions(self, new_data):
         """
