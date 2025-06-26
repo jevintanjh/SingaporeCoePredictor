@@ -981,6 +981,19 @@ def main():
         except Exception as e:
             st.session_state.scheduler_initialized = False
     
+    # Initialize keep-alive service for production deployment
+    if 'keep_alive_started' not in st.session_state:
+        try:
+            from keep_alive import start_keep_alive
+            start_keep_alive()
+            st.session_state.keep_alive_started = True
+        except ImportError:
+            # Keep-alive not available in this environment
+            pass
+        except Exception as e:
+            # Silently handle keep-alive startup errors
+            pass
+    
     # Display automated update status
     try:
         scheduler_status = get_scheduler_status()
