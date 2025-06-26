@@ -634,111 +634,47 @@ def initialize_models():
 
 def show_loading_screen():
     """Display a professional loading screen with project information"""
+    # Loading screen header
     st.markdown("""
-    <style>
-    .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 80vh;
-        text-align: center;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 20px;
-        padding: 3rem;
-        margin: 2rem;
-        color: white;
-    }
-    .loading-title {
-        font-size: 3rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-        background: linear-gradient(45deg, #FFD700, #FFA500);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .loading-subtitle {
-        font-size: 1.5rem;
-        margin-bottom: 2rem;
-        opacity: 0.9;
-    }
-    .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin: 2rem 0;
-        width: 100%;
-    }
-    .feature-card {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 1.5rem;
-        border-radius: 15px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .feature-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
-    .loading-spinner {
-        width: 60px;
-        height: 60px;
-        border: 6px solid rgba(255, 255, 255, 0.3);
-        border-top: 6px solid #FFD700;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 2rem auto;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    .progress-text {
-        font-size: 1.1rem;
-        margin-top: 1rem;
-        opacity: 0.8;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Loading screen content
-    st.markdown("""
-    <div class="loading-container">
-        <div class="loading-title">🚗 COE Prediction Platform</div>
-        <div class="loading-subtitle">Advanced Machine Learning Forecasting System</div>
-        
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🧠</div>
-                <h3>N-BEATSx Model</h3>
-                <p>Neural architecture with exogenous variables<br>
-                <strong>Current Rank: #1 (92.7% accuracy)</strong></p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>Interpretable N-BEATS</h3>
-                <p>Transparent trend & seasonal analysis<br>
-                <strong>Current Rank: #2 (90.6% accuracy)</strong></p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Fast Directional Forecaster</h3>
-                <p>High-speed momentum analysis<br>
-                <strong>Current Rank: #3 (88.9% accuracy)</strong></p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔄</div>
-                <h3>Real-time Updates</h3>
-                <p>Automated data from Singapore Gov API<br>
-                <strong>2,574 records (2002-2025)</strong></p>
-            </div>
-        </div>
-        
-        <div class="loading-spinner"></div>
-        <div class="progress-text">Initializing models and loading data...</div>
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 3rem; border-radius: 20px; color: white; text-align: center; margin: 2rem 0;">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem; color: #FFD700;">🚗 COE Prediction Platform</h1>
+        <h2 style="font-size: 1.5rem; opacity: 0.9; margin-bottom: 2rem;">Advanced Machine Learning Forecasting System</h2>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Model showcase using native Streamlit components
+    st.subheader("🧠 Three Advanced AI Models")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.info("""
+        **N-BEATSx Model**  
+        Neural architecture with exogenous variables  
+        **Current Rank: #1 (92.7% accuracy)**
+        """)
+    
+    with col2:
+        st.info("""
+        **Interpretable N-BEATS**  
+        Transparent trend & seasonal analysis  
+        **Current Rank: #2 (90.6% accuracy)**
+        """)
+    
+    with col3:
+        st.info("""
+        **Fast Directional Forecaster**  
+        High-speed momentum analysis  
+        **Current Rank: #3 (88.9% accuracy)**
+        """)
+    
+    # Data info
+    st.success("""
+    **🔄 Real-time Data Pipeline**  
+    Automated updates from Singapore Government API  
+    **2,574 historical records (2002-2025)**
+    """)
 
 def main():
     # Configure page
@@ -775,11 +711,8 @@ def main():
         
         # Execute loading with real backend work
         for i, (step_text, progress) in enumerate(loading_steps):
-            with status_text.container():
-                st.info(f"🔄 {step_text}")
-            
-            with progress_placeholder.container():
-                st.progress(progress / 100)
+            status_text.info(f"🔄 {step_text}")
+            progress_placeholder.progress(progress / 100)
             
             # Actual loading work happens here
             if i == 0:  # Load data
@@ -796,11 +729,12 @@ def main():
                 except:
                     pass
             
-            time.sleep(0.6)  # Visual feedback timing
+            time.sleep(0.4)  # Visual feedback timing
         
         # Mark loading complete
         st.session_state.models_loaded = True
-        time.sleep(0.5)
+        st.success("✅ Platform ready! Redirecting to dashboard...")
+        time.sleep(1)
         st.rerun()
         return
     
