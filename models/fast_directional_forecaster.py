@@ -6,24 +6,72 @@ warnings.filterwarnings('ignore')
 
 class FastDirectionalForecaster:
     """
+    === LEARNING OBJECTIVE: Understanding Statistical Time Series Forecasting ===
+    
     Fast and reliable directional forecaster optimized for performance
+    
+    KEY CONCEPTS DEMONSTRATED:
+    1. Exponential Smoothing - Classical time series technique
+    2. Momentum Indicators - Financial market analysis methods
+    3. Direction Prediction - Binary classification for trend forecasting
+    4. Statistical Validation - Walk-forward testing methodology
+    
+    WHY THIS MODEL:
+    - Demonstrates traditional statistical approaches vs neural methods
+    - Shows interpretable forecasting techniques
+    - Teaches financial indicator computation
+    - Illustrates robust validation practices
     """
     
     def __init__(self):
-        self.models = {}
-        self.performance_metrics = {}
+        """
+        === INITIALIZATION SECTION ===
+        
+        LEARNING FOCUS: Model Architecture Design
+        - Simple dictionary-based storage for model components
+        - Category-based organization for multi-series forecasting
+        - Performance tracking for model comparison
+        """
+        self.models = {}  # Stores trained model parameters per category
+        self.performance_metrics = {}  # Tracks validation results
         self.categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E']
     
     def exponential_smoothing(self, series, alpha=0.3):
-        """Proper exponential smoothing implementation"""
+        """
+        === EXPONENTIAL SMOOTHING EXPLANATION ===
+        
+        LEARNING OBJECTIVE: Classical Time Series Smoothing
+        
+        CONCEPT: Exponential smoothing gives more weight to recent observations
+        FORMULA: S_t = α * X_t + (1-α) * S_{t-1}
+        WHERE:
+        - S_t = Smoothed value at time t
+        - X_t = Actual observation at time t
+        - α (alpha) = Smoothing parameter (0 < α < 1)
+        
+        INTUITION:
+        - Higher α = More responsive to recent changes
+        - Lower α = More stable, less reactive to noise
+        - α = 0.3 provides good balance for COE data
+        
+        WHY USEFUL:
+        - Removes noise while preserving trends
+        - Computationally efficient
+        - Foundation for more complex forecasting methods
+        """
         if len(series) == 0:
             return 0
         
+        # Initialize with first observation
         smoothed = [series[0]]
+        
+        # Apply exponential smoothing formula iteratively
         for i in range(1, len(series)):
+            # Weight recent observation vs. previous smoothed value
             new_value = alpha * series[i] + (1 - alpha) * smoothed[-1]
             smoothed.append(new_value)
         
+        # Return most recent smoothed value for forecasting
         return smoothed[-1]
     
     def calculate_volatility_correlation(self, actual, predicted, window=3):
@@ -57,8 +105,27 @@ class FastDirectionalForecaster:
             return 0.15
     
     def calculate_momentum_indicators(self, prices):
-        """Calculate fast momentum indicators for direction prediction"""
+        """
+        === FINANCIAL MOMENTUM INDICATORS EXPLANATION ===
+        
+        LEARNING OBJECTIVE: Technical Analysis in Machine Learning
+        
+        PURPOSE: Extract market sentiment signals from price data
+        
+        INDICATORS COMPUTED:
+        1. MOMENTUM: Rate of price change over different periods
+        2. VOLATILITY: Market uncertainty measure
+        3. MOVING AVERAGE RATIO: Current price vs. average
+        4. RSI: Relative Strength Index for overbought/oversold
+        
+        WHY THESE INDICATORS:
+        - Capture different aspects of market behavior
+        - Provide complementary signals for direction prediction
+        - Widely used in financial forecasting
+        - Help identify trend reversals and continuations
+        """
         if len(prices) < 6:
+            # Return neutral indicators when insufficient data
             return {
                 'momentum_3': 0, 'momentum_6': 0, 'volatility': 0.02,
                 'ma_ratio': 1, 'trend': 0, 'rsi_simple': 50
@@ -66,41 +133,52 @@ class FastDirectionalForecaster:
         
         indicators = {}
         
-        # Short-term momentum
+        # === SHORT-TERM MOMENTUM ===
+        # Measures 3-period price change rate
         if len(prices) >= 4:
             indicators['momentum_3'] = (prices[-1] - prices[-4]) / prices[-4]
         else:
             indicators['momentum_3'] = 0
             
-        # Medium-term momentum
+        # === MEDIUM-TERM MOMENTUM ===
+        # Captures longer-term directional bias
         if len(prices) >= 7:
             indicators['momentum_6'] = (prices[-1] - prices[-7]) / prices[-7]
         else:
             indicators['momentum_6'] = indicators['momentum_3']
         
-        # Volatility
+        # === VOLATILITY COEFFICIENT ===
+        # Normalized volatility (std dev / mean)
+        # Higher values indicate more uncertain market conditions
         recent_prices = prices[-min(6, len(prices)):]
         indicators['volatility'] = np.std(recent_prices) / np.mean(recent_prices)
         
-        # Moving average ratio
+        # === MOVING AVERAGE RATIO ===
+        # Current price relative to recent average
+        # > 1.0 indicates price above average (bullish)
+        # < 1.0 indicates price below average (bearish)
         ma = np.mean(recent_prices)
         indicators['ma_ratio'] = prices[-1] / ma
         
-        # Simple trend
+        # === SIMPLE TREND INDICATOR ===
+        # 3-period trend strength
         if len(prices) >= 3:
             indicators['trend'] = (prices[-1] - prices[-3]) / prices[-3]
         else:
             indicators['trend'] = 0
         
-        # Simplified RSI
+        # === SIMPLIFIED RSI (RELATIVE STRENGTH INDEX) ===
+        # Momentum oscillator (0-100 scale)
+        # > 60: Potentially overbought
+        # < 40: Potentially oversold
         if len(prices) >= 6:
-            changes = np.diff(prices[-6:])
+            changes = np.diff(prices[-6:])  # Price changes
             gains = np.mean(changes[changes > 0]) if np.any(changes > 0) else 0
             losses = -np.mean(changes[changes < 0]) if np.any(changes < 0) else 0.01
-            rs = gains / losses
+            rs = gains / losses  # Relative strength
             indicators['rsi_simple'] = 100 - (100 / (1 + rs))
         else:
-            indicators['rsi_simple'] = 50
+            indicators['rsi_simple'] = 50  # Neutral
         
         return indicators
     

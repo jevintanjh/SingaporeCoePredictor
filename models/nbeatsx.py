@@ -10,78 +10,163 @@ warnings.filterwarnings('ignore')
 
 class NBEATSx:
     """
+    === LEARNING OBJECTIVE: Advanced Multivariate Time Series with Exogenous Variables ===
+    
     N-BEATSx implementation with exogenous variables and enhanced feature engineering
     Incorporates external factors like quota, bids, and market indicators for improved forecasting
+    
+    KEY ADVANCED CONCEPTS DEMONSTRATED:
+    1. EXOGENOUS VARIABLES: External factors influencing predictions
+    2. MULTIVARIATE TIME SERIES: Multiple input features beyond target variable
+    3. FEATURE ENGINEERING: Creating predictive features from raw data
+    4. ENSEMBLE LEARNING: Combining specialized models for robustness
+    5. FEATURE SELECTION: Automated selection of most predictive features
+    
+    EXOGENOUS VARIABLES IN COE CONTEXT:
+    - Quota: Supply-side constraint
+    - Bids Received: Demand indicator
+    - Success Rate: Market efficiency measure
+    - Seasonal Patterns: Cyclical market behavior
+    
+    WHY N-BEATSx vs N-BEATS:
+    - N-BEATS: Uses only historical prices (univariate)
+    - N-BEATSx: Incorporates external market factors (multivariate)
+    - Better captures complex market dynamics
+    - More robust to external shocks
+    
+    BUSINESS VALUE:
+    - More accurate predictions by considering market fundamentals
+    - Better understanding of price drivers
+    - Ability to scenario plan with different quota/demand levels
     """
     
     def __init__(self, lookback_window=36, forecast_horizon=6):
+        """
+        === ADVANCED ARCHITECTURE INITIALIZATION ===
+        
+        LEARNING FOCUS: Complex ML System Design
+        
+        COMPONENTS EXPLAINED:
+        - Multiple scalers: Different normalization for prices vs features
+        - Feature selectors: Automated feature importance ranking
+        - Specialized models: Each handles different data aspects
+        - Cache systems: Efficient data management for predictions
+        """
         self.lookback_window = lookback_window
         self.forecast_horizon = forecast_horizon
         
-        self.models = {}
-        self.scalers = {}
-        self.feature_scalers = {}
-        self.performance_metrics = {}
-        self.data_cache = {}
-        self.feature_selectors = {}
+        # === CORE MODEL COMPONENTS ===
+        self.models = {}  # Main ensemble models
+        self.scalers = {}  # Price data normalization
+        self.feature_scalers = {}  # Exogenous feature normalization
+        self.performance_metrics = {}  # Model evaluation results
+        self.data_cache = {}  # Recent data for predictions
         
-        # Exogenous variable models
-        self.trend_models = {}
-        self.seasonal_models = {}
-        self.exogenous_models = {}
+        # === FEATURE ENGINEERING COMPONENTS ===
+        self.feature_selectors = {}  # Automatic feature selection
         
-        np.random.seed(42)
+        # === SPECIALIZED MODELS FOR N-BEATSx APPROACH ===
+        self.trend_models = {}      # Ridge regression for trend
+        self.seasonal_models = {}   # Random Forest for seasonality
+        self.exogenous_models = {}  # Gradient Boosting for external factors
+        
+        np.random.seed(42)  # Reproducible results
     
     def create_exogenous_features(self, data, category):
-        """Create exogenous features specific to COE market dynamics"""
+        """
+        === ADVANCED FEATURE ENGINEERING FOR EXOGENOUS VARIABLES ===
+        
+        LEARNING OBJECTIVE: Domain-Specific Feature Creation
+        
+        FEATURE ENGINEERING PRINCIPLES:
+        1. DOMAIN KNOWLEDGE: Use COE market understanding
+        2. SUPPLY-DEMAND DYNAMICS: Capture market fundamentals  
+        3. TEMPORAL PATTERNS: Extract time-based effects
+        4. INTERACTION FEATURES: Combine variables for new insights
+        
+        FEATURE CATEGORIES CREATED:
+        
+        A) RAW MARKET VARIABLES:
+        - quota: Certificate supply (government policy)
+        - bids_received: Market demand indicator
+        - bids_success: Successful bidder count
+        
+        B) DERIVED MARKET RATIOS:
+        - bid_quota_ratio: Demand pressure (bids/quota)
+        - success_rate: Market efficiency (success/total bids)
+        
+        C) TEMPORAL FEATURES:
+        - Monthly seasonality (sine/cosine encoding)
+        - Quarterly business cycles
+        - Long-term economic trends
+        
+        WHY THESE FEATURES MATTER:
+        - Higher bid/quota ratio → Higher prices (demand pressure)
+        - Lower success rate → Higher prices (competitive market)
+        - Seasonal patterns → Predictable price cycles
+        - Economic trends → Long-term price direction
+        """
         category_data = data[data['vehicle_class'] == category].copy()
         category_data = category_data.sort_values('date').reset_index(drop=True)
         
         features = []
         feature_names = []
         
-        # Basic exogenous variables
+        # === A) BASIC MARKET FUNDAMENTALS ===
+        
+        # Supply-side variable: How many certificates available
         if 'quota' in category_data.columns:
             features.append(category_data['quota'].values)
             feature_names.append('quota')
         
+        # Demand-side variable: Total market interest
         if 'bids_received' in category_data.columns:
             features.append(category_data['bids_received'].values)
             feature_names.append('bids_received')
         
+        # Market outcome: Successful bidders
         if 'bids_success' in category_data.columns:
             features.append(category_data['bids_success'].values)
             feature_names.append('bids_success')
         
-        # Derived exogenous features
+        # === B) DERIVED MARKET EFFICIENCY INDICATORS ===
+        
+        # Market pressure ratio: Higher ratio = more competition = higher prices
         if 'quota' in category_data.columns and 'bids_received' in category_data.columns:
             bid_quota_ratio = category_data['bids_received'] / np.maximum(category_data['quota'], 1)
             features.append(bid_quota_ratio.values)
             feature_names.append('bid_quota_ratio')
         
+        # Success rate: Lower rate = more competitive = higher prices
         if 'bids_success' in category_data.columns and 'bids_received' in category_data.columns:
             success_rate = category_data['bids_success'] / np.maximum(category_data['bids_received'], 1)
             features.append(success_rate.values)
             feature_names.append('success_rate')
         
-        # Time-based exogenous features
+        # === C) TEMPORAL PATTERN FEATURES ===
+        
+        # Extract time components
         category_data['month'] = category_data['date'].dt.month
         category_data['quarter'] = category_data['date'].dt.quarter
         category_data['year'] = category_data['date'].dt.year
         
-        # Monthly seasonality
+        # === CYCLICAL TIME ENCODING ===
+        # Why sine/cosine: Captures cyclical nature (month 12 is close to month 1)
+        # Linear encoding would treat month 12 as far from month 1
         month_sin = np.sin(2 * np.pi * category_data['month'] / 12)
         month_cos = np.cos(2 * np.pi * category_data['month'] / 12)
         features.extend([month_sin.values, month_cos.values])
         feature_names.extend(['month_sin', 'month_cos'])
         
-        # Quarterly trends
+        # === BUSINESS CYCLE INDICATORS ===
+        # One-hot encoding for quarters (Q1, Q2, Q3, Q4 patterns)
         quarter_encoded = pd.get_dummies(category_data['quarter'], prefix='quarter')
         for col in quarter_encoded.columns:
             features.append(quarter_encoded[col].values)
             feature_names.append(col)
         
-        # Economic cycle indicators (using year as proxy)
+        # === ECONOMIC TREND PROXY ===
+        # Normalized year trend: 0 = earliest year, 1 = latest year
         year_trend = (category_data['year'] - category_data['year'].min()) / (category_data['year'].max() - category_data['year'].min() + 1)
         features.append(year_trend.values)
         feature_names.append('year_trend')
@@ -101,7 +186,42 @@ class NBEATSx:
         return np.concatenate(lagged_features, axis=1) if lagged_features else exog_data
     
     def create_sequences_with_exogenous(self, price_data, exog_data, target_col='premium'):
-        """Create sequences incorporating both price history and exogenous variables"""
+        """
+        === MULTIVARIATE SEQUENCE CREATION FOR DEEP LEARNING ===
+        
+        LEARNING OBJECTIVE: Advanced Feature Engineering for Time Series ML
+        
+        PURPOSE: Transform raw time series into ML-ready feature matrices
+        
+        SEQUENCE STRUCTURE:
+        Each training example contains:
+        1. Historical price sequence (lookback_window points)
+        2. Statistical features derived from price history
+        3. Exogenous market variables at prediction time
+        4. Target: Next period price
+        
+        FEATURE ENGINEERING CATEGORIES:
+        
+        A) RAW HISTORICAL PRICES:
+        - Direct sequence input for pattern recognition
+        - Maintains temporal relationships
+        
+        B) STATISTICAL PRICE FEATURES:
+        - Mean, std, min, max: Distribution characteristics
+        - Recent change: Momentum indicator
+        - Moving averages: Trend indicators
+        - Volatility ratio: Risk assessment
+        
+        C) EXOGENOUS MARKET VARIABLES:
+        - External factors not captured in price history
+        - Market fundamentals (supply, demand, efficiency)
+        - Temporal patterns (seasonality, trends)
+        
+        WHY THIS APPROACH:
+        - Combines time series patterns with market fundamentals
+        - Provides multiple information sources for robust predictions
+        - Enables model to learn complex relationships
+        """
         if isinstance(price_data, pd.DataFrame):
             prices = price_data[target_col].values
         else:
@@ -109,53 +229,63 @@ class NBEATSx:
         
         X, y, X_exog = [], [], []
         
+        # Create sequences using sliding window approach
         for i in range(self.lookback_window, len(prices)):
-            # Price sequence features
+            
+            # === A) HISTORICAL PRICE SEQUENCE ===
+            # Extract price history for pattern recognition
             price_seq = prices[i - self.lookback_window:i]
             
-            # Price-based features
+            # === B) STATISTICAL PRICE FEATURES ===
+            # Extract distributional and trend characteristics
             price_features = [
-                np.mean(price_seq),
-                np.std(price_seq),
-                np.max(price_seq),
-                np.min(price_seq),
-                price_seq[-1],  # Last price
-                price_seq[-1] - price_seq[-2] if len(price_seq) > 1 else 0,  # Recent change
+                np.mean(price_seq),    # Central tendency
+                np.std(price_seq),     # Volatility measure
+                np.max(price_seq),     # Peak price in window
+                np.min(price_seq),     # Trough price in window
+                price_seq[-1],         # Most recent price (level)
+                price_seq[-1] - price_seq[-2] if len(price_seq) > 1 else 0,  # Recent momentum
             ]
             
-            # Moving averages
+            # === MOVING AVERAGE INDICATORS ===
+            # Short and medium-term trend indicators
             if len(price_seq) >= 3:
-                ma_3 = np.mean(price_seq[-3:])
-                ma_6 = np.mean(price_seq[-6:]) if len(price_seq) >= 6 else ma_3
+                ma_3 = np.mean(price_seq[-3:])  # 3-period moving average
+                ma_6 = np.mean(price_seq[-6:]) if len(price_seq) >= 6 else ma_3  # 6-period MA
                 price_features.extend([ma_3, ma_6])
             else:
-                price_features.extend([price_seq[-1], price_seq[-1]])
+                price_features.extend([price_seq[-1], price_seq[-1]])  # Fallback to current price
             
-            # Volatility features
+            # === VOLATILITY DYNAMICS ===
+            # Compare recent vs historical volatility
             if len(price_seq) >= 3:
-                recent_vol = np.std(price_seq[-3:])
-                total_vol = np.std(price_seq)
-                vol_ratio = recent_vol / (total_vol + 1e-8)
+                recent_vol = np.std(price_seq[-3:])    # Recent volatility
+                total_vol = np.std(price_seq)          # Historical volatility
+                vol_ratio = recent_vol / (total_vol + 1e-8)  # Volatility regime indicator
                 price_features.append(vol_ratio)
             else:
-                price_features.append(0.1)
+                price_features.append(0.1)  # Default stable volatility
             
-            # Exogenous features at current time
+            # === C) EXOGENOUS MARKET VARIABLES ===
+            # External factors at prediction time
             if i < len(exog_data):
                 exog_features = exog_data[i].flatten()
             else:
-                exog_features = exog_data[-1].flatten()
+                exog_features = exog_data[-1].flatten()  # Use last available
             
-            # Combine all features
+            # === FEATURE VECTOR CONSTRUCTION ===
+            # Combine all information sources
             combined_features = np.concatenate([
-                price_seq,  # Historical prices
-                price_features,  # Price-derived features
-                exog_features  # Exogenous variables
+                price_seq,        # Raw price history (temporal patterns)
+                price_features,   # Derived price statistics (trend/volatility)
+                exog_features     # Market fundamentals (external factors)
             ])
             
+            # Store training example
             X.append(combined_features)
-            y.append(prices[i])
+            y.append(prices[i])  # Target: next period price
             
+            # Store exogenous variables for future use
             if i < len(exog_data):
                 X_exog.append(exog_data[i])
             else:

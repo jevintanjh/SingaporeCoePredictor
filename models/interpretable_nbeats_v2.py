@@ -9,59 +9,153 @@ warnings.filterwarnings('ignore')
 
 class InterpretableNBEATS:
     """
+    === LEARNING OBJECTIVE: Time Series Decomposition & Interpretable AI ===
+    
     Interpretable N-BEATS implementation with trend and seasonality decomposition
     Uses ensemble methods to achieve interpretable forecasting without TensorFlow dependencies
+    
+    KEY CONCEPTS DEMONSTRATED:
+    1. TIME SERIES DECOMPOSITION: Breaking data into trend + seasonal + residual
+    2. INTERPRETABLE AI: Understanding what drives predictions
+    3. ENSEMBLE LEARNING: Combining multiple specialized models
+    4. FOURIER ANALYSIS: Mathematical approach to seasonality detection
+    
+    N-BEATS BACKGROUND:
+    - Neural basis expansion analysis for interpretable time series forecasting
+    - Originally uses neural networks with basis functions
+    - This version uses classical ML for better interpretability
+    
+    WHY INTERPRETABILITY MATTERS:
+    - Stakeholders need to understand forecast drivers
+    - Regulatory compliance in financial applications
+    - Building trust in AI predictions
+    - Debugging and model improvement
     """
     
     def __init__(self, lookback_window=36, forecast_horizon=6):
+        """
+        === INITIALIZATION & ARCHITECTURE DESIGN ===
+        
+        LEARNING FOCUS: Modular ML System Design
+        
+        PARAMETERS:
+        - lookback_window: How much history to consider (36 cycles ≈ 18 months)
+        - forecast_horizon: How far ahead to predict (6 cycles ≈ 3 months)
+        
+        ARCHITECTURE COMPONENTS:
+        - Separate models for trend, seasonal, and residual patterns
+        - Individual scalers for proper data normalization
+        - Component storage for interpretability analysis
+        """
         self.lookback_window = lookback_window
         self.forecast_horizon = forecast_horizon
         
-        self.models = {}
-        self.scalers = {}
-        self.performance_metrics = {}
-        self.trend_components = {}
-        self.seasonal_components = {}
-        self.data_cache = {}
+        # === MODEL STORAGE ===
+        self.models = {}  # Combined model ensemble
+        self.scalers = {}  # Data normalization tools
+        self.performance_metrics = {}  # Validation results
         
-        # Model components for interpretability
-        self.trend_models = {}
-        self.seasonal_models = {}
-        self.residual_models = {}
+        # === INTERPRETABILITY COMPONENTS ===
+        self.trend_components = {}  # Extracted trend patterns
+        self.seasonal_components = {}  # Extracted seasonal patterns
+        self.data_cache = {}  # Recent data for predictions
         
-        np.random.seed(42)
+        # === SPECIALIZED MODELS FOR EACH COMPONENT ===
+        self.trend_models = {}     # Linear/polynomial trend models
+        self.seasonal_models = {}  # Random Forest for seasonality
+        self.residual_models = {}  # Gradient Boosting for residuals
+        
+        np.random.seed(42)  # Reproducible results
     
     def extract_trend_component(self, data):
-        """Extract polynomial trend component"""
+        """
+        === POLYNOMIAL TREND EXTRACTION ===
+        
+        LEARNING OBJECTIVE: Mathematical Trend Analysis
+        
+        CONCEPT: Fit polynomial curve to capture long-term direction
+        
+        WHY POLYNOMIAL (DEGREE 2):
+        - Captures linear growth/decline (degree 1 term)
+        - Captures acceleration/deceleration (degree 2 term)
+        - Maintains interpretability (vs higher degree polynomials)
+        - Balances flexibility with overfitting prevention
+        
+        MATHEMATICAL FOUNDATION:
+        - Uses least squares fitting: minimize Σ(y - p(x))²
+        - Coefficients have clear interpretation:
+          * a₂: Acceleration/deceleration
+          * a₁: Base growth rate  
+          * a₀: Intercept
+        
+        BUSINESS INTERPRETATION:
+        - Positive a₂: Accelerating COE price growth
+        - Negative a₂: Decelerating price growth
+        - a₁: Base trend rate per period
+        """
         n = len(data)
-        t = np.arange(n)
+        t = np.arange(n)  # Time index: 0, 1, 2, ..., n-1
         
         # Fit polynomial trend (degree 2 for interpretability)
+        # Returns coefficients [a₂, a₁, a₀] for a₂t² + a₁t + a₀
         trend_coeffs = np.polyfit(t, data, deg=2)
+        
+        # Evaluate polynomial at all time points
         trend = np.polyval(trend_coeffs, t)
         
         return trend, trend_coeffs
     
     def extract_seasonal_component(self, data, period=24):
-        """Extract seasonal component using Fourier series"""
-        n = len(data)
-        t = np.arange(n)
+        """
+        === FOURIER SERIES SEASONALITY EXTRACTION ===
         
-        # Create Fourier basis functions
+        LEARNING OBJECTIVE: Frequency Domain Analysis
+        
+        CONCEPT: Decompose cyclical patterns using sine/cosine waves
+        
+        FOURIER SERIES FOUNDATION:
+        Any periodic function can be represented as:
+        f(t) = Σ [aₖcos(2πkt/T) + bₖsin(2πkt/T)]
+        
+        WHERE:
+        - T = period (24 months for COE bidding cycles)
+        - k = harmonic number (1st, 2nd, 3rd harmonic)
+        - aₖ, bₖ = coefficients fitted to data
+        
+        WHY FOURIER ANALYSIS:
+        - Mathematically rigorous approach to seasonality
+        - Each harmonic captures different cycle lengths
+        - Coefficients show strength of each seasonal pattern
+        - Interpretable: can identify dominant cycles
+        
+        BUSINESS INTERPRETATION:
+        - 1st harmonic: Annual seasonality (12-month cycle)
+        - 2nd harmonic: Semi-annual patterns (6-month cycle)
+        - 3rd harmonic: Quarterly effects (4-month cycle)
+        """
+        n = len(data)
+        t = np.arange(n)  # Time points
+        
+        # Initialize seasonal component
         seasonal = np.zeros(n)
         
         # Use first few harmonics for interpretability
+        # More harmonics = more detail but less interpretable
         n_harmonics = min(3, period // 2)
         seasonal_coeffs = []
         
         for k in range(1, n_harmonics + 1):
+            # === CREATE BASIS FUNCTIONS ===
+            # Cosine and sine waves at frequency k
             cos_term = np.cos(2 * np.pi * k * t / period)
             sin_term = np.sin(2 * np.pi * k * t / period)
             
-            # Fit coefficients
+            # === FIT COEFFICIENTS ===
+            # Project data onto basis functions using dot product
             cos_coeff = np.dot(data, cos_term) / np.dot(cos_term, cos_term)
             sin_coeff = np.dot(data, sin_term) / np.dot(sin_term, sin_term)
             
+            # === RECONSTRUCT SEASONAL COMPONENT ===
             seasonal += cos_coeff * cos_term + sin_coeff * sin_term
             seasonal_coeffs.append((cos_coeff, sin_coeff))
         
