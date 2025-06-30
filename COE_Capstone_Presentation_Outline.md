@@ -130,7 +130,60 @@ trend = np.poly1d(coeffs)(future_time)
 
 ---
 
-### Slide 8: Fast Directional Forecaster - Algorithm Design (2 minutes)
+### Slide 8: Model Comparison - Pros and Cons Analysis (2 minutes)
+
+#### **N-BEATSx Model (Current Top Performer - 92.7% Accuracy)**
+
+**✅ PROS:**
+- **Highest Accuracy**: Superior performance with 92.7% directional accuracy
+- **Multivariate Analysis**: Incorporates external factors (quota, demand, seasonality)
+- **Market Fundamentals**: Captures supply-demand dynamics effectively
+- **Robust to Volatility**: Maintains performance during market turbulence
+- **Feature Engineering**: Advanced exogenous variable integration
+
+**❌ CONS:**
+- **Computational Complexity**: Highest resource requirements
+- **Data Dependency**: Requires comprehensive historical data
+- **Black Box Nature**: Less interpretable predictions
+- **Training Time**: Longer model fitting and validation cycles
+
+---
+
+#### **Interpretable N-BEATS Model (Second Place - 90.6% Accuracy)**
+
+**✅ PROS:**
+- **Full Transparency**: Clear trend and seasonal decomposition
+- **Regulatory Compliance**: Explainable predictions for stakeholders
+- **Component Analysis**: Separate trend, seasonal, and residual insights
+- **Mathematical Foundation**: Polynomial and Fourier basis interpretability
+- **Balanced Performance**: Good accuracy with clear reasoning
+
+**❌ CONS:**
+- **Moderate Accuracy**: Slightly lower performance than N-BEATSx
+- **Limited Complexity**: May miss subtle non-linear relationships
+- **Parameter Sensitivity**: Requires careful tuning for optimal results
+- **Feature Limitations**: Fewer external variables incorporated
+
+---
+
+#### **Fast Directional Forecaster (Third Place - 88.9% Accuracy)**
+
+**✅ PROS:**
+- **Lightning Speed**: Sub-second predictions and updates
+- **Low Resource Usage**: Minimal computational requirements
+- **Real-Time Ready**: Instant response for live applications
+- **Directional Strength**: Excellent at predicting price direction
+- **Simplicity**: Easy to understand and maintain
+
+**❌ CONS:**
+- **Lower Precision**: Reduced price accuracy compared to neural models
+- **Limited Features**: Simplified feature engineering approach
+- **Pattern Recognition**: May miss complex market patterns
+- **Volatility Sensitivity**: Less robust during extreme market conditions
+
+---
+
+### Slide 9: Fast Directional Forecaster - Technical Details (1.5 minutes)
 **Optimized Statistical Learning Pipeline**
 
 **Exponential Smoothing Implementation:**
@@ -148,19 +201,6 @@ Forecast = St + h·bt               # h-step ahead
 - Medium-term momentum: M₆ = (P(t) - P(t-6)) / P(t-6)
 - Momentum signal: Sign(0.6·M₃ + 0.4·M₆)
 
-**Volatility Correlation Algorithm:**
-```python
-# Rolling volatility correlation
-volatility = prices.rolling(3).std()
-correlation = np.corrcoef(volatility[:-1], volatility[1:])[0,1]
-stability_score = max(0, correlation)
-```
-
-**Directional Prediction Logic:**
-- Price change probability: P(↑) = sigmoid(momentum_score + trend_strength)
-- Confidence adjustment: prediction * stability_score
-- Threshold-based classification: direction = 1 if P(↑) > 0.55 else -1
-
 **Performance Optimization:**
 - Vectorized NumPy operations (10x speedup)
 - Pre-computed rolling statistics
@@ -168,7 +208,7 @@ stability_score = max(0, correlation)
 
 ---
 
-### Slide 9: Dynamic Ranking Algorithm (1.5 minutes)
+### Slide 10: Dynamic Ranking Algorithm (1.5 minutes)
 **Adaptive Model Selection Framework**
 
 **Ranking Metric Formulation:**
@@ -203,7 +243,7 @@ directional_accuracy = mean(direction_actual == direction_pred)
 
 ---
 
-### Slide 10: Validation Framework & Error Analysis (1.5 minutes)
+### Slide 11: Validation Framework & Error Analysis (1.5 minutes)
 **Comprehensive Model Validation**
 
 **Cross-Validation Strategy:**
@@ -239,7 +279,7 @@ total_error = bias² + variance + noise
 
 ---
 
-### Slide 11: Advanced Performance Analysis (1.5 minutes)
+### Slide 12: Advanced Performance Analysis (1.5 minutes)
 **Statistical Performance Evaluation**
 
 **Quantitative Results Matrix:**
@@ -269,7 +309,7 @@ Ensemble Average   | 10.8%   | 95.6%   | 0.081  | 1.52
 
 ---
 
-### Slide 12: Business Impact & Applications (1 minute)
+### Slide 13: Business Impact & Applications (1 minute)
 **Real-World Value Proposition**
 
 **For Vehicle Buyers:**
@@ -284,7 +324,7 @@ Ensemble Average   | 10.8%   | 95.6%   | 0.081  | 1.52
 
 ---
 
-### Slide 13: Technical Challenges & Algorithmic Solutions (1.5 minutes)
+### Slide 14: Technical Challenges & Algorithmic Solutions (1.5 minutes)
 **Advanced Problem-Solving Approaches**
 
 **Non-Stationarity Handling:**
@@ -318,7 +358,7 @@ def fast_exponential_smoothing(data, alpha):
 
 ---
 
-### Slide 14: Future Enhancements (1 minute)
+### Slide 15: Future Enhancements (1 minute)
 **Planned Improvements & Extensions**
 
 **Short-term Enhancements:**
@@ -333,7 +373,7 @@ def fast_exponential_smoothing(data, alpha):
 
 ---
 
-### Slide 15: Demonstration & Q&A (1 minute)
+### Slide 16: Demonstration & Q&A (1 minute)
 **Live Platform Demonstration**
 
 **Demo Flow:**
