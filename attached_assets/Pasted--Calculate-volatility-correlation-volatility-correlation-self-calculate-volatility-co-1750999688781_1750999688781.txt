@@ -1,0 +1,77 @@
+# Calculate volatility correlation
+            volatility_correlation = self.calculate_volatility_correlation(test_prices, price_predictions)
+            
+            self.performance_metrics[category] = {
+                'mae': mae,
+                'rmse': rmse,
+                'mape': mape,
+                'r2': r2,
+                'direction_accuracy': direction_accuracy,
+                'volatility_correlation': volatility_correlation,
+                'n_test_points': len(test_prices),
+                'has_direction_model': True,
+                'model_type': 'fast_directional'
+            }
+            
+        except Exception as e:
+            # Fallback metrics
+            self.performance_metrics[category] = {
+                'mae': np.std(prices) if len(prices) > 1 else 1000,
+                'rmse': np.std(prices) if len(prices) > 1 else 1000,
+                'mape': 15.0,
+                'r2': 0.0,
+                'direction_accuracy': 50.0,
+                'n_test_points': len(prices),
+                'has_direction_model': False,
+                'error': str(e)
+            }
+    
+    def predict(self, steps=3):
+        """Generate predictions for all categories"""
+        predictions = {}
+        
+        for category in self.categories:
+            if category not in self.models:
+                continue
+            
+            prices = self.models[category]['prices']
+            if len(prices) < 3:
+                continue
+            
+            # Generate forecasts
+            forecasts = []
+            current_prices = prices.copy()
+            
+            for step in range(steps):
+                # Base forecast using exponential smoothing
+                smoothed = self.exponential_smoothing(current_prices)
+                
+                # Trend component
+                if len(current_prices) >= 3:
+                    trend = (current_prices[-1] - current_prices[-3]) / 2
+                else:
+                    trend = 0
+                
+                # Direction adjustment
+                direction_prob = self.predict_direction_simple(current_prices)
+                direction_adjustment = 1.0
+                
+                if direction_prob > 0.6:  # Strong up signal
+                    direction_adjustment = 1.01 + (direction_prob - 0.6) * 0.05
+                elif direction_prob < 0.4:  # Strong down signal
+                    direction_adjustment = 0.99 - (0.4 - direction_prob) * 0.05
+                
+                # Combined forecast
+                forecast = (smoothed + trend * 0.3) * direction_adjustment
+                
+                # Apply volatility constraints
+                if len(current_prices) >= 6:
+                    recent_vol = np.std(current_prices[-6:])
+                    max_change = recent_vol * 1.5
+                    forecast = np.clip(forecast, 
+                                     current_prices[-1] - max_change,
+                                     current_prices[-1] + max_change)
+                
+                forecasts.append(forecast)
+                current_prices = np.append(current_prices, forecast)
+            

@@ -1,0 +1,78 @@
+def predict(self, steps=3):
+        """Generate predictions for all categories"""
+        predictions = {}
+        
+        for category in self.categories:
+            if category not in self.models:
+                continue
+            
+            prices = self.models[category]['prices']
+            if len(prices) < 3:
+                continue
+            
+            # Generate forecasts
+            forecasts = []
+            current_prices = prices.copy()
+            
+            for step in range(steps):
+                # Base forecast using exponential smoothing
+                smoothed = self.exponential_smoothing(current_prices)
+                
+                # Trend component
+                if len(current_prices) >= 3:
+                    trend = (current_prices[-1] - current_prices[-3]) / 2
+                else:
+                    trend = 0
+                
+                # Direction adjustment
+                direction_prob = self.predict_direction_simple(current_prices)
+                direction_adjustment = 1.0
+                
+                if direction_prob > 0.6:  # Strong up signal
+                    direction_adjustment = 1.01 + (direction_prob - 0.6) * 0.05
+                elif direction_prob < 0.4:  # Strong down signal
+                    direction_adjustment = 0.99 - (0.4 - direction_prob) * 0.05
+                
+                # Combined forecast
+                forecast = (smoothed + trend * 0.3) * direction_adjustment
+                
+                # Apply volatility constraints
+                if len(current_prices) >= 6:
+                    recent_vol = np.std(current_prices[-6:])
+                    max_change = recent_vol * 1.5
+                    forecast = np.clip(forecast, 
+                                     current_prices[-1] - max_change,
+                                     current_prices[-1] + max_change)
+                
+                forecasts.append(forecast)
+                current_prices = np.append(current_prices, forecast)
+            
+            # Calculate confidence intervals
+            if len(prices) >= 6:
+                volatility = np.std(prices[-6:])
+            else:
+                volatility = np.std(prices) if len(prices) > 1 else prices[-1] * 0.02
+            
+            lower_bounds = []
+            upper_bounds = []
+            
+            for i, forecast in enumerate(forecasts):
+                uncertainty = volatility * (1.1 + i * 0.2)
+                lower_bounds.append(forecast - uncertainty)
+                upper_bounds.append(forecast + uncertainty)
+            
+            predictions[category] = {
+                'mean': forecasts,
+                'lower': lower_bounds,
+                'upper': upper_bounds
+            }
+        
+        return predictions
+    
+    def get_performance_metrics(self, category):
+        """Get performance metrics for a category"""
+        return self.performance_metrics.get(category, {
+            'mae': 0, 'rmse': 0, 'mape': 0, 'r2': 0, 
+            'direction_accuracy': 0, 'n_test_points': 0,
+            'has_direction_model': False, 'model_type': 'fast_directional'
+        })

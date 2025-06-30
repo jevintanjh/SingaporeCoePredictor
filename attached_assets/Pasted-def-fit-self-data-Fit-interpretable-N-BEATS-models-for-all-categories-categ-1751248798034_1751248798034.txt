@@ -1,0 +1,63 @@
+def fit(self, data):
+        """Fit interpretable N-BEATS models for all categories"""
+        categories = data['vehicle_class'].unique()
+        
+        for category in categories:
+            try:
+                category_data = data[data['vehicle_class'] == category].copy()
+                category_data = category_data.sort_values('date')
+                
+                if len(category_data) < self.lookback_window + 10:
+                    continue
+                
+                # Store recent data for predictions
+                self.data_cache[category] = category_data.tail(self.lookback_window * 2)
+                
+                # Extract price series
+                prices = category_data['premium'].values
+                
+                # Scale the data
+                scaler = MinMaxScaler()
+                prices_scaled = scaler.fit_transform(prices.reshape(-1, 1)).flatten()
+                self.scalers[category] = scaler
+                
+                # Create sequences
+                X, y = self.create_sequences(prices_scaled)
+                
+                if len(X) < 10:
+                    continue
+                
+                # Split data for validation
+                split_idx = int(0.8 * len(X))
+                X_train, X_val = X[:split_idx], X[split_idx:]
+                y_train, y_val = y[:split_idx], y[split_idx:]
+                
+                # Train interpretable ensemble models
+                trend_model = Ridge(alpha=1.0, random_state=42)
+                seasonal_model = RandomForestRegressor(
+                    n_estimators=30, 
+                    max_depth=4, 
+                    random_state=42,
+                    n_jobs=1
+                )
+                residual_model = GradientBoostingRegressor(
+                    n_estimators=50,
+                    max_depth=3,
+                    learning_rate=0.1,
+                    random_state=42
+                )
+                
+                # Train models
+                trend_model.fit(X_train, y_train)
+                seasonal_model.fit(X_train, y_train)
+                residual_model.fit(X_train, y_train)
+                
+                # Store models
+                self.trend_models[category] = trend_model
+                self.seasonal_models[category] = seasonal_model
+                self.residual_models[category] = residual_model
+                self.models[category] = {
+                    'trend': trend_model,
+                    'seasonal': seasonal_model,
+                    'residual': residual_model
+                }

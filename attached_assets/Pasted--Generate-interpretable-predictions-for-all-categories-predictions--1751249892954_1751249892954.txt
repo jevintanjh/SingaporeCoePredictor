@@ -1,0 +1,49 @@
+ """Generate interpretable predictions for all categories"""
+        predictions = {}
+        
+        for category in self.models.keys():
+            try:
+                if category not in self.data_cache:
+                    continue
+                
+                # Get recent data for this category
+                category_data = self.data_cache[category]
+                recent_prices = category_data['premium'].tail(self.lookback_window).values
+                
+                if len(recent_prices) < self.lookback_window:
+                    continue
+                
+                scaler = self.scalers[category]
+                models = self.models[category]
+                
+                # Scale recent data
+                recent_scaled = scaler.transform(recent_prices.reshape(-1, 1)).flatten()
+                
+                # Generate multi-step predictions
+                forecasts = []
+                current_data = recent_scaled.copy()
+                
+                for step in range(steps):
+                    # Decompose current sequence
+                    if len(current_data) >= self.lookback_window:
+                        input_seq = current_data[-self.lookback_window:]
+                    else:
+                        input_seq = current_data
+                    
+                    decomp = self.decompose_time_series(input_seq)
+                    
+                    # Create feature vector
+                    features = np.concatenate([
+                        decomp['trend'][-6:],
+                        decomp['seasonal'][-6:],
+                        decomp['residual'][-6:],
+                        [np.mean(input_seq), np.std(input_seq), input_seq[-1]],
+                        decomp['trend_coeffs'],
+                    ])
+                    
+                    X_pred = features.reshape(1, -1)
+                    
+                    # Predict with each component
+                    trend_pred = models['trend'].predict(X_pred)[0]
+                    seasonal_pred = models['seasonal'].predict(X_pred)[0]
+                    residual_pred = models['residual'].predict(X_pred)[0]
