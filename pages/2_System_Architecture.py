@@ -89,13 +89,13 @@ def create_architecture_diagram():
             yanchor='middle'
         )
     
-    # Simplified data flow with larger numbered steps
+    # Simplified data flow with properly positioned steps
     flow_steps = [
-        {'text': '1', 'x': 1.8, 'y': 4, 'desc': 'User Input'},
-        {'text': '2', 'x': 3.2, 'y': 4, 'desc': 'Processing'},
+        {'text': '1', 'x': 2.5, 'y': 4.9, 'desc': 'User Input'},
+        {'text': '2', 'x': 4, 'y': 4.9, 'desc': 'Processing'},
         {'text': '3', 'x': 4, 'y': 3, 'desc': 'ML Models'},
         {'text': '4', 'x': 4, 'y': 2, 'desc': 'Data Access'},
-        {'text': '5', 'x': 6.2, 'y': 4, 'desc': 'Display Results'}
+        {'text': '5', 'x': 5.5, 'y': 4.9, 'desc': 'Results'}
     ]
     
     for step in flow_steps:
@@ -117,22 +117,22 @@ def create_architecture_diagram():
             yanchor='middle'
         )
         
-        # Add step description with larger font
+        # Add step description with larger font, positioned to avoid overlap
         fig.add_annotation(
-            x=step['x'], y=step['y']-0.35,
+            x=step['x'], y=step['y']-0.25,
             text=f"<b>{step['desc']}</b>",
             showarrow=False,
-            font=dict(size=12, color='#34495e'),
+            font=dict(size=11, color='#34495e'),
             xanchor='center'
         )
     
     fig.update_layout(
         title="<b>COE Prediction System Architecture</b><br><span style='font-size:14px'>Simple layered design with numbered data flow</span>",
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0, 7.5]),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[1, 5.2]),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[1, 5.5]),
         plot_bgcolor='white',
-        height=650,
-        margin=dict(l=120, r=20, t=80, b=20)
+        height=700,
+        margin=dict(l=120, r=20, t=80, b=30)
     )
     
     return fig
