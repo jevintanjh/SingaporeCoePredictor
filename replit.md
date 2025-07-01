@@ -4,12 +4,12 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 
 ## Recent Changes
 
-**Capstone Presentation (June 25, 2025)**:
-- Created comprehensive 15-minute presentation outline
-- Structured presentation following academic capstone standards
-- Detailed technical deep-dive sections for each model
-- Performance metrics and business impact analysis
-- Live demonstration guide for platform showcase
+**Educational Enhancement (July 1, 2025)**:
+- Created System Architecture documentation page with interactive diagrams
+- Added comprehensive Data Cleaning Process page with step-by-step pipeline documentation
+- Enhanced Testing & Validation page with model weaknesses and performance interpretation guides
+- Implemented educational benchmarks and scoring explanations for new learners
+- Added technical specifications, component relationships, and future enhancement plans
 
 **Class Presentation Features (July 1, 2025)**:
 - Created comprehensive Testing & Validation Results page for academic presentation
@@ -17,6 +17,13 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 - Implemented professional styling following academic standards
 - Separated validation page from main dashboard to reduce clutter
 - Enhanced model comparison with technical specifications and business impact analysis
+
+**Capstone Presentation (June 25, 2025)**:
+- Created comprehensive 15-minute presentation outline
+- Structured presentation following academic capstone standards
+- Detailed technical deep-dive sections for each model
+- Performance metrics and business impact analysis
+- Live demonstration guide for platform showcase
 
 **UI/UX Improvements (June 26, 2025)**:
 - Implemented professional loading screen with model showcase
