@@ -11,126 +11,199 @@ st.set_page_config(
 )
 
 def create_architecture_diagram():
-    """Create an interactive system architecture diagram"""
+    """Create a clean layered architecture diagram"""
     fig = go.Figure()
     
-    # Define components and their positions
-    components = {
-        # Frontend Layer
-        'Streamlit Dashboard': {'x': 1, 'y': 4, 'color': '#3498db', 'size': 20},
-        'Interactive Charts': {'x': 0.5, 'y': 3.5, 'color': '#3498db', 'size': 15},
-        'Model Tabs': {'x': 1.5, 'y': 3.5, 'color': '#3498db', 'size': 15},
-        
-        # Processing Layer
-        'Data Pipeline': {'x': 3, 'y': 4, 'color': '#e74c3c', 'size': 20},
-        'Model Manager': {'x': 3, 'y': 3, 'color': '#e74c3c', 'size': 18},
-        
-        # ML Models Layer
-        'N-BEATSx': {'x': 5, 'y': 4.5, 'color': '#2ecc71', 'size': 18},
-        'Interpretable N-BEATS': {'x': 5, 'y': 3.5, 'color': '#2ecc71', 'size': 18},
-        'Fast Directional': {'x': 5, 'y': 2.5, 'color': '#2ecc71', 'size': 18},
-        
-        # Data Layer
-        'Government API': {'x': 7, 'y': 4, 'color': '#9b59b6', 'size': 18},
-        'CSV Storage': {'x': 7, 'y': 3, 'color': '#9b59b6', 'size': 15},
-        'Model Ranker': {'x': 7, 'y': 2, 'color': '#9b59b6', 'size': 15},
-    }
-    
-    # Add nodes
-    for name, props in components.items():
-        fig.add_trace(go.Scatter(
-            x=[props['x']], y=[props['y']],
-            mode='markers+text',
-            marker=dict(size=props['size'], color=props['color']),
-            text=[name],
-            textposition="middle center",
-            textfont=dict(size=10, color='white'),
-            name=name,
-            showlegend=False
-        ))
-    
-    # Add connections
-    connections = [
-        ('Streamlit Dashboard', 'Data Pipeline'),
-        ('Data Pipeline', 'Model Manager'),
-        ('Model Manager', 'N-BEATSx'),
-        ('Model Manager', 'Interpretable N-BEATS'),
-        ('Model Manager', 'Fast Directional'),
-        ('Data Pipeline', 'Government API'),
-        ('Data Pipeline', 'CSV Storage'),
-        ('Model Manager', 'Model Ranker'),
+    # Layer positions and styling
+    layers = [
+        {'name': 'Frontend Layer', 'y': 4.5, 'color': '#3498db'},
+        {'name': 'Processing Layer', 'y': 3.5, 'color': '#e74c3c'},
+        {'name': 'Models Layer', 'y': 2.5, 'color': '#2ecc71'},
+        {'name': 'Data Layer', 'y': 1.5, 'color': '#9b59b6'}
     ]
     
-    for start, end in connections:
-        start_pos = components[start]
-        end_pos = components[end]
-        fig.add_trace(go.Scatter(
-            x=[start_pos['x'], end_pos['x']],
-            y=[start_pos['y'], end_pos['y']],
-            mode='lines',
-            line=dict(color='gray', width=2),
-            showlegend=False,
-            hoverinfo='none'
-        ))
+    # Add layer backgrounds
+    for layer in layers:
+        fig.add_shape(
+            type="rect",
+            x0=0.5, x1=7.5,
+            y0=layer['y']-0.4, y1=layer['y']+0.4,
+            fillcolor=layer['color'],
+            opacity=0.1,
+            line=dict(color=layer['color'], width=2)
+        )
+        
+        # Add layer labels
+        fig.add_annotation(
+            x=0.2, y=layer['y'],
+            text=f"<b>{layer['name']}</b>",
+            showarrow=False,
+            font=dict(size=14, color=layer['color']),
+            textangle=-90
+        )
+    
+    # Define components with cleaner positioning
+    components = [
+        # Frontend Layer
+        {'name': 'Streamlit\nDashboard', 'x': 2, 'y': 4.5, 'color': '#3498db'},
+        {'name': 'Interactive\nCharts', 'x': 4, 'y': 4.5, 'color': '#3498db'},
+        {'name': 'Model\nTabs', 'x': 6, 'y': 4.5, 'color': '#3498db'},
+        
+        # Processing Layer
+        {'name': 'Data\nPipeline', 'x': 2.5, 'y': 3.5, 'color': '#e74c3c'},
+        {'name': 'Model\nManager', 'x': 4.5, 'y': 3.5, 'color': '#e74c3c'},
+        {'name': 'Performance\nRanker', 'x': 6, 'y': 3.5, 'color': '#e74c3c'},
+        
+        # Models Layer
+        {'name': 'N-BEATSx', 'x': 2, 'y': 2.5, 'color': '#2ecc71'},
+        {'name': 'Interpretable\nN-BEATS', 'x': 4, 'y': 2.5, 'color': '#2ecc71'},
+        {'name': 'Fast\nDirectional', 'x': 6, 'y': 2.5, 'color': '#2ecc71'},
+        
+        # Data Layer
+        {'name': 'Government\nAPI', 'x': 2, 'y': 1.5, 'color': '#9b59b6'},
+        {'name': 'CSV\nStorage', 'x': 4, 'y': 1.5, 'color': '#9b59b6'},
+        {'name': 'Scheduler\nService', 'x': 6, 'y': 1.5, 'color': '#9b59b6'},
+    ]
+    
+    # Add component boxes
+    for comp in components:
+        fig.add_shape(
+            type="rect",
+            x0=comp['x']-0.4, x1=comp['x']+0.4,
+            y0=comp['y']-0.15, y1=comp['y']+0.15,
+            fillcolor=comp['color'],
+            opacity=0.8,
+            line=dict(color=comp['color'], width=1)
+        )
+        
+        fig.add_annotation(
+            x=comp['x'], y=comp['y'],
+            text=f"<b>{comp['name']}</b>",
+            showarrow=False,
+            font=dict(size=10, color='white'),
+        )
+    
+    # Add clean arrows showing data flow
+    arrows = [
+        # Frontend to Processing
+        {'start': (2, 4.35), 'end': (2.5, 3.65)},
+        {'start': (4, 4.35), 'end': (4.5, 3.65)},
+        {'start': (6, 4.35), 'end': (6, 3.65)},
+        
+        # Processing to Models
+        {'start': (2.5, 3.35), 'end': (2, 2.65)},
+        {'start': (4.5, 3.35), 'end': (4, 2.65)},
+        {'start': (4.5, 3.35), 'end': (6, 2.65)},
+        
+        # Processing to Data
+        {'start': (2.5, 3.35), 'end': (2, 1.65)},
+        {'start': (4.5, 3.35), 'end': (4, 1.65)},
+        {'start': (6, 3.35), 'end': (6, 1.65)},
+    ]
+    
+    for arrow in arrows:
+        fig.add_annotation(
+            x=arrow['end'][0], y=arrow['end'][1],
+            ax=arrow['start'][0], ay=arrow['start'][1],
+            xref='x', yref='y',
+            axref='x', ayref='y',
+            arrowhead=2, arrowsize=1, arrowwidth=1.5,
+            arrowcolor='#34495e'
+        )
     
     fig.update_layout(
-        title="COE Prediction System Architecture",
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        title="<b>COE Prediction System - Layered Architecture</b>",
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0, 8]),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[1, 5]),
         plot_bgcolor='white',
-        height=500,
-        margin=dict(l=20, r=20, t=50, b=20)
+        height=600,
+        margin=dict(l=80, r=20, t=50, b=20)
     )
     
     return fig
 
 def create_data_flow_diagram():
-    """Create data flow visualization"""
+    """Create a clean horizontal data flow visualization"""
     fig = go.Figure()
     
-    # Data flow stages
-    stages = {
-        'Raw Data': {'x': 1, 'y': 3, 'color': '#e74c3c'},
-        'Data Cleaning': {'x': 2, 'y': 3, 'color': '#f39c12'},
-        'Feature Engineering': {'x': 3, 'y': 3, 'color': '#f1c40f'},
-        'Model Training': {'x': 4, 'y': 3, 'color': '#27ae60'},
-        'Predictions': {'x': 5, 'y': 3, 'color': '#3498db'},
-        'Dashboard': {'x': 6, 'y': 3, 'color': '#9b59b6'}
-    }
+    # Data flow stages with better spacing
+    stages = [
+        {'name': 'Raw Data\nIngestion', 'x': 1, 'color': '#e74c3c', 'icon': '📥'},
+        {'name': 'Data\nCleaning', 'x': 2.5, 'color': '#f39c12', 'icon': '🧹'},
+        {'name': 'Feature\nEngineering', 'x': 4, 'color': '#f1c40f', 'icon': '⚙️'},
+        {'name': 'Model\nTraining', 'x': 5.5, 'color': '#27ae60', 'icon': '🧠'},
+        {'name': 'Prediction\nGeneration', 'x': 7, 'color': '#3498db', 'icon': '🔮'},
+        {'name': 'Dashboard\nDisplay', 'x': 8.5, 'color': '#9b59b6', 'icon': '📊'}
+    ]
     
-    # Add flow stages
-    for stage, props in stages.items():
-        fig.add_trace(go.Scatter(
-            x=[props['x']], y=[props['y']],
-            mode='markers+text',
-            marker=dict(size=30, color=props['color']),
-            text=[stage],
-            textposition="middle center",
-            textfont=dict(size=9, color='white'),
-            showlegend=False
-        ))
+    # Add stage boxes with icons
+    for stage in stages:
+        # Add rounded rectangle background
+        fig.add_shape(
+            type="rect",
+            x0=stage['x']-0.4, x1=stage['x']+0.4,
+            y0=2.7, y1=3.3,
+            fillcolor=stage['color'],
+            opacity=0.8,
+            line=dict(color=stage['color'], width=2),
+            layer="below"
+        )
+        
+        # Add icon at top
+        fig.add_annotation(
+            x=stage['x'], y=3.45,
+            text=stage['icon'],
+            showarrow=False,
+            font=dict(size=20)
+        )
+        
+        # Add stage name
+        fig.add_annotation(
+            x=stage['x'], y=3,
+            text=f"<b>{stage['name']}</b>",
+            showarrow=False,
+            font=dict(size=10, color='white')
+        )
     
-    # Add arrows
+    # Add flow arrows between stages
     for i in range(len(stages) - 1):
-        stage_names = list(stages.keys())
-        start = stages[stage_names[i]]
-        end = stages[stage_names[i + 1]]
+        start_x = stages[i]['x'] + 0.4
+        end_x = stages[i + 1]['x'] - 0.4
         
         fig.add_annotation(
-            x=end['x'], y=end['y'],
-            ax=start['x'], ay=start['y'],
+            x=end_x, y=3,
+            ax=start_x, ay=3,
             xref='x', yref='y',
             axref='x', ayref='y',
-            arrowhead=2, arrowsize=1, arrowwidth=2,
-            arrowcolor='black'
+            arrowhead=2, arrowsize=1.5, arrowwidth=3,
+            arrowcolor='#34495e'
+        )
+    
+    # Add process descriptions below
+    descriptions = [
+        "Singapore Gov API\n2,600 records",
+        "Remove duplicates\nHandle missing values", 
+        "Create indicators\nTime features",
+        "3 ML models\nValidation testing",
+        "Price forecasts\nDirectional signals",
+        "Interactive charts\nReal-time updates"
+    ]
+    
+    for i, desc in enumerate(descriptions):
+        fig.add_annotation(
+            x=stages[i]['x'], y=2.4,
+            text=desc,
+            showarrow=False,
+            font=dict(size=9, color='#7f8c8d'),
+            align='center'
         )
     
     fig.update_layout(
-        title="Data Processing Flow",
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0.5, 6.5]),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[2.5, 3.5]),
+        title="<b>Data Processing Pipeline - End-to-End Flow</b>",
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0.3, 9.2]),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[2.2, 3.7]),
         plot_bgcolor='white',
-        height=300,
+        height=350,
         margin=dict(l=20, r=20, t=50, b=20)
     )
     

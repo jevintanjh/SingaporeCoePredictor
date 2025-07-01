@@ -12,35 +12,94 @@ st.set_page_config(
 )
 
 def create_cleaning_pipeline_chart():
-    """Create a data cleaning pipeline visualization"""
+    """Create a clean data pipeline funnel visualization"""
     fig = go.Figure()
     
-    # Pipeline stages
+    # Pipeline stages with better descriptions
     stages = [
-        "Raw Data", "Remove Duplicates", "Handle Missing Values", 
-        "Standardize Categories", "Convert Data Types", "Validate Ranges", "Clean Output"
+        "Raw Data\nIngestion",
+        "Duplicate\nRemoval", 
+        "Missing Value\nHandling",
+        "Category\nStandardization",
+        "Data Type\nConversion",
+        "Range\nValidation",
+        "Final Clean\nDataset"
     ]
     
-    # Sample data showing reduction at each stage
+    # Record counts showing data quality improvement
     record_counts = [2600, 2580, 2575, 2574, 2574, 2574, 2574]
     
-    colors = ['#e74c3c', '#f39c12', '#f1c40f', '#27ae60', '#3498db', '#9b59b6', '#2ecc71']
+    # Colors representing data quality (red to green)
+    colors = ['#e74c3c', '#e67e22', '#f39c12', '#f1c40f', '#27ae60', '#2ecc71', '#16a085']
     
-    fig.add_trace(go.Bar(
-        x=stages,
-        y=record_counts,
-        marker_color=colors,
-        text=[f"{count:,}" for count in record_counts],
-        textposition='auto',
-        name='Records Count'
-    ))
+    # Create funnel-style visualization
+    for i, (stage, count, color) in enumerate(zip(stages, record_counts, colors)):
+        # Calculate width for funnel effect
+        width = 0.8 + (count - min(record_counts)) / (max(record_counts) - min(record_counts)) * 0.4
+        
+        # Add bar with custom width
+        fig.add_trace(go.Bar(
+            x=[stage],
+            y=[count],
+            width=[width],
+            marker_color=color,
+            marker_line=dict(color='white', width=2),
+            text=[f"<b>{count:,}</b><br>records"],
+            textposition='auto',
+            textfont=dict(color='white', size=11),
+            showlegend=False,
+            hovertemplate=f"<b>{stage}</b><br>Records: {count:,}<br>Quality Score: {(count/2600)*100:.1f}%<extra></extra>"
+        ))
+    
+    # Add quality improvement annotations
+    improvements = [
+        "", "-20 duplicates", "-5 incomplete", "-1 invalid", "Types fixed", "Ranges checked", "✅ Clean"
+    ]
+    
+    for i, improvement in enumerate(improvements):
+        if improvement:
+            fig.add_annotation(
+                x=i, y=record_counts[i] + 50,
+                text=improvement,
+                showarrow=True,
+                arrowhead=2,
+                arrowsize=1,
+                arrowcolor=colors[i],
+                font=dict(size=10, color=colors[i])
+            )
     
     fig.update_layout(
-        title="Data Cleaning Pipeline - Record Count at Each Stage",
-        xaxis_title="Cleaning Stage",
-        yaxis_title="Number of Records",
-        height=400,
-        xaxis_tickangle=-45
+        title="<b>Data Cleaning Pipeline - Quality Improvement Journey</b>",
+        xaxis_title="<b>Cleaning Stage</b>",
+        yaxis_title="<b>Number of Records</b>",
+        height=500,
+        xaxis=dict(tickangle=-20),
+        yaxis=dict(range=[2550, 2650]),
+        plot_bgcolor='white',
+        margin=dict(l=60, r=60, t=80, b=100)
+    )
+    
+    # Add quality score line
+    quality_scores = [(count/2600)*100 for count in record_counts]
+    fig.add_trace(go.Scatter(
+        x=stages,
+        y=[score * 26 + 2550 for score in quality_scores],  # Scale to fit chart
+        mode='lines+markers',
+        name='Quality Score (%)',
+        line=dict(color='#34495e', width=3, dash='dot'),
+        marker=dict(size=8, color='#34495e'),
+        yaxis='y2',
+        showlegend=True
+    ))
+    
+    # Add secondary y-axis for quality score
+    fig.update_layout(
+        yaxis2=dict(
+            overlaying='y',
+            side='right',
+            title='<b>Data Quality Score (%)</b>',
+            range=[98, 101]
+        )
     )
     
     return fig
