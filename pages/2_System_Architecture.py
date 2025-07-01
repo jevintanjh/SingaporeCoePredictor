@@ -33,74 +33,77 @@ def create_architecture_diagram():
             line=dict(color=layer['color'], width=3)
         )
         
-        # Add layer title on the left
+        # Add layer title on the left with better positioning
         fig.add_annotation(
             x=0.5, y=layer['y'],
             text=f"<b>{layer['name']}</b>",
             showarrow=False,
-            font=dict(size=16, color=layer['color']),
+            font=dict(size=18, color=layer['color']),
             textangle=0,
-            xanchor='center'
+            xanchor='center',
+            yanchor='middle'
         )
     
-    # Define components with better spacing and readability
+    # Define components with better spacing and larger boxes
     components = [
         # Frontend Layer
-        {'name': 'Dashboard<br>Interface', 'x': 2.5, 'y': 4.5, 'color': '#2980b9'},
-        {'name': 'Interactive<br>Charts', 'x': 4, 'y': 4.5, 'color': '#2980b9'},
-        {'name': 'Model<br>Comparison', 'x': 5.5, 'y': 4.5, 'color': '#2980b9'},
+        {'name': 'Dashboard Interface', 'x': 2.5, 'y': 4.5, 'color': '#2980b9'},
+        {'name': 'Interactive Charts', 'x': 4, 'y': 4.5, 'color': '#2980b9'},
+        {'name': 'Model Comparison', 'x': 5.5, 'y': 4.5, 'color': '#2980b9'},
         
         # Processing Layer
-        {'name': 'Data<br>Pipeline', 'x': 2.5, 'y': 3.5, 'color': '#c0392b'},
-        {'name': 'Model<br>Manager', 'x': 4, 'y': 3.5, 'color': '#c0392b'},
-        {'name': 'Performance<br>Ranking', 'x': 5.5, 'y': 3.5, 'color': '#c0392b'},
+        {'name': 'Data Pipeline', 'x': 2.5, 'y': 3.5, 'color': '#c0392b'},
+        {'name': 'Model Manager', 'x': 4, 'y': 3.5, 'color': '#c0392b'},
+        {'name': 'Performance Ranking', 'x': 5.5, 'y': 3.5, 'color': '#c0392b'},
         
         # Models Layer
-        {'name': 'N-BEATSx<br>Model', 'x': 2.5, 'y': 2.5, 'color': '#27ae60'},
-        {'name': 'Interpretable<br>N-BEATS', 'x': 4, 'y': 2.5, 'color': '#27ae60'},
-        {'name': 'Fast Directional<br>Forecaster', 'x': 5.5, 'y': 2.5, 'color': '#27ae60'},
+        {'name': 'N-BEATSx Model', 'x': 2.5, 'y': 2.5, 'color': '#27ae60'},
+        {'name': 'Interpretable N-BEATS', 'x': 4, 'y': 2.5, 'color': '#27ae60'},
+        {'name': 'Fast Directional', 'x': 5.5, 'y': 2.5, 'color': '#27ae60'},
         
         # Data Layer
-        {'name': 'Government<br>API', 'x': 2.5, 'y': 1.5, 'color': '#8e44ad'},
-        {'name': 'CSV Data<br>Storage', 'x': 4, 'y': 1.5, 'color': '#8e44ad'},
-        {'name': 'Update<br>Scheduler', 'x': 5.5, 'y': 1.5, 'color': '#8e44ad'},
+        {'name': 'Government API', 'x': 2.5, 'y': 1.5, 'color': '#8e44ad'},
+        {'name': 'CSV Storage', 'x': 4, 'y': 1.5, 'color': '#8e44ad'},
+        {'name': 'Update Scheduler', 'x': 5.5, 'y': 1.5, 'color': '#8e44ad'},
     ]
     
-    # Add component boxes with better text contrast
+    # Add component boxes with better sizing and alignment
     for comp in components:
-        # Add white background box for better text readability
+        # Add larger white background box for better text readability
         fig.add_shape(
             type="rect",
-            x0=comp['x']-0.5, x1=comp['x']+0.5,
-            y0=comp['y']-0.2, y1=comp['y']+0.2,
+            x0=comp['x']-0.6, x1=comp['x']+0.6,
+            y0=comp['y']-0.15, y1=comp['y']+0.15,
             fillcolor='white',
             opacity=0.95,
             line=dict(color=comp['color'], width=3)
         )
         
-        # Add component text with dark color for readability
+        # Add component text with larger font and proper centering
         fig.add_annotation(
             x=comp['x'], y=comp['y'],
             text=f"<b>{comp['name']}</b>",
             showarrow=False,
-            font=dict(size=12, color='#2c3e50'),
+            font=dict(size=14, color='#2c3e50'),
+            xanchor='center',
+            yanchor='middle'
         )
     
-    # Simplified data flow with numbered steps and clear direction
+    # Simplified data flow with larger numbered steps
     flow_steps = [
-        {'text': '1', 'x': 1.2, 'y': 4, 'desc': 'User Input'},
-        {'text': '2', 'x': 3.2, 'y': 4, 'desc': 'Data Processing'},
-        {'text': '3', 'x': 4, 'y': 3, 'desc': 'Model Training'},
+        {'text': '1', 'x': 1.8, 'y': 4, 'desc': 'User Input'},
+        {'text': '2', 'x': 3.2, 'y': 4, 'desc': 'Processing'},
+        {'text': '3', 'x': 4, 'y': 3, 'desc': 'ML Models'},
         {'text': '4', 'x': 4, 'y': 2, 'desc': 'Data Access'},
-        {'text': '5', 'x': 6.2, 'y': 4, 'desc': 'Results Display'}
+        {'text': '5', 'x': 6.2, 'y': 4, 'desc': 'Display Results'}
     ]
     
     for step in flow_steps:
-        # Add numbered circles for flow
+        # Add larger numbered circles for better visibility
         fig.add_shape(
             type="circle",
-            x0=step['x']-0.15, x1=step['x']+0.15,
-            y0=step['y']-0.1, y1=step['y']+0.1,
+            x0=step['x']-0.2, x1=step['x']+0.2,
+            y0=step['y']-0.12, y1=step['y']+0.12,
             fillcolor='#34495e',
             line=dict(color='#34495e', width=2)
         )
@@ -109,15 +112,18 @@ def create_architecture_diagram():
             x=step['x'], y=step['y'],
             text=f"<b>{step['text']}</b>",
             showarrow=False,
-            font=dict(size=12, color='white')
+            font=dict(size=16, color='white'),
+            xanchor='center',
+            yanchor='middle'
         )
         
-        # Add step description
+        # Add step description with larger font
         fig.add_annotation(
-            x=step['x'], y=step['y']-0.3,
-            text=step['desc'],
+            x=step['x'], y=step['y']-0.35,
+            text=f"<b>{step['desc']}</b>",
             showarrow=False,
-            font=dict(size=10, color='#7f8c8d')
+            font=dict(size=12, color='#34495e'),
+            xanchor='center'
         )
     
     fig.update_layout(
