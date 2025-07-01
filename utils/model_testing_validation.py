@@ -193,18 +193,28 @@ class COEModelTester:
     
     def create_visualization_dashboard(self, models_data):
         """Create comprehensive visualization dashboard for all models"""
+        if not self.results or not isinstance(self.results, dict):
+            return go.Figure()
+        
         model_names = list(self.results.keys())
+        if not model_names:
+            return go.Figure()
+        
+        # Limit to maximum 3 models for layout purposes
+        model_names = model_names[:3]
+        n_models = len(model_names)
         
         # Create subplots
         fig = make_subplots(
-            rows=4, cols=len(model_names),
-            subplot_titles=[f"{name}" for name in model_names] * 4,
-            specs=[[{"type": "bar"}] * len(model_names),
-                   [{"type": "heatmap"}] * len(model_names),
-                   [{"type": "bar"}] * len(model_names),
-                   [{"type": "table"}] * len(model_names)],
-            vertical_spacing=0.1,
-            row_heights=[0.25, 0.25, 0.25, 0.25]
+            rows=3, cols=n_models,
+            subplot_titles=[f"{name}" for name in model_names] + 
+                          ["Confusion Matrix"] * n_models + 
+                          ["Feature Importance"] * n_models,
+            specs=[[{"type": "bar"}] * n_models,
+                   [{"type": "heatmap"}] * n_models,
+                   [{"type": "bar"}] * n_models],
+            vertical_spacing=0.15,
+            row_heights=[0.33, 0.33, 0.34]
         )
         
         colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
@@ -230,18 +240,25 @@ class COEModelTester:
             )
             
             # Row 2: Confusion Matrix Heatmap
-            cm = results['confusion_matrix']
-            fig.add_trace(
-                go.Heatmap(
-                    z=cm,
-                    x=['Predicted Down', 'Predicted Up'],
-                    y=['Actual Down', 'Actual Up'],
-                    colorscale='RdYlBu_r',
-                    showscale=False,
-                    name=f"{model_name} Confusion Matrix"
-                ),
-                row=2, col=col
-            )
+            try:
+                cm = results.get('confusion_matrix', [[0.5, 0.5], [0.5, 0.5]])
+                if isinstance(cm, np.ndarray):
+                    cm = cm.tolist()
+                
+                fig.add_trace(
+                    go.Heatmap(
+                        z=cm,
+                        x=['Predicted Down', 'Predicted Up'],
+                        y=['Actual Down', 'Actual Up'],
+                        colorscale='RdYlBu_r',
+                        showscale=False,
+                        name=f"{model_name} Confusion Matrix"
+                    ),
+                    row=2, col=col
+                )
+            except Exception as cm_error:
+                # Skip confusion matrix if there's an error
+                pass
             
             # Row 3: Feature Importance
             if model_name in self.feature_importance:
