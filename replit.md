@@ -11,6 +11,13 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 - Performance metrics and business impact analysis
 - Live demonstration guide for platform showcase
 
+**Class Presentation Features (July 1, 2025)**:
+- Created comprehensive Testing & Validation Results page for academic presentation
+- Added detailed performance metrics, confusion matrices, and feature importance charts
+- Implemented professional styling following academic standards
+- Separated validation page from main dashboard to reduce clutter
+- Enhanced model comparison with technical specifications and business impact analysis
+
 **UI/UX Improvements (June 26, 2025)**:
 - Implemented professional loading screen with model showcase
 - Added keep-alive service to prevent Streamlit sleeping issues
