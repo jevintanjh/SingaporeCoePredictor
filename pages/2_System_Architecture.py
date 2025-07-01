@@ -11,113 +11,122 @@ st.set_page_config(
 )
 
 def create_architecture_diagram():
-    """Create a clean layered architecture diagram"""
+    """Create a simple, readable layered architecture diagram"""
     fig = go.Figure()
     
-    # Layer positions and styling
+    # Layer definitions with clear colors
     layers = [
-        {'name': 'Frontend Layer', 'y': 4.5, 'color': '#3498db'},
-        {'name': 'Processing Layer', 'y': 3.5, 'color': '#e74c3c'},
-        {'name': 'Models Layer', 'y': 2.5, 'color': '#2ecc71'},
-        {'name': 'Data Layer', 'y': 1.5, 'color': '#9b59b6'}
+        {'name': 'Frontend Layer', 'y': 4.5, 'color': '#2980b9', 'bg_color': '#ebf3fd'},
+        {'name': 'Processing Layer', 'y': 3.5, 'color': '#c0392b', 'bg_color': '#fadbd8'},
+        {'name': 'ML Models Layer', 'y': 2.5, 'color': '#27ae60', 'bg_color': '#d5f4e6'},
+        {'name': 'Data Layer', 'y': 1.5, 'color': '#8e44ad', 'bg_color': '#f4ecf7'}
     ]
     
-    # Add layer backgrounds
+    # Add layer backgrounds with better contrast
     for layer in layers:
         fig.add_shape(
             type="rect",
-            x0=0.5, x1=7.5,
-            y0=layer['y']-0.4, y1=layer['y']+0.4,
-            fillcolor=layer['color'],
-            opacity=0.1,
-            line=dict(color=layer['color'], width=2)
+            x0=1, x1=7,
+            y0=layer['y']-0.35, y1=layer['y']+0.35,
+            fillcolor=layer['bg_color'],
+            opacity=0.8,
+            line=dict(color=layer['color'], width=3)
         )
         
-        # Add layer labels
+        # Add layer title on the left
         fig.add_annotation(
-            x=0.2, y=layer['y'],
+            x=0.5, y=layer['y'],
             text=f"<b>{layer['name']}</b>",
             showarrow=False,
-            font=dict(size=14, color=layer['color']),
-            textangle=-90
+            font=dict(size=16, color=layer['color']),
+            textangle=0,
+            xanchor='center'
         )
     
-    # Define components with cleaner positioning
+    # Define components with better spacing and readability
     components = [
         # Frontend Layer
-        {'name': 'Streamlit\nDashboard', 'x': 2, 'y': 4.5, 'color': '#3498db'},
-        {'name': 'Interactive\nCharts', 'x': 4, 'y': 4.5, 'color': '#3498db'},
-        {'name': 'Model\nTabs', 'x': 6, 'y': 4.5, 'color': '#3498db'},
+        {'name': 'Dashboard<br>Interface', 'x': 2.5, 'y': 4.5, 'color': '#2980b9'},
+        {'name': 'Interactive<br>Charts', 'x': 4, 'y': 4.5, 'color': '#2980b9'},
+        {'name': 'Model<br>Comparison', 'x': 5.5, 'y': 4.5, 'color': '#2980b9'},
         
         # Processing Layer
-        {'name': 'Data\nPipeline', 'x': 2.5, 'y': 3.5, 'color': '#e74c3c'},
-        {'name': 'Model\nManager', 'x': 4.5, 'y': 3.5, 'color': '#e74c3c'},
-        {'name': 'Performance\nRanker', 'x': 6, 'y': 3.5, 'color': '#e74c3c'},
+        {'name': 'Data<br>Pipeline', 'x': 2.5, 'y': 3.5, 'color': '#c0392b'},
+        {'name': 'Model<br>Manager', 'x': 4, 'y': 3.5, 'color': '#c0392b'},
+        {'name': 'Performance<br>Ranking', 'x': 5.5, 'y': 3.5, 'color': '#c0392b'},
         
         # Models Layer
-        {'name': 'N-BEATSx', 'x': 2, 'y': 2.5, 'color': '#2ecc71'},
-        {'name': 'Interpretable\nN-BEATS', 'x': 4, 'y': 2.5, 'color': '#2ecc71'},
-        {'name': 'Fast\nDirectional', 'x': 6, 'y': 2.5, 'color': '#2ecc71'},
+        {'name': 'N-BEATSx<br>Model', 'x': 2.5, 'y': 2.5, 'color': '#27ae60'},
+        {'name': 'Interpretable<br>N-BEATS', 'x': 4, 'y': 2.5, 'color': '#27ae60'},
+        {'name': 'Fast Directional<br>Forecaster', 'x': 5.5, 'y': 2.5, 'color': '#27ae60'},
         
         # Data Layer
-        {'name': 'Government\nAPI', 'x': 2, 'y': 1.5, 'color': '#9b59b6'},
-        {'name': 'CSV\nStorage', 'x': 4, 'y': 1.5, 'color': '#9b59b6'},
-        {'name': 'Scheduler\nService', 'x': 6, 'y': 1.5, 'color': '#9b59b6'},
+        {'name': 'Government<br>API', 'x': 2.5, 'y': 1.5, 'color': '#8e44ad'},
+        {'name': 'CSV Data<br>Storage', 'x': 4, 'y': 1.5, 'color': '#8e44ad'},
+        {'name': 'Update<br>Scheduler', 'x': 5.5, 'y': 1.5, 'color': '#8e44ad'},
     ]
     
-    # Add component boxes
+    # Add component boxes with better text contrast
     for comp in components:
+        # Add white background box for better text readability
         fig.add_shape(
             type="rect",
-            x0=comp['x']-0.4, x1=comp['x']+0.4,
-            y0=comp['y']-0.15, y1=comp['y']+0.15,
-            fillcolor=comp['color'],
-            opacity=0.8,
-            line=dict(color=comp['color'], width=1)
+            x0=comp['x']-0.5, x1=comp['x']+0.5,
+            y0=comp['y']-0.2, y1=comp['y']+0.2,
+            fillcolor='white',
+            opacity=0.95,
+            line=dict(color=comp['color'], width=3)
         )
         
+        # Add component text with dark color for readability
         fig.add_annotation(
             x=comp['x'], y=comp['y'],
             text=f"<b>{comp['name']}</b>",
             showarrow=False,
-            font=dict(size=10, color='white'),
+            font=dict(size=12, color='#2c3e50'),
         )
     
-    # Add clean arrows showing data flow
-    arrows = [
-        # Frontend to Processing
-        {'start': (2, 4.35), 'end': (2.5, 3.65)},
-        {'start': (4, 4.35), 'end': (4.5, 3.65)},
-        {'start': (6, 4.35), 'end': (6, 3.65)},
-        
-        # Processing to Models
-        {'start': (2.5, 3.35), 'end': (2, 2.65)},
-        {'start': (4.5, 3.35), 'end': (4, 2.65)},
-        {'start': (4.5, 3.35), 'end': (6, 2.65)},
-        
-        # Processing to Data
-        {'start': (2.5, 3.35), 'end': (2, 1.65)},
-        {'start': (4.5, 3.35), 'end': (4, 1.65)},
-        {'start': (6, 3.35), 'end': (6, 1.65)},
+    # Simplified data flow with numbered steps and clear direction
+    flow_steps = [
+        {'text': '1', 'x': 1.2, 'y': 4, 'desc': 'User Input'},
+        {'text': '2', 'x': 3.2, 'y': 4, 'desc': 'Data Processing'},
+        {'text': '3', 'x': 4, 'y': 3, 'desc': 'Model Training'},
+        {'text': '4', 'x': 4, 'y': 2, 'desc': 'Data Access'},
+        {'text': '5', 'x': 6.2, 'y': 4, 'desc': 'Results Display'}
     ]
     
-    for arrow in arrows:
+    for step in flow_steps:
+        # Add numbered circles for flow
+        fig.add_shape(
+            type="circle",
+            x0=step['x']-0.15, x1=step['x']+0.15,
+            y0=step['y']-0.1, y1=step['y']+0.1,
+            fillcolor='#34495e',
+            line=dict(color='#34495e', width=2)
+        )
+        
         fig.add_annotation(
-            x=arrow['end'][0], y=arrow['end'][1],
-            ax=arrow['start'][0], ay=arrow['start'][1],
-            xref='x', yref='y',
-            axref='x', ayref='y',
-            arrowhead=2, arrowsize=1, arrowwidth=1.5,
-            arrowcolor='#34495e'
+            x=step['x'], y=step['y'],
+            text=f"<b>{step['text']}</b>",
+            showarrow=False,
+            font=dict(size=12, color='white')
+        )
+        
+        # Add step description
+        fig.add_annotation(
+            x=step['x'], y=step['y']-0.3,
+            text=step['desc'],
+            showarrow=False,
+            font=dict(size=10, color='#7f8c8d')
         )
     
     fig.update_layout(
-        title="<b>COE Prediction System - Layered Architecture</b>",
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0, 8]),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[1, 5]),
+        title="<b>COE Prediction System Architecture</b><br><span style='font-size:14px'>Simple layered design with numbered data flow</span>",
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0, 7.5]),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[1, 5.2]),
         plot_bgcolor='white',
-        height=600,
-        margin=dict(l=80, r=20, t=50, b=20)
+        height=650,
+        margin=dict(l=120, r=20, t=80, b=20)
     )
     
     return fig
@@ -308,14 +317,18 @@ def main():
         fig_flow = create_data_flow_diagram()
         st.plotly_chart(fig_flow, use_container_width=True)
         
-        st.info("""
-        **User Journey:**
-        1. **Landing**: Professional loading screen with model showcase
-        2. **Data Check**: Automatic data freshness verification
-        3. **Model Selection**: Dynamic tabs ordered by performance ranking
-        4. **Prediction**: Interactive category selection and forecasting
-        5. **Analysis**: Detailed charts, trends, and insights
-        6. **Validation**: Comprehensive testing results on separate page
+        st.success("""
+        **Simple User Journey (5 Easy Steps):**
+        
+        **Step 1**: Load dashboard → See professional loading screen
+        
+        **Step 2**: Data updates → System checks for latest COE results
+        
+        **Step 3**: Choose model → Select from top-performing prediction models
+        
+        **Step 4**: Get predictions → View 6-cycle price forecasts with charts
+        
+        **Step 5**: Explore details → Check model performance and validation results
         """)
     
     with processing_tab:
