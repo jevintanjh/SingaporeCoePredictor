@@ -1260,7 +1260,7 @@ def main():
                 selected_categories, 
                 prediction_cycles
             )
-    
+
     # Sidebar for model selection and settings
     st.sidebar.header("Model Configuration")
 
@@ -1277,12 +1277,12 @@ def main():
         if st.sidebar.checkbox(display_name, value=True, key=f"model_{key}"):
             selected_models.append(key)
 
-    # Add testing dashboard option
-    if st.sidebar.button("🧪 Run Model Testing & Validation"):
-        st.session_state.show_testing = True
+    # Add navigation to testing page
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🧪 Model Testing")
 
-    if st.sidebar.button("📊 Hide Testing Dashboard"):
-        st.session_state.show_testing = False
+    if st.sidebar.button("🧪 Open Testing Dashboard", type="primary"):
+        st.switch_page("pages/model_testing.py")
 
 if __name__ == "__main__":
     main()
