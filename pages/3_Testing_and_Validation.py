@@ -237,7 +237,7 @@ def main():
             **MAPE (Mean Absolute Percentage Error): 8.5%**
             - Measures how far off our COE price predictions are
             - 8.5% means we're typically within 8.5% of actual winning bid
-            - For an $80,000 COE, we'd typically be off by about $6,800
+            - Average prediction error within industry standards
             - Lower is better - this is good performance for price prediction
             
             **Direction Accuracy: 73.2%**
