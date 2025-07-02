@@ -4,6 +4,13 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 
 ## Recent Changes
 
+**Academic Validation Enhancement (July 2, 2025)**:
+- Added critical analysis section to Testing & Validation page addressing suspiciously high ROC-AUC (0.94)
+- Implemented academic honesty disclosure about potential overfitting and data leakage issues
+- Created realistic performance benchmark comparisons (industry standard 0.55-0.65 vs observed 0.94)
+- Added MODEL_VALIDATION_CRITIQUE.md documenting validation concerns and presentation strategies
+- Enhanced educational value by demonstrating mature ML engineering judgment and ethical disclosure practices
+
 **Educational Enhancement (July 1, 2025)**:
 - Created System Architecture documentation page with interactive diagrams (Page 1)
 - Added comprehensive Data Cleaning Process page with step-by-step pipeline documentation (Page 2)

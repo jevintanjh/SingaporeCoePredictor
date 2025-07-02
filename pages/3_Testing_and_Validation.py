@@ -337,8 +337,9 @@ def main():
             metrics = metrics_data['N-BEATSx']
             
             st.markdown(f"""
-            <div style="background: #f0f2f6; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center;">
-                <h4 style="margin: 0; color: #1f77b4;">ROC-AUC: {metrics['ROC-AUC']:.3f}</h4>
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center; border: 2px solid #ffc107;">
+                <h4 style="margin: 0; color: #856404;">⚠️ ROC-AUC: {metrics['ROC-AUC']:.3f}</h4>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #856404;">Suspiciously high - see analysis below</p>
             </div>
             <div style="background: #e8f4fd; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center;">
                 <h4 style="margin: 0; color: #ff7f0e;">Accuracy: {metrics['Accuracy']:.3f}</h4>
@@ -354,7 +355,7 @@ def main():
             </div>
             """, unsafe_allow_html=True)
             
-            # Performance interpretation
+            # Performance interpretation with critical analysis
             st.markdown("""
             **📖 Performance Interpretation:**
             - **ROC-AUC 0.940**: Outstanding discrimination (>0.95 approaching perfect)
@@ -362,6 +363,19 @@ def main():
             - **Precision 92.0%**: Very high positive prediction reliability
             - **Recall 93.0%**: Exceptional sensitivity (>92% is outstanding)
             - **F1-Score 92.5%**: Near-perfect balance of precision/recall
+            """)
+            
+            st.warning("""
+            **🔍 Critical Analysis Required:**
+            
+            These metrics are suspiciously high for financial prediction. Professional trading firms typically achieve ROC-AUC of 0.55-0.65, making our 0.94 potentially indicative of:
+            
+            • **Data leakage** in validation
+            • **Overfitting** to historical patterns  
+            • **Temporal validation** issues
+            • **Sample size** limitations
+            
+            This represents an important learning about ML validation challenges.
             """)
         
         with col2:
