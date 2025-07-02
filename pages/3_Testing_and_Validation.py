@@ -228,9 +228,13 @@ def main():
             - **Advantage over Random**: 23.2% better than chance
             """)
         
-        with col3:
-            st.subheader("📋 COE Prediction Metrics Explained")
-            
+        
+        # Metrics Explanation Section - Full Width
+        st.subheader("📋 COE Prediction Metrics Explained")
+        
+        col1_exp, col2_exp = st.columns([1, 1])
+        
+        with col1_exp:
             st.info("""
             **📚 Key COE Prediction Metrics for AI/ML Graduates:**
             
@@ -245,13 +249,9 @@ def main():
             - 73.2% means we're right about price direction 7 out of 10 times
             - Random guessing would be 50%, so we have a 23.2% advantage
             - Critical for COE bidding strategy planning
-            
-            **R² (Coefficient of Determination): 0.820**
-            - Explains 82% of COE price variance with our features
-            - Shows how much of price movement our model can explain
-            - Higher values mean better model explanatory power
             """)
-            
+        
+        with col2_exp:
             st.success("""
             **Why These Metrics Matter for COE Prediction:**
             
@@ -268,30 +268,30 @@ def main():
             **Academic Insight:**
             This demonstrates domain-specific evaluation - choosing metrics that matter to COE stakeholders, not just generic ML scores.
             """)
-            
-            # Comparative Analysis
-            st.subheader("⚖️ Strengths vs Other Models")
-            st.info("""
-            **🎯 Fast Directional Forecaster vs Competition:**
-            
-            **Advantages over Interpretable N-BEATS:**
-            - 10x faster inference (100ms vs 1000ms)
-            - Lower computational requirements
-            - Real-time prediction capability
-            - Simpler deployment and maintenance
-            
-            **Advantages over N-BEATSx:**
-            - 50x faster training time
-            - Minimal hardware requirements
-            - Easier to debug and troubleshoot
-            - Lower operational costs
-            
-            **Disadvantages:**
-            - Lower accuracy (8.5% vs 7.8% vs 6.8% MAPE)
-            - Less sophisticated pattern recognition
-            - Weaker long-term trend capture
-            - Limited handling of complex seasonality
-            """)
+        
+        # Comparative Analysis Section - Full Width
+        st.subheader("⚖️ Strengths vs Other Models")
+        st.info("""
+        **🎯 Fast Directional Forecaster vs Competition:**
+        
+        **Advantages over Interpretable N-BEATS:**
+        - 10x faster inference (100ms vs 1000ms)
+        - Lower computational requirements
+        - Real-time prediction capability
+        - Simpler deployment and maintenance
+        
+        **Advantages over N-BEATSx:**
+        - 50x faster training time
+        - Minimal hardware requirements
+        - Easier to debug and troubleshoot
+        - Lower operational costs
+        
+        **Disadvantages:**
+        - Lower accuracy (8.5% vs 7.8% vs 6.8% MAPE)
+        - Less sophisticated pattern recognition
+        - Weaker long-term trend capture
+        - Limited handling of complex seasonality
+        """)
         
         # Feature importance
         st.subheader("🎯 Key Feature Importances")
@@ -304,7 +304,7 @@ def main():
     with model_tab2:
         st.header("Interpretable N-BEATS - COE Price Prediction Performance")
         
-        col1, col2, col3 = st.columns([2, 2, 3])
+        col1, col2 = st.columns([1, 1])
         
         with col1:
             st.subheader("📊 Prediction Accuracy")
@@ -428,7 +428,7 @@ def main():
     with model_tab3:
         st.header("N-BEATSx - COE Price Prediction Performance")
         
-        col1, col2, col3 = st.columns([2, 2, 3])
+        col1, col2 = st.columns([1, 1])
         
         with col1:
             st.subheader("📊 Prediction Accuracy")
