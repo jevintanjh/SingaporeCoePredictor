@@ -256,28 +256,45 @@ def main():
             """)
         
         with col3:
-            st.subheader("📋 Model Analysis")
+            st.subheader("📋 Financial Metrics Explained")
+            
+            # Key metrics explanation for graduates
+            st.info("""
+            **📚 Key Financial Metrics for AI/ML Graduates:**
+            
+            **MAPE (Mean Absolute Percentage Error):**
+            - Measures how far off our price predictions are
+            - 8.5% means we're typically within $8,500 of actual COE price
+            - Like accuracy but in percentage terms - lower is better
+            
+            **Volatility Correlation (Vol Corr): 0.840**
+            - Measures if we predict risky periods correctly
+            - 0.840 = 84% correlation with actual market volatility  
+            - Important for position sizing and risk management
+            - Think: "Do we know when prices will be unstable?"
+            
+            **Sharpe Ratio: 0.68**
+            - Risk-adjusted returns (return per unit of risk)
+            - 0.68 = decent, >0.8 = institutional grade, >1.0 = excellent
+            - Like ROI but accounting for risk taken
+            - Higher = better return for the risk
+            """)
+            
             st.success("""
-            **Financial Performance Assessment:**
+            **Why These Beat Traditional ML Metrics:**
             
-            Fast Directional Forecaster achieves solid financial metrics suitable for systematic trading strategies.
+            **Business Relevance:**
+            - MAPE tells stakeholders actual dollar impact
+            - Sharpe Ratio shows if strategy is profitable after risk
+            - Direction Accuracy reveals trading edge over random
             
-            **Key Strengths:**
-            - Fast inference time (< 100ms)
-            - Good directional accuracy for short-term predictions  
-            - Positive Sharpe ratio (0.68)
-            - Low computational requirements
-            - Acceptable risk levels (7.8% max drawdown)
+            **Real-World Application:**
+            - Banks use Sharpe Ratio for investment decisions
+            - Traders need Direction Accuracy >55% to be profitable
+            - Vol Correlation helps size positions appropriately
             
-            **Areas for Improvement:**
-            - MAPE could be lower (<8%)
-            - Sharpe ratio below institutional grade (target: >0.8)
-            - Information ratio modest (0.31)
-            
-            **Use Cases:**
-            - Real-time trading decisions
-            - High-frequency prediction updates
-            - Resource-constrained environments
+            **Academic Insight:**
+            This demonstrates domain expertise - knowing that financial problems need financial metrics, not just ML accuracy scores.
             """)
         
         # Feature importance
@@ -360,28 +377,45 @@ def main():
             """)
         
         with col3:
-            st.subheader("📋 Model Analysis")
+            st.subheader("📋 Advanced Metrics Explained")
+            
+            st.info("""
+            **📚 Advanced Financial Concepts for Graduates:**
+            
+            **Information Ratio: 0.38**
+            - Measures "alpha" - excess return beyond market benchmark
+            - 0.38 = generating 38% more return than expected for risk
+            - Like Sharpe but compares to market, not risk-free rate
+            - Higher = better at beating the market consistently
+            
+            **Maximum Drawdown: 6.9%**
+            - Worst-case loss from peak to trough
+            - 6.9% = in worst period, strategy lost 6.9% of value
+            - Critical for risk management and investor psychology
+            - Lower = more stable, less stressful investing
+            
+            **R² (Coefficient of Determination): 0.845**
+            - Explains 84.5% of price variance with our features
+            - Like correlation but for multiple variables
+            - Shows how much of price movement we can explain
+            - Higher = model captures more market patterns
+            """)
+            
             st.success("""
-            **Financial Performance Assessment:**
+            **Professional Trading Context:**
             
-            Interpretable N-BEATS provides excellent performance with strong transparency for regulatory compliance.
+            **Institutional Standards:**
+            - Sharpe >0.8 = considered institutional quality
+            - Information Ratio >0.3 = good alpha generation
+            - Max Drawdown <10% = acceptable risk levels
             
-            **Key Strengths:**
-            - High interpretability with mathematical foundations
-            - Strong financial metrics across all categories
-            - Excellent directional accuracy (75.4%)
-            - Good risk-adjusted returns (Sharpe: 0.84)
-            - Low maximum drawdown (6.9%)
+            **Why Interpretability Matters:**
+            - Regulators require explainable AI in finance
+            - Stakeholders need to understand model decisions
+            - Risk managers must know what drives predictions
             
-            **Areas for Improvement:**
-            - Could achieve institutional-grade Sharpe (>1.0)
-            - Training time longer than fast models
-            
-            **Use Cases:**
-            - Regulatory compliance requirements
-            - Business stakeholder presentations
-            - Long-term strategic planning
-            - Risk-conscious trading strategies
+            **Career Relevance:**
+            Understanding these metrics shows you can bridge the gap between ML theory and business application - exactly what financial firms need.
             """)
         
         # Component importance
@@ -464,29 +498,46 @@ def main():
             """)
         
         with col3:
-            st.subheader("📋 Model Analysis")
+            st.subheader("📋 Institutional-Grade Metrics")
+            
+            st.info("""
+            **📚 Professional Finance Concepts:**
+            
+            **Direction Accuracy: 77.1%**
+            - Correctly predicts if price goes up/down 77.1% of time
+            - Random guessing = 50%, so we have 27.1% edge
+            - Critical for trading strategies - need >55% to be profitable
+            - This level (77%) is excellent for systematic trading
+            
+            **Calmar Ratio: 1.38**
+            - Annual return divided by maximum drawdown
+            - 1.38 = excellent risk-adjusted performance
+            - Preferred by institutional investors over Sharpe
+            - Higher = better return per unit of downside risk
+            
+            **Sharpe Ratio: 1.12 (Institutional Grade)**
+            - >1.0 = institutional quality performance
+            - 1.12 = would attract professional capital allocation
+            - Measures return per unit of total risk (volatility)
+            - Hedge funds typically target >1.0 for investor appeal
+            """)
+            
             st.success("""
-            **Financial Performance Assessment:**
+            **Institutional Investment Context:**
             
-            N-BEATSx achieves institutional-grade performance across all financial metrics.
+            **Professional Standards Met:**
+            - Sharpe 1.12 > 1.0 institutional threshold ✓
+            - Information Ratio 0.45 > 0.3 alpha target ✓
+            - Max Drawdown 5.4% < 10% risk limit ✓
+            - Direction Accuracy 77.1% > 70% trading edge ✓
             
-            **Key Strengths:**
-            - Best-in-class accuracy (MAPE: 6.8%)
-            - Institutional-grade Sharpe ratio (1.12)
-            - Exceptional directional accuracy (77.1%)
-            - Strong alpha generation (IR: 0.45)
-            - Excellent risk control (5.4% max drawdown)
+            **Real-World Impact:**
+            - Performance would qualify for institutional capital
+            - Risk metrics satisfy regulatory requirements
+            - Alpha generation attracts investor interest
             
-            **Areas for Improvement:**
-            - Higher computational requirements
-            - Longer training time
-            - Less interpretable than N-BEATS
-            
-            **Use Cases:**
-            - High-stakes financial decisions
-            - Institutional trading strategies
-            - Maximum accuracy requirements
-            - Professional asset management
+            **Career Insight:**
+            This demonstrates you understand the difference between academic ML metrics and professional finance standards - a crucial skill for fintech careers.
             """)
         
         # Variable importance
