@@ -1,8 +1,14 @@
 # Critical Analysis: ROC-AUC 0.94 - Too Good to Be True?
 
-## The Red Flag: ROC-AUC = 0.94
+## The Red Flags: ALL Models Show Suspiciously High ROC-AUC
 
-**Your instinct is correct** - a ROC-AUC of 0.94 for financial prediction is suspiciously high and warrants critical examination.
+**Your instinct is correct** - ALL three models show unrealistically high ROC-AUC values:
+
+- **Fast Directional Forecaster**: 0.87 (87%) - Still too high!
+- **Interpretable N-BEATS**: 0.90 (90%) - Way too high!
+- **N-BEATSx**: 0.94 (94%) - Extremely suspicious!
+
+**ALL of these are well above realistic financial prediction benchmarks.**
 
 ### Why This Matters for Your Capstone
 
