@@ -237,7 +237,7 @@ def main():
             **MAPE (Mean Absolute Percentage Error): 8.5%**
             - Measures how far off our COE price predictions are
             - 8.5% means we're typically within 8.5% of actual winning bid
-            - For an $80,000 COE, we'd be off by about $6,800 on average
+            - For an $80,000 COE, we'd typically be off by about $6,800
             - Lower is better - this is good performance for price prediction
             
             **Direction Accuracy: 73.2%**
@@ -598,6 +598,47 @@ def main():
         comparison_df = pd.DataFrame(comparison_data)
         st.dataframe(comparison_df, use_container_width=True)
         
+        # Comprehensive Strengths & Weaknesses Analysis
+        st.subheader("⚖️ Comprehensive Model Comparison: Strengths vs Weaknesses")
+        
+        # Create comparison table
+        st.markdown("### 📊 Detailed Strengths & Weaknesses Matrix")
+        
+        comparison_matrix = {
+            "Aspect": [
+                "Prediction Accuracy (MAPE)",
+                "Direction Accuracy", 
+                "Computational Speed",
+                "Interpretability",
+                "Memory Requirements",
+                "Training Time",
+                "Deployment Complexity",
+                "Real-time Capability",
+                "Regulatory Compliance",
+                "Long-term Trends",
+                "Seasonal Patterns",
+                "External Variables"
+            ],
+            "Fast Directional": [
+                "❌ Lowest (8.5%)", "❌ Lowest (73.2%)", "✅ Fastest (100ms)", 
+                "⚠️ Limited", "✅ Minimal", "✅ Fastest", "✅ Simple", 
+                "✅ Excellent", "❌ Poor", "⚠️ Basic", "⚠️ Basic", "❌ None"
+            ],
+            "Interpretable N-BEATS": [
+                "⚠️ Medium (7.8%)", "⚠️ Medium (75.4%)", "⚠️ Medium (1s)", 
+                "✅ Full", "⚠️ Medium", "⚠️ Medium", "⚠️ Medium", 
+                "❌ Slow", "✅ Excellent", "✅ Good", "✅ Excellent", "⚠️ Limited"
+            ],
+            "N-BEATSx": [
+                "✅ Best (6.8%)", "✅ Best (77.1%)", "❌ Slowest (5s)", 
+                "❌ Black-box", "❌ High", "❌ Longest", "❌ Complex", 
+                "❌ Poor", "❌ Poor", "✅ Excellent", "✅ Excellent", "✅ Excellent"
+            ]
+        }
+        
+        comparison_df = pd.DataFrame(comparison_matrix)
+        st.dataframe(comparison_df, use_container_width=True)
+        
         # Model rankings and insights
         col1, col2 = st.columns(2)
         
@@ -606,33 +647,48 @@ def main():
             st.success("**1st Place: N-BEATSx**")
             st.markdown("- Best MAPE (6.8%), Direction (77.1%), R² (0.870)")
             st.markdown("- State-of-the-art performance across all metrics")
+            st.markdown("- **Trade-off**: High computational cost, no interpretability")
             
             st.info("**2nd Place: Interpretable N-BEATS**")
             st.markdown("- Strong performance with full transparency")
             st.markdown("- Excellent for regulatory compliance")
+            st.markdown("- **Trade-off**: Medium performance, slower than simple models")
             
             st.warning("**3rd Place: Fast Directional Forecaster**")
             st.markdown("- Good performance with speed advantage")
             st.markdown("- Suitable for real-time applications")
+            st.markdown("- **Trade-off**: Lower accuracy but operational efficiency")
             
         with col2:
-            st.subheader("💡 Key COE Prediction Insights")
-            st.markdown("""
-            **Model Selection Guidelines:**
-            - **Maximum Accuracy**: Use N-BEATSx for critical decisions
-            - **Transparency Required**: Use Interpretable N-BEATS for public sector
-            - **Real-time Speed**: Use Fast Directional for live applications
+            st.subheader("💡 Strategic Model Selection Guide")
             
-            **Performance Analysis:**
-            - All models significantly outperform random guessing
-            - MAPE <10% achieved across all models (industry standard)
-            - Direction accuracy 73-77% enables profitable strategies
+            st.success("""
+            **When to Use Each Model:**
             
-            **Practical Applications:**
-            - Car dealers: Inventory planning and pricing strategies
-            - Individual buyers: Timing purchase decisions
-            - Policy makers: Understanding market dynamics
-            - Researchers: Economic impact analysis
+            **Fast Directional Forecaster:**
+            ✅ Real-time bidding platforms
+            ✅ Mobile applications
+            ✅ High-frequency predictions
+            ✅ Limited computational resources
+            ❌ High-stakes financial decisions
+            """)
+            
+            st.info("""
+            **Interpretable N-BEATS:**
+            ✅ Government policy analysis
+            ✅ Public sector transparency
+            ✅ Academic research
+            ✅ Regulatory reporting
+            ❌ Real-time applications
+            """)
+            
+            st.error("""
+            **N-BEATSx:**
+            ✅ Critical business decisions
+            ✅ Maximum accuracy requirements
+            ✅ Long-term strategic planning
+            ✅ Research and development
+            ❌ Resource-constrained environments
             """)
         
         # Why these metrics matter section
