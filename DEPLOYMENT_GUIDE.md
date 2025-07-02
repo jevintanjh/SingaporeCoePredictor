@@ -1,111 +1,67 @@
-# COE Platform Deployment & Sleep Prevention Guide
+# Streamlit Cloud Deployment Guide
 
-## Current Status
-✅ **Keep-alive service is ACTIVE** - Automatically pings every 15 minutes
-✅ **Health check endpoint available** - `/health_check` for external monitoring
-✅ **Optimized Streamlit configuration** - Enhanced performance settings
+## Files Required for Streamlit Cloud
 
-## Recommended Solutions (in order of effectiveness)
+### 1. Main App Files
+- `app.py` - Main application entry point
+- `streamlit_app.py` - Streamlit Cloud specific entry point
+- `.streamlit/config.toml` - Streamlit configuration
 
-### 1. UptimeRobot Monitoring (Recommended - Free)
-**Setup Steps:**
-1. Go to [uptimerobot.com](https://uptimerobot.com) and create free account
-2. Add "New Monitor" with these settings:
-   - Monitor Type: HTTP(s)
-   - URL: Your Streamlit app URL
-   - Monitoring Interval: 10 minutes
-   - Timeout: 30 seconds
-3. Set up email alerts for downtime notifications
+### 2. Configuration Files
+```toml
+# .streamlit/config.toml
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = false
 
-**Benefits:**
-- External monitoring prevents sleeping
-- Free tier allows 50 monitors
-- Sends alerts if app goes down
-- Works with any hosting platform
-
-### 2. GitHub Actions Keep-Alive (Advanced)
-Create `.github/workflows/keep-alive.yml`:
-```yaml
-name: Keep COE Platform Alive
-on:
-  schedule:
-    - cron: '*/10 * * * *'  # Every 10 minutes
-jobs:
-  ping:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Ping App
-        run: |
-          curl -f "YOUR_APP_URL" || echo "App might be sleeping"
-          curl -f "YOUR_APP_URL/health_check" || echo "Health check failed"
+[browser]
+gatherUsageStats = false
 ```
 
-### 3. Streamlit Cloud Optimization
-**Current Configuration:**
-- Keep-alive service running internally
-- Optimized server settings for responsiveness
-- Session state management for faster loading
-- Health check endpoint for monitoring
+### 3. Requirements (already in requirements.txt)
+- streamlit
+- pandas
+- numpy
+- plotly
+- scikit-learn
+- trafilatura
+- schedule
+- requests
 
-### 4. Alternative Hosting Options
+### 4. Environment Detection
+The app automatically detects if running on Streamlit Cloud and disables:
+- Keep-alive service (only needed for Replit)
+- Port-specific configurations
 
-**A) Heroku (Paid - Most Reliable)**
-- Cost: $7/month for Hobby tier
-- Benefits: No sleeping, custom domains, better performance
-- Setup: `git push heroku main` deployment
+### 5. Deployment Steps
+1. Push code to GitHub repository
+2. Connect to Streamlit Cloud
+3. Use `streamlit_app.py` as entry point
+4. Deploy with default settings
 
-**B) Railway (Affordable)**
-- Cost: $5/month for Hobby plan
-- Benefits: No sleeping, generous resource limits
-- Setup: Connect GitHub repository
+### 6. Features Available on Streamlit Cloud
+✅ All 3 ML models (N-BEATSx, Interpretable N-BEATS, Fast Directional)
+✅ Real-time predictions and historical analysis
+✅ Educational pages (System Architecture, Data Cleaning, etc.)
+✅ Model performance ranking
+✅ Interactive visualizations
 
-**C) DigitalOcean App Platform**
-- Cost: $5/month for basic tier
-- Benefits: Dedicated resources, no sleeping
-- Setup: Docker or GitHub deployment
-
-## Current Implementation Details
-
-### Keep-Alive Service
-```python
-# Automatically started in app.py
-# Pings every 15 minutes: http://0.0.0.0:5000
-# Logs success/failure in console
-```
-
-### Health Check Endpoint
-```
-URL: /health_check
-Purpose: Lightweight monitoring endpoint
-Response: JSON health status
-Auto-refresh: Optional 5-minute intervals
-```
-
-### Monitoring Setup
-1. **Internal**: Keep-alive service running automatically
-2. **External**: Set up UptimeRobot for additional monitoring
-3. **Alerts**: Configure notifications for downtime
-4. **Logs**: Monitor console for ping success/failure
-
-## Quick Start (5 minutes)
-1. ✅ Keep-alive already running in your app
-2. 📋 Sign up for UptimeRobot (free)
-3. 🔗 Add your app URL to monitoring
-4. 📧 Set up email notifications
-5. ✅ Done - your app will stay awake
+### 7. Features Disabled on Streamlit Cloud
+❌ Keep-alive service (not needed on cloud)
+❌ Local port configuration
+❌ Replit-specific settings
 
 ## Troubleshooting
 
-**If app still sleeps:**
-- Check UptimeRobot is properly configured
-- Verify keep-alive logs show successful pings
-- Consider upgrading to paid hosting
-- Contact Streamlit support for persistent issues
+### Connection Refused Error
+If you see "connection refused" errors, ensure:
+1. Keep-alive service is disabled for cloud deployment
+2. No hardcoded port references
+3. Using `streamlit_app.py` as entry point
 
-**Monitoring checklist:**
-- [ ] Keep-alive service shows successful pings
-- [ ] UptimeRobot monitor is active
-- [ ] Health check endpoint responds
-- [ ] App loads quickly after inactivity
+### Import Errors
+Ensure all dependencies are in requirements.txt with compatible versions.
 
-The combination of internal keep-alive + external monitoring should eliminate sleeping issues completely.
+### Performance Issues
+The app loads 2,574+ historical records on startup. First load may take 10-15 seconds.

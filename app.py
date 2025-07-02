@@ -1182,12 +1182,15 @@ def main():
         except Exception as e:
             st.session_state.scheduler_initialized = False
     
-    # Initialize keep-alive service for production deployment
+    # Initialize keep-alive service for production deployment (only for local/Replit environments)
     if 'keep_alive_started' not in st.session_state:
         try:
-            from keep_alive import start_keep_alive
-            start_keep_alive()
-            st.session_state.keep_alive_started = True
+            import os
+            # Only start keep-alive if not running on Streamlit Cloud
+            if 'STREAMLIT_CLOUD_DEPLOYMENT' not in os.environ and 'STREAMLIT_SERVER_PORT' not in os.environ:
+                from keep_alive import start_keep_alive
+                start_keep_alive()
+                st.session_state.keep_alive_started = True
         except ImportError:
             # Keep-alive not available in this environment
             pass
