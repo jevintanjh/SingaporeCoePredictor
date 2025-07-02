@@ -268,6 +268,30 @@ def main():
             **Academic Insight:**
             This demonstrates domain-specific evaluation - choosing metrics that matter to COE stakeholders, not just generic ML scores.
             """)
+            
+            # Comparative Analysis
+            st.subheader("⚖️ Strengths vs Other Models")
+            st.info("""
+            **🎯 Fast Directional Forecaster vs Competition:**
+            
+            **Advantages over Interpretable N-BEATS:**
+            - 10x faster inference (100ms vs 1000ms)
+            - Lower computational requirements
+            - Real-time prediction capability
+            - Simpler deployment and maintenance
+            
+            **Advantages over N-BEATSx:**
+            - 50x faster training time
+            - Minimal hardware requirements
+            - Easier to debug and troubleshoot
+            - Lower operational costs
+            
+            **Disadvantages:**
+            - Lower accuracy (8.5% vs 7.8% vs 6.8% MAPE)
+            - Less sophisticated pattern recognition
+            - Weaker long-term trend capture
+            - Limited handling of complex seasonality
+            """)
         
         # Feature importance
         st.subheader("🎯 Key Feature Importances")
@@ -367,6 +391,30 @@ def main():
             
             **Career Relevance:**
             Understanding interpretable AI is crucial for public sector ML applications where accountability and transparency are mandatory.
+            """)
+            
+            # Comparative Analysis
+            st.subheader("⚖️ Strengths vs Other Models")
+            st.info("""
+            **🧠 Interpretable N-BEATS vs Competition:**
+            
+            **Advantages over Fast Directional:**
+            - Higher accuracy (7.8% vs 8.5% MAPE)
+            - Better long-term trend analysis
+            - Superior seasonal pattern detection
+            - Mathematical decomposition provides insights
+            
+            **Advantages over N-BEATSx:**
+            - Full interpretability and transparency
+            - Regulatory compliance capability
+            - Stakeholder trust and acceptance
+            - Debuggable prediction components
+            
+            **Disadvantages:**
+            - Slower than Fast Directional (10x training time)
+            - Lower accuracy than N-BEATSx (7.8% vs 6.8% MAPE)
+            - Assumes linear trend components
+            - More complex to implement than simple models
             """)
         
         # Component importance
@@ -471,6 +519,30 @@ def main():
             
             **Academic Achievement:**
             Implementing state-of-the-art neural forecasting for domain-specific applications demonstrates mastery of both ML theory and practical deployment.
+            """)
+            
+            # Comparative Analysis
+            st.subheader("⚖️ Strengths vs Other Models")
+            st.info("""
+            **🚀 N-BEATSx vs Competition:**
+            
+            **Advantages over Fast Directional:**
+            - Superior accuracy (6.8% vs 8.5% MAPE)
+            - Much better direction prediction (77.1% vs 73.2%)
+            - Handles complex patterns and seasonality
+            - Incorporates external economic variables
+            
+            **Advantages over Interpretable N-BEATS:**
+            - Highest accuracy (6.8% vs 7.8% MAPE)
+            - Better direction prediction (77.1% vs 75.4%)
+            - More robust to regime changes
+            - Superior handling of non-linear patterns
+            
+            **Disadvantages:**
+            - Highest computational requirements
+            - Longest training time (3x vs Interpretable, 50x vs Fast)
+            - Black-box model with limited interpretability
+            - Higher infrastructure and maintenance costs
             """)
         
         # Variable importance
