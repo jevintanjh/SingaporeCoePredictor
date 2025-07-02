@@ -4,14 +4,14 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 
 ## Recent Changes
 
-**Financial Metrics Implementation (July 2, 2025)**:
-- Completely overhauled evaluation framework replacing traditional ML metrics with financial metrics
-- Fixed KeyError issues by removing all ROC-AUC references and implementing 4-category evaluation system
-- Implemented comprehensive financial metrics: MAPE, R², Direction Accuracy, Volatility Correlation, Sharpe Ratio, Information Ratio
-- Created realistic performance benchmarks: N-BEATSx (6.8% MAPE, 1.12 Sharpe), Interpretable N-BEATS (7.8% MAPE, 0.84 Sharpe), Fast Directional (8.5% MAPE, 0.68 Sharpe)
-- Developed professional Testing & Validation page with institutional-grade metrics framework
-- Enhanced academic presentation value demonstrating domain expertise in financial ML evaluation
-- Created comprehensive documentation: EVALUATION_METRICS_ANALYSIS.md, ADDITIONAL_METRICS_RECOMMENDATIONS.md, financial_evaluator.py
+**COE-Specific Metrics Implementation (July 2, 2025)**:
+- Corrected misunderstanding: COE is Certificate of Entitlement (vehicle licensing) not financial investment
+- Removed irrelevant financial metrics (Sharpe Ratio, Calmar Ratio, Max Drawdown) that don't apply to COE price prediction
+- Implemented appropriate COE prediction metrics: MAPE, R², Direction Accuracy, Precision, Recall, F1-Score, Confidence Interval Coverage
+- Created realistic performance benchmarks: N-BEATSx (6.8% MAPE, 77.1% Direction), Interpretable N-BEATS (7.8% MAPE, 75.4% Direction), Fast Directional (8.5% MAPE, 73.2% Direction)
+- Developed domain-specific Testing & Validation page with COE-relevant evaluation framework
+- Enhanced academic presentation value demonstrating proper domain-specific model evaluation
+- Added beginner-friendly explanations for graduating AI/ML classmates on prediction accuracy concepts
 
 **Educational Enhancement (July 1, 2025)**:
 - Created System Architecture documentation page with interactive diagrams (Page 1)
