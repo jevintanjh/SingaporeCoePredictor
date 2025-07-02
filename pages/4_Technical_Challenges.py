@@ -56,8 +56,21 @@ def show_nonstationarity_solutions():
         """)
         
         st.subheader("⚡ Solutions Implemented")
+        
+        # Add beginner-friendly explanations
+        st.info("💡 **Beginner's Guide**: These are statistical tests that help us understand if our COE price data behaves predictably over time.")
+        
         st.markdown("""
-        **1. Augmented Dickey-Fuller Test**
+        **1. Augmented Dickey-Fuller Test (ADF)**
+        
+        🎯 **What it does**: Think of it like a "stability detector" for price trends
+        - Tests if COE prices have a consistent pattern or just wander randomly
+        - Like asking: "Do price changes follow a predictable rule?"
+        
+        🔍 **Simple Explanation**: 
+        - If p-value < 0.05 → Prices are "stationary" (predictable patterns) ✅
+        - If p-value > 0.05 → Prices are "non-stationary" (random walking) ❌
+        
         ```python
         from statsmodels.tsa.stattools import adfuller
         
@@ -67,12 +80,28 @@ def show_nonstationarity_solutions():
             return p_value < 0.05  # Stationary if p < 0.05
         ```
         
-        **2. Seasonal Decomposition**
-        - X-13ARIMA-SEATS methodology
-        - Separate trend, seasonal, and irregular components
-        - Handle irregular seasonal patterns
+        **2. Seasonal Decomposition (X-13ARIMA-SEATS)**
+        
+        🎯 **What it does**: Breaks down COE prices into simple components
+        - **Trend**: Overall direction (going up or down over years)
+        - **Seasonal**: Repeating patterns (e.g., higher prices before Chinese New Year)
+        - **Irregular**: Random noise and unexpected events
+        
+        🔍 **Think of it like**: Separating a music song into bass, melody, and background noise
+        - X-13ARIMA-SEATS is just a fancy name for the mathematical method
+        - Used by government statisticians worldwide for economic data
         
         **3. Cointegration Analysis**
+        
+        🎯 **What it does**: Finds if different COE categories move together long-term
+        - Like asking: "Do car and motorcycle prices always go up/down together?"
+        - Even if they differ short-term, they return to similar patterns
+        
+        🔍 **Simple Example**: 
+        - Category A and B might have different daily prices
+        - But over months/years, they follow the same economic trends
+        - Useful for predicting one category based on another
+        
         ```python
         # Long-term relationships between categories
         from statsmodels.tsa.vector_ar.vecm import coint_johansen
@@ -124,14 +153,21 @@ def show_nonstationarity_solutions():
         
         st.plotly_chart(fig, use_container_width=True)
         
-        # ADF Test Results
-        st.subheader("🧪 ADF Test Results")
+        # ADF Test Results with explanations
+        st.subheader("🧪 ADF Test Results Explained")
+        
+        st.info("💡 **Reading the Results**: Lower ADF statistic + P-value near 0.000 = Good predictable data!")
+        
         st.markdown("""
-        | Series | ADF Statistic | P-Value | Conclusion |
-        |--------|---------------|---------|------------|
-        | Original | -1.234 | 0.654 | Non-Stationary ❌ |
-        | Differenced | -8.456 | 0.000 | Stationary ✅ |
-        | Log-Differenced | -9.123 | 0.000 | Stationary ✅ |
+        | Series | ADF Statistic | P-Value | Conclusion | What This Means |
+        |--------|---------------|---------|------------|-----------------|
+        | Original | -1.234 | 0.654 | Non-Stationary ❌ | Prices wander randomly - hard to predict |
+        | Differenced | -8.456 | 0.000 | Stationary ✅ | Price *changes* are predictable |
+        | Log-Differenced | -9.123 | 0.000 | Stationary ✅ | Percentage changes are very predictable |
+        
+        **🎯 Key Insight**: We transform raw prices into "price changes" to make them predictable!
+        - **Differenced**: Today's price - Yesterday's price
+        - **Log-Differenced**: Percentage change (better for financial data)
         """)
 
 def show_missing_data_solutions():
@@ -151,40 +187,75 @@ def show_missing_data_solutions():
         
         st.subheader("🛠️ Advanced Solutions")
         
+        st.info("💡 **Missing Data Challenge**: When COE bidding gets cancelled or data isn't recorded, we need smart ways to fill the gaps!")
+        
         st.markdown("""
-        **1. Multiple Imputation (MICE)**
+        **1. Multiple Imputation using Chained Equations (MICE)**
+        
+        🎯 **What it does**: Like having 5 different experts guess the missing value
+        - Each expert uses different information to make their guess
+        - We average all 5 guesses to get the final answer
+        - MICE = "Multiple Imputation by Chained Equations" (fancy name for smart averaging)
+        
+        🔍 **Simple Analogy**: If you miss a class exam, teachers might estimate your score based on:
+        - Your homework grades, attendance, previous exam scores, class participation
+        - MICE does this but with statistical models instead of human judgment
+        
         ```python
         from sklearn.experimental import enable_iterative_imputer
         from sklearn.impute import IterativeImputer
         
         def mice_imputation(data):
             imputer = IterativeImputer(
-                estimator=BayesianRidge(),
-                n_burn_in=10,
-                n_imputations=5
+                estimator=BayesianRidge(),  # The "expert" model
+                n_burn_in=10,               # Warm-up rounds
+                n_imputations=5             # Number of expert guesses
             )
             return imputer.fit_transform(data)
         ```
         
         **2. Kalman Filter for Time-Varying Patterns**
+        
+        🎯 **What it does**: Like GPS navigation that adapts to changing traffic
+        - Originally used in rocket guidance systems (NASA space missions!)
+        - Tracks how COE price patterns change over time
+        - Adjusts predictions as new information arrives
+        
+        🔍 **Simple Example**: 
+        - Week 1: "COE usually goes up 2% monthly"
+        - Week 2: "Wait, it went down 5%... let me adjust my understanding"
+        - Week 3: "Now I see the new pattern, here's my updated prediction"
+        
         ```python
         from pykalman import KalmanFilter
         
         def kalman_imputation(time_series):
             kf = KalmanFilter(
-                transition_matrices=transition_matrix,
-                observation_matrices=observation_matrix
+                transition_matrices=transition_matrix,    # How patterns change
+                observation_matrices=observation_matrix   # What we can measure
             )
             state_means, _ = kf.em(time_series).smooth()
             return state_means
         ```
         
         **3. Forward-Fill with Exponential Decay**
+        
+        🎯 **What it does**: Uses the last known value but makes it "fade" over time
+        - Like assuming yesterday's weather, but with less confidence each day
+        - Simple but surprisingly effective for short gaps
+        
+        🔍 **Real-world Example**:
+        - Last COE price: $50,000
+        - 1 day missing: Estimate $49,500 (99% confidence)
+        - 2 days missing: Estimate $49,000 (98% confidence)
+        - Gets less reliable as gap increases
+        
         ```python
         def exponential_decay_fill(series, decay_rate=0.1):
             filled = series.copy()
             for i in range(1, len(series)):
                 if pd.isna(filled.iloc[i]):
+                    # Use previous value but reduce confidence
                     filled.iloc[i] = filled.iloc[i-1] * (1 - decay_rate)
             return filled
         ```
@@ -270,37 +341,72 @@ def show_overfitting_prevention():
         
         st.subheader("🔬 Advanced Regularization")
         
+        st.info("💡 **Overfitting Problem**: When your model memorizes training data but fails on new data - like cramming for exams but failing real-world application!")
+        
         st.markdown("""
         **1. Elastic Net Regularization**
+        
+        🎯 **What it does**: Prevents your model from being "too clever" and overthinking
+        - Combines two penalties: L1 (Lasso) + L2 (Ridge)
+        - **L1 Penalty**: Forces model to ignore useless features (feature selection)
+        - **L2 Penalty**: Keeps model weights small and stable
+        
+        🔍 **Simple Analogy**: Like speed limits on different roads
+        - L1: "Don't use more than 5 features" (absolute limit)
+        - L2: "Keep all weights small and reasonable" (smooth driving)
+        - Elastic Net: Uses both rules for better balance
+        
         ```python
         # Combined L1 (Lasso) + L2 (Ridge) penalties
         def elastic_net_loss(y_true, y_pred, weights, λ1, λ2):
             mse = mean_squared_error(y_true, y_pred)
-            l1_penalty = λ1 * np.sum(np.abs(weights))
-            l2_penalty = λ2 * np.sum(weights ** 2)
+            l1_penalty = λ1 * np.sum(np.abs(weights))      # "Feature selection penalty"
+            l2_penalty = λ2 * np.sum(weights ** 2)         # "Keep weights small penalty"
             return mse + l1_penalty + l2_penalty
         ```
         
-        **Mathematical Formula:**
+        **Mathematical Formula (Don't worry, the code does this automatically!):**
         $$L = \\frac{1}{2n}||y - X\\beta||^2_2 + \\lambda_1||\\beta||_1 + \\lambda_2||\\beta||^2_2$$
         
-        **2. Temporal Cross-Validation**
+        **2. Temporal Cross-Validation (Time-Aware Testing)**
+        
+        🎯 **What it does**: Tests your model like real life - using past to predict future
+        - Regular CV: Randomly splits data (unrealistic for time series)
+        - Temporal CV: Always trains on past, tests on future
+        
+        🔍 **Real Example**:
+        - Train on Jan-Mar data → Test on April
+        - Train on Jan-Apr data → Test on May  
+        - Train on Jan-May data → Test on June
+        - Never lets the model "peek into the future"!
+        
         ```python
         def purged_cross_validation(data, n_splits=5, gap_size=2):
             for i in range(n_splits):
                 train_end = len(data) // n_splits * (i + 1)
-                test_start = train_end + gap_size
+                test_start = train_end + gap_size      # Gap prevents data leakage
                 test_end = test_start + len(data) // n_splits
                 
                 yield (data[:train_end], data[test_start:test_end])
         ```
         
-        **3. Information Criteria Selection**
+        **3. Information Criteria Selection (AIC/BIC)**
+        
+        🎯 **What it does**: Helps choose between different models objectively
+        - **AIC** (Akaike Information Criterion): Balances accuracy vs complexity
+        - **BIC** (Bayesian Information Criterion): More strict about complexity
+        
+        🔍 **Simple Decision Rule**:
+        - Lower AIC/BIC = Better model
+        - Like comparing cars: balance performance, fuel efficiency, and price
+        - AIC: "Performance matters more"
+        - BIC: "Simplicity matters more"
+        
         ```python
         def model_selection_criteria(y_true, y_pred, n_params, n_samples):
             mse = mean_squared_error(y_true, y_pred)
-            aic = n_samples * np.log(mse) + 2 * n_params
-            bic = n_samples * np.log(mse) + np.log(n_samples) * n_params
+            aic = n_samples * np.log(mse) + 2 * n_params              # Penalizes complexity lightly
+            bic = n_samples * np.log(mse) + np.log(n_samples) * n_params  # Penalizes complexity heavily
             return {'AIC': aic, 'BIC': bic}
         ```
         """)
@@ -371,12 +477,25 @@ def show_computational_optimization():
         
         st.subheader("🚀 Optimization Techniques")
         
+        st.info("💡 **Speed Challenge**: Making your model fast enough for real-time predictions - from 10 minutes to 10 seconds!")
+        
         st.markdown("""
-        **1. Numba JIT Compilation**
+        **1. Numba JIT Compilation (Just-In-Time Magic)**
+        
+        🎯 **What it does**: Converts Python code into super-fast machine code
+        - JIT = "Just-In-Time" compilation
+        - Think: Translating English instructions into native language for faster understanding
+        - One simple decorator (`@numba.jit`) can make code 50-100x faster!
+        
+        🔍 **Simple Analogy**: 
+        - Python: Speaking through a translator (slow but flexible)
+        - Numba: Learning the local language (fast but requires preparation)
+        - Same result, dramatically different speed
+        
         ```python
         import numba
         
-        @numba.jit(nopython=True)
+        @numba.jit(nopython=True)    # Magic speed booster!
         def fast_exponential_smoothing(data, alpha):
             result = np.empty_like(data)
             result[0] = data[0]
@@ -389,9 +508,18 @@ def show_computational_optimization():
         # Speed improvement: 50-100x faster than pure Python
         ```
         
-        **2. Vectorized Operations**
+        **2. Vectorized Operations (No More Loops!)**
+        
+        🎯 **What it does**: Lets NumPy do the work instead of Python loops
+        - NumPy operations run in C (much faster than Python)
+        - Replace "for loops" with array operations
+        
+        🔍 **Think of it like**: 
+        - Slow way: Calculating each student's grade one by one
+        - Fast way: Calculator that processes the entire class at once
+        
         ```python
-        # Instead of loops
+        # SLOW: Python loop (like doing math by hand)
         def slow_momentum_calculation(prices):
             momentum = []
             for i in range(len(prices)-1):
@@ -399,34 +527,54 @@ def show_computational_optimization():
                 momentum.append(mom)
             return momentum
         
-        # Use NumPy vectorization
+        # FAST: NumPy vectorization (like using a calculator)
         def fast_momentum_calculation(prices):
             return np.diff(prices) / prices[:-1]
         
         # Speed improvement: 10-20x faster
         ```
         
-        **3. Memory Optimization**
+        **3. Memory Optimization (Smart Data Storage)**
+        
+        🎯 **What it does**: Uses smaller data types to save memory
+        - float64 → float32: Half the memory, same accuracy for most cases
+        - int64 → int32: Perfect for COE prices (no need for huge numbers)
+        
+        🔍 **Real Example**:
+        - Before: 2574 records × 8 bytes = 20.6 KB per column
+        - After: 2574 records × 4 bytes = 10.3 KB per column
+        - 50% memory savings with no loss in accuracy!
+        
         ```python
-        # Use appropriate data types
+        # Use appropriate data types (smart storage)
         def optimize_dataframe(df):
             for col in df.select_dtypes(include=['float64']):
-                df[col] = pd.to_numeric(df[col], downcast='float')
+                df[col] = pd.to_numeric(df[col], downcast='float')  # 64→32 bits
             
             for col in df.select_dtypes(include=['int64']):
-                df[col] = pd.to_numeric(df[col], downcast='integer')
+                df[col] = pd.to_numeric(df[col], downcast='integer')  # 64→32 bits
             
             return df
         
         # Memory reduction: 30-50% smaller footprint
         ```
         
-        **4. Parallel Processing**
+        **4. Parallel Processing (Multiple Workers)**
+        
+        🎯 **What it does**: Trains multiple models simultaneously
+        - Instead of training models one by one, train them all at once
+        - Uses all CPU cores instead of just one
+        
+        🔍 **Simple Analogy**:
+        - Sequential: One chef cooking 5 dishes (takes 5 hours)
+        - Parallel: 5 chefs cooking 5 dishes simultaneously (takes 1 hour)
+        
         ```python
         from joblib import Parallel, delayed
         
         def parallel_model_training(categories, data):
-            results = Parallel(n_jobs=-1)(
+            # Train all category models simultaneously
+            results = Parallel(n_jobs=-1)(    # n_jobs=-1 uses all CPU cores
                 delayed(train_category_model)(cat, data[cat]) 
                 for cat in categories
             )
@@ -511,25 +659,48 @@ def show_deployment_architecture():
         
         st.subheader("🔧 Architecture Solutions")
         
+        st.info("💡 **Production Challenge**: Moving from laptop prototype to enterprise system handling thousands of users!")
+        
         st.markdown("""
-        **1. Containerization with Docker**
+        **1. Containerization with Docker (Portable Applications)**
+        
+        🎯 **What it does**: Packages your app like a shipping container
+        - Works the same way on any computer (laptop, server, cloud)
+        - Docker = "Ship your code with its entire environment"
+        - No more "it works on my machine" problems!
+        
+        🔍 **Simple Analogy**:
+        - Before: Sending a recipe (might fail with different ingredients/tools)
+        - After: Sending a complete meal kit (everything included, guaranteed to work)
+        
         ```dockerfile
-        # Multi-stage build for optimization
-        FROM python:3.9-slim as builder
+        # Multi-stage build for optimization (like meal prep)
+        FROM python:3.9-slim as builder     # Kitchen for preparation
         
         WORKDIR /app
         COPY requirements.txt .
-        RUN pip install --user -r requirements.txt
+        RUN pip install --user -r requirements.txt    # Install ingredients
         
-        FROM python:3.9-slim
-        COPY --from=builder /root/.local /root/.local
+        FROM python:3.9-slim              # Clean serving plate
+        COPY --from=builder /root/.local /root/.local  # Transfer prepared ingredients
         COPY . .
         
-        EXPOSE 5000
+        EXPOSE 5000                        # Open the restaurant door
         CMD ["streamlit", "run", "app.py", "--server.port=5000"]
         ```
         
-        **2. Redis Caching Strategy**
+        **2. Redis Caching Strategy (Smart Memory)**
+        
+        🎯 **What it does**: Remembers recent predictions to avoid recalculation
+        - Redis = "Really fast memory storage"
+        - Like having a smart assistant who remembers your recent questions
+        - Predictions served in milliseconds instead of seconds!
+        
+        🔍 **Real Example**:
+        - User asks: "What's Category A price prediction?"
+        - First time: Calculate for 2 seconds, save answer
+        - Next time: Instant answer from memory (0.01 seconds)
+        
         ```python
         import redis
         import pickle
@@ -537,72 +708,90 @@ def show_deployment_architecture():
         
         redis_client = redis.Redis(host='localhost', port=6379, db=0)
         
-        def cache_predictions(expiry=3600):
+        def cache_predictions(expiry=3600):    # Remember for 1 hour
             def decorator(func):
                 @wraps(func)
                 def wrapper(*args, **kwargs):
-                    cache_key = f"prediction:{hash(str(args))}"
+                    cache_key = f"prediction:{hash(str(args))}"    # Unique question ID
                     
-                    # Try to get from cache
+                    # Check if we already know the answer
                     cached = redis_client.get(cache_key)
                     if cached:
-                        return pickle.loads(cached)
+                        return pickle.loads(cached)    # Return saved answer
                     
-                    # Compute and cache result
+                    # Calculate new answer and remember it
                     result = func(*args, **kwargs)
-                    redis_client.setex(
-                        cache_key, 
-                        expiry, 
-                        pickle.dumps(result)
-                    )
+                    redis_client.setex(cache_key, expiry, pickle.dumps(result))
                     return result
                 return wrapper
             return decorator
         ```
         
-        **3. Async Processing with Celery**
+        **3. Async Processing with Celery (Background Workers)**
+        
+        🎯 **What it does**: Handles heavy tasks in the background
+        - User doesn't wait for slow operations (model training, data updates)
+        - Celery = "Task queue system" (like having assistants for heavy lifting)
+        - Web app stays responsive while work happens behind the scenes
+        
+        🔍 **Simple Example**:
+        - User clicks "Update Models" → Gets instant "Task started" message
+        - Background worker trains models for 10 minutes
+        - User gets notification when complete
+        
         ```python
         from celery import Celery
         
-        app = Celery('coe_predictor')
+        app = Celery('coe_predictor')    # Create task manager
         
-        @app.task
+        @app.task                        # Mark as background task
         def async_model_training(category, data):
-            model = train_model(category, data)
+            model = train_model(category, data)           # Heavy work happens here
             save_model(model, f"models/{category}_model.pkl")
             return f"Model trained for {category}"
         
         @app.task
         def async_data_update():
-            new_data = fetch_latest_coe_data()
+            new_data = fetch_latest_coe_data()           # API calls in background
             update_database(new_data)
-            trigger_model_retraining.delay()
+            trigger_model_retraining.delay()             # Chain tasks together
             return "Data updated successfully"
         ```
         
-        **4. Health Checks & Circuit Breakers**
+        **4. Health Checks & Circuit Breakers (System Protection)**
+        
+        🎯 **What it does**: Protects system when external services fail
+        - Circuit Breaker = "Smart electrical breaker for software"
+        - Stops trying failed operations to prevent system overload
+        - Automatically recovers when services come back online
+        
+        🔍 **Real-world Analogy**:
+        - Government API goes down → Circuit breaker "opens"
+        - System stops making failed requests (protects resources)
+        - Periodically tests if API is back → "Closes" circuit when recovered
+        
         ```python
         class CircuitBreaker:
             def __init__(self, failure_threshold=5, timeout=60):
-                self.failure_threshold = failure_threshold
-                self.timeout = timeout
+                self.failure_threshold = failure_threshold    # Max failures before stopping
+                self.timeout = timeout                        # How long to wait before retry
                 self.failure_count = 0
                 self.last_failure_time = None
-                self.state = 'CLOSED'  # CLOSED, OPEN, HALF_OPEN
+                self.state = 'CLOSED'  # CLOSED=working, OPEN=stopped, HALF_OPEN=testing
             
             def call(self, func, *args, **kwargs):
-                if self.state == 'OPEN':
+                if self.state == 'OPEN':                     # System is protecting itself
                     if time.time() - self.last_failure_time > self.timeout:
-                        self.state = 'HALF_OPEN'
+                        self.state = 'HALF_OPEN'             # Test if service recovered
                     else:
-                        raise Exception("Circuit breaker is OPEN")
+                        raise Exception("Circuit breaker is OPEN")    # Still broken
                 
                 try:
-                    result = func(*args, **kwargs)
-                    self.reset()
+                    result = func(*args, **kwargs)           # Try the operation
+                    self.reset()                             # Success! Reset failure count
                     return result
                 except Exception as e:
-                    self.record_failure()
+                    self.record_failure()                    # Count this failure
                     raise e
         ```
         """)
