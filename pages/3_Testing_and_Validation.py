@@ -486,7 +486,6 @@ def main():
             
             **MAPE 6.8% - Excellent Performance:**
             - Best-in-class accuracy for COE price prediction
-            - For $80,000 COE, typical error only $5,440
             - Outperforms traditional econometric models
             - Suitable for high-stakes decision making
             
