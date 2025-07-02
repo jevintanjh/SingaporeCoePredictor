@@ -10,9 +10,10 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 - Enhanced Testing & Validation page with model weaknesses and performance interpretation guides (Page 3)
 - Developed Technical Challenges & Algorithmic Solutions page for advanced problem-solving demonstration (Page 4)
 - Created Key Achievements & Future Roadmap page showcasing capstone accomplishments and strategic vision (Page 5)
+- Added Export for Presentation page with PowerPoint/PDF ready content and downloadable charts (Page 6)
 - Implemented educational benchmarks and scoring explanations for new learners
 - Added beginner-friendly explanations for complex technical terms with practical analogies
-- Reordered pages per user preference: Architecture → Cleaning → Validation → Technical Challenges → Achievements
+- Created copy-paste ready content and professional charts for academic presentations
 
 **Class Presentation Features (July 1, 2025)**:
 - Created comprehensive Testing & Validation Results page for academic presentation
