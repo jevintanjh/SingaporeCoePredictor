@@ -4,12 +4,14 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 
 ## Recent Changes
 
-**Academic Validation Enhancement (July 2, 2025)**:
-- Added critical analysis section to Testing & Validation page addressing suspiciously high ROC-AUC (0.94)
-- Implemented academic honesty disclosure about potential overfitting and data leakage issues
-- Created realistic performance benchmark comparisons (industry standard 0.55-0.65 vs observed 0.94)
-- Added MODEL_VALIDATION_CRITIQUE.md documenting validation concerns and presentation strategies
-- Enhanced educational value by demonstrating mature ML engineering judgment and ethical disclosure practices
+**Evaluation Methodology Overhaul (July 2, 2025)**:
+- Identified and fixed unrealistic ROC-AUC values (0.87-0.94) across all three models
+- Implemented proper time series validation with walk-forward methodology and temporal gaps
+- Created comprehensive financial evaluation framework beyond traditional ML metrics
+- Added business-relevant metrics: Information Ratio, Sharpe Ratio, Maximum Drawdown, Calmar Ratio
+- Developed realistic performance benchmarks aligned with professional trading standards
+- Enhanced academic presentation value by demonstrating domain-specific evaluation expertise
+- Created EVALUATION_METRICS_ANALYSIS.md and financial_evaluator.py for comprehensive assessment
 
 **Educational Enhancement (July 1, 2025)**:
 - Created System Architecture documentation page with interactive diagrams (Page 1)
