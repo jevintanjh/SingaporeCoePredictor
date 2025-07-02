@@ -880,10 +880,10 @@ def show_loading_screen():
 def main():
     # Configure page
     st.set_page_config(
-        page_title="COE Price Predictor",
+        page_title="Singapore COE Price Predictor",
         page_icon="🚗",
         layout="wide",
-        initial_sidebar_state="expanded"
+        initial_sidebar_state="collapsed"
     )
     
     # Initialize session state for loading
@@ -1105,32 +1105,18 @@ def main():
     # Welcome back message for returning users
     st.markdown("""
     <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 1rem; border-radius: 10px; color: white; margin-bottom: 2rem; text-align: center;">
-        <h2>🚗 Welcome to COE Price Predictor</h2>
-        <p>Advanced ML forecasting system with real-time predictions and educational content</p>
+        <h2>🚗 Welcome to COE Prediction Platform</h2>
+        <p>Your advanced ML forecasting system is ready with real-time predictions and automated updates</p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Educational sidebar notice for students
-    st.sidebar.markdown("---")
-    st.sidebar.info("🎓 **Students & Learners**: Explore the educational pages below! ↓")
-    st.sidebar.markdown("📚 Click each page to learn about:")
-    st.sidebar.markdown("• System Architecture & Design")
-    st.sidebar.markdown("• Data Processing Pipeline")
-    st.sidebar.markdown("• Model Testing & Validation")
-    st.sidebar.markdown("• Technical Problem Solving")
-    st.sidebar.markdown("• Project Achievements & Future")
-    st.sidebar.success("💡 Perfect for capstone presentations and AI/ML learning!")
     
     # Main header
     st.markdown("""
     <div class="main-header">
-        <h1>COE Price Predictor</h1>
-        <p>Singapore Certificate of Entitlement - Advanced Machine Learning Forecasting Platform</p>
+        <h1>Singapore COE Price Predictor</h1>
+        <p>Compare advanced machine learning models for Certificate of Entitlement price forecasting</p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Educational banner for main page visitors
-    st.info("🎓 **Educational AI/ML Platform**: This capstone project demonstrates advanced forecasting techniques. **Students**: Explore the sidebar pages for detailed technical explanations, system architecture, and learning materials!")
     
     # Data info banner with DD-MM-YYYY format and timestamp
     total_records = len(data)
