@@ -354,7 +354,12 @@ def main():
             - **Good Recall**: Few missed opportunities (9)
             """)
         
-        with col3:
+        # Metrics Explanation Section - Full Width
+        st.subheader("📋 Advanced Prediction Concepts")
+        
+        col1_exp, col2_exp = st.columns([1, 1])
+        
+        with col1_exp:
             st.subheader("📋 Advanced Prediction Concepts")
             
             st.info("""
@@ -478,7 +483,12 @@ def main():
             - **High Recall**: Few missed opportunities (7)
             """)
         
-        with col3:
+        # Metrics Explanation Section - Full Width
+        st.subheader("📋 State-of-the-Art Performance")
+        
+        col1_exp, col2_exp = st.columns([1, 1])
+        
+        with col1_exp:
             st.subheader("📋 State-of-the-Art Performance")
             
             st.info("""
