@@ -1110,6 +1110,29 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
+    # Navigation guidance
+    st.markdown("""
+    <div style="background: #f0f2f6; 
+                padding: 20px; 
+                border-radius: 10px; 
+                margin-bottom: 25px;
+                border-left: 5px solid #1f77b4;">
+        <h3 style="color: #1f77b4; margin: 0 0 10px 0;">
+            📚 Explore the Complete Project
+        </h3>
+        <p style="margin: 0; font-size: 1.1em;">
+            <strong>👈 Click the arrow (>) in the sidebar</strong> to discover comprehensive documentation including:
+        </p>
+        <ul style="margin: 10px 0 0 20px; font-size: 1.0em;">
+            <li><strong>System Architecture</strong> - Technical design and components</li>
+            <li><strong>Data Cleaning Process</strong> - Step-by-step data pipeline</li>
+            <li><strong>Testing & Validation</strong> - Model performance analysis</li>
+            <li><strong>Technical Challenges</strong> - Advanced problem-solving solutions</li>
+            <li><strong>Achievements & Future</strong> - Project impact and roadmap</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
     # Main header
     st.markdown("""
     <div class="main-header">
