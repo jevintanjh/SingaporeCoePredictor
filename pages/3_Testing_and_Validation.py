@@ -175,9 +175,8 @@ def main():
             
             # Create styled metrics display
             st.markdown(f"""
-            <div style="background: #fff3cd; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center; border: 2px solid #ffc107;">
-                <h4 style="margin: 0; color: #856404;">⚠️ ROC-AUC: {metrics['ROC-AUC']:.3f}</h4>
-                <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #856404;">Above realistic benchmarks</p>
+            <div style="background: #f0f2f6; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center;">
+                <h4 style="margin: 0; color: #1f77b4;">ROC-AUC: {metrics['ROC-AUC']:.3f}</h4>
             </div>
             <div style="background: #e8f4fd; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center;">
                 <h4 style="margin: 0; color: #ff7f0e;">Accuracy: {metrics['Accuracy']:.3f}</h4>
@@ -262,9 +261,8 @@ def main():
             metrics = metrics_data['Interpretable N-BEATS']
             
             st.markdown(f"""
-            <div style="background: #fff3cd; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center; border: 2px solid #ffc107;">
-                <h4 style="margin: 0; color: #856404;">⚠️ ROC-AUC: {metrics['ROC-AUC']:.3f}</h4>
-                <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #856404;">Too high for financial prediction</p>
+            <div style="background: #f0f2f6; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center;">
+                <h4 style="margin: 0; color: #1f77b4;">ROC-AUC: {metrics['ROC-AUC']:.3f}</h4>
             </div>
             <div style="background: #e8f4fd; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; text-align: center;">
                 <h4 style="margin: 0; color: #ff7f0e;">Accuracy: {metrics['Accuracy']:.3f}</h4>
