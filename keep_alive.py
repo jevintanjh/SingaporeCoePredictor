@@ -10,7 +10,7 @@ import schedule
 from datetime import datetime
 
 class StreamlitKeepAlive:
-    def __init__(self, app_url="http://0.0.0.0:5000", ping_interval=900):  # 15 minutes
+    def __init__(self, app_url="http://localhost:8501", ping_interval=900):  # 15 minutes
         self.app_url = app_url
         self.ping_interval = ping_interval
         self.running = False
