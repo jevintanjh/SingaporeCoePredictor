@@ -1053,10 +1053,63 @@ def main():
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     
-    /* Hide streamlit style */
+    /* Hide streamlit style but keep sidebar toggle */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+    /* Don't hide header completely - keep sidebar toggle visible */
+    
+    /* Ensure sidebar toggle arrow is always visible */
+    .css-1d391kg, .css-1rs6os, .css-17eq0hr {
+        visibility: visible !important;
+        display: block !important;
+    }
+    
+    /* Sidebar toggle button styling */
+    button[kind="header"] {
+        visibility: visible !important;
+        display: block !important;
+        background-color: #f0f2f6 !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 4px !important;
+        padding: 0.25rem 0.5rem !important;
+        margin: 0.5rem !important;
+    }
+    
+    /* Force visibility of sidebar controls */
+    .css-1kyxreq, .css-1outpf7, .css-1d391kg {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: flex !important;
+    }
+    
+    /* Additional sidebar toggle fixes for Streamlit Cloud */
+    .stApp > header {
+        background-color: transparent !important;
+        height: 2.875rem !important;
+        z-index: 10 !important;
+    }
+    
+    .stApp > header [data-testid="stHeader"] {
+        background-color: transparent !important;
+    }
+    
+    .stApp > header [data-testid="stHeader"] button {
+        visibility: visible !important;
+        display: block !important;
+        color: #000000 !important;
+        background-color: #ffffff !important;
+        border: 1px solid #cccccc !important;
+        border-radius: 4px !important;
+        padding: 4px 8px !important;
+        margin: 8px !important;
+    }
+    
+    /* Ensure header is not hidden */
+    header[data-testid="stHeader"] {
+        visibility: visible !important;
+        display: block !important;
+        height: auto !important;
+    }
     </style>
     """, unsafe_allow_html=True)
     
