@@ -44,11 +44,12 @@ def show_about_author():
         margin: 1rem 0;
     }
     .achievement-card {
-        background: #f8f9fa;
+        background: var(--background-color);
         padding: 1.5rem;
         border-radius: 8px;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--secondary-background-color);
         margin: 1rem 0;
+        color: var(--text-color);
     }
     .contact-info {
         background: #e8f4f8;
@@ -192,93 +193,9 @@ def show_about_author():
         for skill in skills_domain:
             st.markdown(f'<span class="skill-badge">{skill}</span>', unsafe_allow_html=True)
 
-    # Capstone Project Showcase
-    st.markdown("""
-    <div class="section-header">
-        <h3>🏆 Capstone Project: Singapore COE Price Prediction Platform</h3>
-    </div>
-    """, unsafe_allow_html=True)
+
     
-    st.markdown("""
-    <div class="achievement-card">
-        <h4>🎯 Project Highlights</h4>
-        <ul>
-            <li><strong>Advanced ML Implementation:</strong> Developed three distinct time series forecasting models with accuracy rates of 88.9% to 92.7%</li>
-            <li><strong>Dynamic Model Ranking:</strong> Engineered intelligent performance-based model selection system</li>
-            <li><strong>Real-time Data Pipeline:</strong> Integrated Singapore Government Open Data API with automated scheduling</li>
-            <li><strong>Interactive Dashboard:</strong> Built comprehensive Streamlit platform with multi-model comparison capabilities</li>
-            <li><strong>Academic Excellence:</strong> Designed educational components for AI/ML graduate presentation and knowledge transfer</li>
-            <li><strong>Production Ready:</strong> Implemented rigorous validation methodologies including walk-forward validation and bootstrap testing</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Professional Experience Timeline
-    st.markdown("""
-    <div class="section-header">
-        <h3>💼 Professional Experience Timeline</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    experiences = [
-        {
-            "period": "July 2017 - Present",
-            "role": "Business Consultant - Regulatory & Licensing Affairs",
-            "company": "Self-Employed",
-            "achievements": [
-                "Regulatory consultancy for pharmaceutical companies across Singapore and Malaysia",
-                "Led establishment of pharmaceutical infrastructure for Series-A funded Tele-health startup (Ora Group)",
-                "Managed product lifecycle for men's and women's health therapeutic products",
-                "Directed sourcing from India and Korea, improving cost efficiency significantly",
-                "Provided critical medical supplies during COVID-19 initial phases"
-            ]
-        },
-        {
-            "period": "April 2015 - Present",
-            "role": "Locum Retail Pharmacist",
-            "company": "Unity Healthcare Pharmacy",
-            "achievements": [
-                "Dispensed medications on-site and via teleconference",
-                "Served average of 100 customers daily across multiple outlets",
-                "Provided comprehensive medication counselling and professional advice"
-            ]
-        },
-        {
-            "period": "April 2014 - February 2021",
-            "role": "Managing Director",
-            "company": "JWD Co. Ltd (Myanmar)",
-            "achievements": [
-                "Owned and managed Sapel Traditional Burmese Spa Group (50 staff)",
-                "Achieved #1 spa ranking in Yangon on TripAdvisor",
-                "Oversaw profitability, business continuity, and tourism industry investments",
-                "Managed P&L reports and quarterly investor updates"
-            ]
-        },
-        {
-            "period": "May 2010 - April 2014",
-            "role": "Business Development Executive/Pharmacist",
-            "company": "Nagase Singapore Pte Ltd",
-            "achievements": [
-                "Achieved 50% year-on-year growth in medical business (2013)",
-                "Managed annual local business volume exceeding USD 1.2 million",
-                "Led regional sales team of 5 staff across ASEAN offices",
-                "Established new medical business in Thailand and Indonesia"
-            ]
-        }
-    ]
-    
-    for exp in experiences:
-        st.markdown(f"""
-        <div class="timeline-item">
-            <h4>{exp['role']}</h4>
-            <p><strong>{exp['company']}</strong> | <em>{exp['period']}</em></p>
-            <ul>
-        """, unsafe_allow_html=True)
-        
-        for achievement in exp['achievements']:
-            st.markdown(f"<li>{achievement}</li>", unsafe_allow_html=True)
-        
-        st.markdown("</ul></div>", unsafe_allow_html=True)
+
 
     # Unique Value Proposition
     st.markdown("""
