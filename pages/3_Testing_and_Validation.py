@@ -269,28 +269,6 @@ def main():
             This demonstrates domain-specific evaluation - choosing metrics that matter to COE stakeholders, not just generic ML scores.
             """)
             
-            # Reference Literature
-            st.subheader("📚 Reference Literature")
-            st.markdown("""
-            **Fast Directional Forecaster - Key References:**
-            
-            1. **Exponential Smoothing Methods**
-               - Hyndman, R. J., & Athanasopoulos, G. (2018). *Forecasting: principles and practice*. OTexts. Chapter 7: Exponential smoothing.
-               - https://otexts.com/fpp3/expsmooth.html
-            
-            2. **Technical Analysis and Momentum Indicators**
-               - Murphy, J. J. (1999). *Technical analysis of the financial markets: A comprehensive guide to trading methods and applications*. New York Institute of Finance.
-               - Wilder, J. W. (1978). *New concepts in technical trading systems*. Trend Research.
-            
-            3. **Time Series Direction Prediction**
-               - Tsay, R. S. (2010). *Analysis of financial time series* (3rd ed.). John Wiley & Sons. Chapter 9: Principal component analysis and factor models.
-               - Box, G. E., Jenkins, G. M., Reinsel, G. C., & Ljung, G. M. (2015). *Time series analysis: forecasting and control* (5th ed.). John Wiley & Sons.
-            
-            4. **Walk-Forward Validation**
-               - Prado, M. L. D. (2018). *Advances in financial machine learning*. John Wiley & Sons. Chapter 7: Cross-validation in finance.
-               - White, H. (2000). A reality check for data snooping. *Econometrica*, 68(5), 1097-1126.
-            """)
-            
 
         
         # Feature importance
@@ -391,31 +369,6 @@ def main():
             
             **Career Relevance:**
             Understanding interpretable AI is crucial for public sector ML applications where accountability and transparency are mandatory.
-            """)
-            
-            # Reference Literature
-            st.subheader("📚 Reference Literature")
-            st.markdown("""
-            **Interpretable N-BEATS - Key References:**
-            
-            1. **Original N-BEATS Architecture**
-               - Oreshkin, B. N., Carpov, D., Chapados, N., & Bengio, Y. (2019). N-BEATS: Neural basis expansion analysis for interpretable time series forecasting. *arXiv preprint arXiv:1905.10437*.
-               - https://arxiv.org/abs/1905.10437
-            
-            2. **Time Series Decomposition Methods**
-               - Cleveland, R. B., Cleveland, W. S., McRae, J. E., & Terpenning, I. (1990). STL: A seasonal-trend decomposition. *Journal of official statistics*, 6(1), 3-73.
-               - Hyndman, R. J., & Athanasopoulos, G. (2018). *Forecasting: principles and practice*. Chapter 3: Time series decomposition.
-            
-            3. **Fourier Series and Seasonality Analysis**
-               - Chatfield, C. (2003). *The analysis of time series: an introduction*. Chapman and Hall/CRC. Chapter 4: Spectral analysis.
-               - Priestley, M. B. (1981). *Spectral analysis and time series*. Academic Press. Volume 1: Univariate series.
-            
-            4. **Interpretable Machine Learning**
-               - Molnar, C. (2020). *Interpretable machine learning*. Lulu.com. Available online: https://christophm.github.io/interpretable-ml-book/
-               - Rudin, C. (2019). Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead. *Nature Machine Intelligence*, 1(5), 206-215.
-            
-            5. **Polynomial Trend Analysis**
-               - Shumway, R. H., & Stoffer, D. S. (2017). *Time series analysis and its applications: with R examples*. Springer. Chapter 2: Time series regression and exploratory data analysis.
             """)
             
 
@@ -521,36 +474,6 @@ def main():
             
             **Academic Achievement:**
             Implementing state-of-the-art neural forecasting for domain-specific applications demonstrates mastery of both ML theory and practical deployment.
-            """)
-            
-            # Reference Literature
-            st.subheader("📚 Reference Literature")
-            st.markdown("""
-            **N-BEATSx - Key References:**
-            
-            1. **Original N-BEATS Paper**
-               - Oreshkin, B. N., Carpov, D., Chapados, N., & Bengio, Y. (2019). N-BEATS: Neural basis expansion analysis for interpretable time series forecasting. *arXiv preprint arXiv:1905.10437*.
-               - https://arxiv.org/abs/1905.10437
-            
-            2. **N-BEATSx Extensions with Exogenous Variables**
-               - Challu, C., Olivares, K. G., Oreshkin, B. N., Ramirez, F. G., Canseco, M. M., & Dubrawski, A. (2021). N-HiTS: Neural hierarchical interpolation for time series forecasting. *arXiv preprint arXiv:2201.12886*.
-               - https://arxiv.org/abs/2201.12886
-            
-            3. **Neural Basis Functions and Fourier Analysis**
-               - Bengio, Y., Courville, A., & Vincent, P. (2013). Representation learning: A review and new perspectives. *IEEE transactions on pattern analysis and machine intelligence*, 35(8), 1798-1828.
-               - Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep learning*. MIT Press. Chapter 9: Convolutional networks.
-            
-            4. **Time Series Forecasting with Deep Learning**
-               - Lim, B., & Zohren, S. (2021). Time-series forecasting with deep learning: a survey. *Philosophical Transactions of the Royal Society A*, 379(2194), 20200209.
-               - Hewamalage, H., Bergmeir, C., & Bandara, K. (2021). Recurrent neural networks for time series forecasting: Current status and future directions. *International Journal of Forecasting*, 37(1), 388-427.
-            
-            5. **Exogenous Variables in Forecasting**
-               - Hyndman, R. J., & Athanasopoulos, G. (2018). *Forecasting: principles and practice*. Chapter 5: Multiple regression. 
-               - https://otexts.com/fpp3/regression.html
-            
-            6. **Neural Network Architecture Design**
-               - He, K., Zhang, X., Ren, S., & Sun, J. (2016). Deep residual learning for image recognition. *Proceedings of the IEEE conference on computer vision and pattern recognition*, 770-778.
-               - Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). Attention is all you need. *Advances in neural information processing systems*, 30.
             """)
             
 
