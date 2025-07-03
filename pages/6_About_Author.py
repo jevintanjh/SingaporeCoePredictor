@@ -23,7 +23,7 @@ def show_about_author():
         margin-bottom: 2rem;
     }
     .section-header {
-        background: #f0f2f6;
+        background: rgba(31, 119, 180, 0.1);
         padding: 1rem;
         border-radius: 8px;
         border-left: 4px solid #1f77b4;
@@ -44,18 +44,18 @@ def show_about_author():
         margin: 1rem 0;
     }
     .achievement-card {
-        background: var(--background-color);
+        background: rgba(31, 119, 180, 0.05);
         padding: 1.5rem;
         border-radius: 8px;
-        border: 1px solid var(--secondary-background-color);
+        border: 1px solid rgba(31, 119, 180, 0.2);
         margin: 1rem 0;
-        color: var(--text-color);
     }
     .contact-info {
-        background: #e8f4f8;
+        background: rgba(31, 119, 180, 0.08);
         padding: 1rem;
         border-radius: 8px;
         text-align: center;
+        border: 1px solid rgba(31, 119, 180, 0.2);
     }
     </style>
     """, unsafe_allow_html=True)
