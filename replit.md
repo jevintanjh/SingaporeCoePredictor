@@ -4,6 +4,17 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 
 ## Recent Changes
 
+**About Author Page Implementation (July 3, 2025)**:
+- Created comprehensive About Author page highlighting career transition from pharmacist to AI/ML Engineer
+- Showcased 14+ years pharmaceutical industry experience combined with newly acquired AI/ML skills
+- Included professional photo and detailed contact information
+- Highlighted unique value proposition combining healthcare domain expertise with technical AI capabilities
+- Documented educational achievement (SCTP Associate AI/ML Developer completion July 2025)
+- Featured capstone project achievements and technical skill progression
+- Designed for academic presentation value demonstrating professional growth and career transformation
+- Added timeline of professional experiences across Singapore, Malaysia, Myanmar, Thailand, and Indonesia
+- Emphasized future vision for healthcare AI innovation across ASEAN region
+
 **COE-Specific Metrics Implementation (July 2, 2025)**:
 - Corrected misunderstanding: COE is Certificate of Entitlement (vehicle licensing) not financial investment
 - Removed irrelevant financial metrics (Sharpe Ratio, Calmar Ratio, Max Drawdown) that don't apply to COE price prediction
