@@ -4,6 +4,16 @@ Singapore COE Price Prediction Platform - A sophisticated machine learning syste
 
 ## Recent Changes
 
+**Project Cleanup & Capstone Preparation (July 4, 2025)**:
+- Archived all non-essential development files to /archive/ directory for clean submission
+- Moved analysis documents (ADDITIONAL_METRICS_RECOMMENDATIONS.md, ALL_MODELS_ANALYSIS.md, etc.) to archive
+- Relocated deployment guides and development scripts to maintain clean project structure
+- Created comprehensive CAPSTONE_PROJECT_STRUCTURE.md documenting final project organization
+- Streamlined main directory to essential files: app.py, models/, pages/, utils/, data/, configuration files
+- Prepared production-ready codebase suitable for academic capstone submission and evaluation
+- Enhanced dark mode compatibility across all pages for professional presentation
+- Finalized "SG COE Price Predictor" branding for clarity and professional appearance
+
 **About Author Page Implementation (July 3, 2025)**:
 - Created comprehensive About Author page highlighting career transition from pharmacist to AI/ML Engineer
 - Showcased 14+ years pharmaceutical industry experience combined with newly acquired AI/ML skills
